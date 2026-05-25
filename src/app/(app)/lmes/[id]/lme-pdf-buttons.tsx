@@ -46,8 +46,6 @@ const DISEASE_LABELS: Record<string, string> = {
 
 export function LmePdfButtons({
   lmeId, disease, hasLmeData,
-  hasSpecificFormData: _hasSpecificFormData,
-  lmePdfUrl: _l, specificFormPdfUrl: _s, prescriptionPdfUrl: _p,
   situacoesOk,
   isCreator,
 }: Props) {

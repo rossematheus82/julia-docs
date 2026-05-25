@@ -5,25 +5,10 @@ import Link from 'next/link'
 import { format, differenceInYears, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Plus, FileText, Edit, Phone, Mail, MapPin, User, Calendar } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Edit, Phone, Mail, MapPin, User } from 'lucide-react'
 import { DeletePatientButton } from './delete-patient-button'
 import { TimelineActions } from './timeline-actions'
-
-const STATUS_COLORS: Record<string, string> = {
-  rascunho: 'bg-gray-100 text-gray-700',
-  enviada: 'bg-blue-100 text-blue-700',
-  em_analise: 'bg-yellow-100 text-yellow-700',
-  deferida: 'bg-green-100 text-green-700',
-  devolvida: 'bg-orange-100 text-orange-700',
-  indeferida: 'bg-red-100 text-red-700',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  rascunho: 'Rascunho', enviada: 'Enviada', em_analise: 'Em análise',
-  deferida: 'Deferida', devolvida: 'Devolvida', indeferida: 'Indeferida',
-}
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Download, RefreshCw, Loader2 } from 'lucide-react'
@@ -19,7 +18,6 @@ const DISEASE_LABELS: Record<string, string> = {
 }
 
 export function TimelineActions({ lmeId, disease, showRenew }: Props) {
-  const router = useRouter()
   const [downloading, setDownloading] = useState(false)
   const label = DISEASE_LABELS[disease] ?? disease
 

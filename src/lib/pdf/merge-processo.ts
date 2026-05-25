@@ -16,7 +16,6 @@ import { PDFDocument } from 'pdf-lib'
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 import {
-  fillSpecificForm,
   fillLmeForm,
   applyMappingsToDoc,
   buildSpecificMappings,
@@ -33,7 +32,6 @@ import { fillTermoAdesao, type TermoAdesaoData } from './fill-termo-adesao'
 import type { LmeCommonData } from '@/lib/schemas/lme-common'
 
 const TEMPLATE_DIR = path.join(process.cwd(), 'templates-ses')
-const LME_STANDALONE = path.join(TEMPLATE_DIR, 'lme', 'lme-eletronico_Jun2023-v.2.pdf')
 
 function processoPath(disease: string) {
   return path.join(TEMPLATE_DIR, disease, 'processo-completo.pdf')

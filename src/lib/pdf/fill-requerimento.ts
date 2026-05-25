@@ -1,4 +1,4 @@
-import { PDFDocument, PDFFont, StandardFonts, rgb } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 export interface RequerimentoData {
   unidade_solicitante: string
@@ -25,25 +25,6 @@ function drawBlankLine(
   width: number,
 ) {
   page.drawLine({ start: { x, y: y + 2 }, end: { x: x + width, y: y + 2 }, thickness: 0.4, color: GRAY })
-}
-
-function row(
-  page: ReturnType<PDFDocument['addPage']>,
-  label: string,
-  value: string | undefined,
-  x: number,
-  y: number,
-  labelFont: PDFFont,
-  valueFont: PDFFont,
-  fieldWidth: number,
-) {
-  page.drawText(label, { x, y, size: 9, font: labelFont, color: DARK })
-  const vx = x + labelFont.widthOfTextAtSize(label, 9) + 4
-  if (value) {
-    page.drawText(value, { x: vx, y, size: 10, font: valueFont, color: BLACK })
-  }
-  // blank fill line
-  drawBlankLine(page, vx + (value ? valueFont.widthOfTextAtSize(value, 10) + 4 : 0), y, fieldWidth - (vx - x))
 }
 
 export async function fillRequerimento(data: RequerimentoData): Promise<Uint8Array> {

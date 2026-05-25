@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TextareaCounted } from '@/components/lme/textarea-counted'
 import { SPEC_TEXT_LIMITS, LME_TEXT_LIMITS } from '@/lib/pdf/text-limits'
-import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -134,7 +133,7 @@ interface SectionProps {
 // ─── DPI-FP ──────────────────────────────────────────────────────────────────
 
 function DpiFpSection({
-  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getNestedBool, setNestedBool, getSpecRaw: _g, sc, sh, requestType,
+  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getNestedBool, setNestedBool, sc, sh,
 }: SectionProps) {
   const classificacao = getSpec('classificacao')
   const isNaoFpi = classificacao === 'nao_fpi'
@@ -254,7 +253,7 @@ function DpiFpSection({
 // ─── Asma ─────────────────────────────────────────────────────────────────────
 
 function AsmaSection({
-  aiFields, changedFields, getSpec, getBoolSpec: _b, setSpec, getNestedBool, setNestedBool, getSpecRaw, sc, sh, requestType,
+  aiFields, changedFields, getSpec, setSpec, getNestedBool, setNestedBool, getSpecRaw, sc, sh, requestType,
 }: SectionProps) {
   const L = SPEC_TEXT_LIMITS.asma
   const DIAG_ITEMS = [
@@ -433,7 +432,7 @@ function AsmaSection({
 // ─── DPOC ─────────────────────────────────────────────────────────────────────
 
 function DpocSection({
-  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getNestedBool, setNestedBool, getNestedText, setNestedText, getSpecRaw: _g2, sc, sh, requestType,
+  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getNestedBool, setNestedBool, getNestedText, setNestedText, sc, sh, requestType,
 }: SectionProps) {
   const L = SPEC_TEXT_LIMITS.dpoc
   const HISTORIA_ITEMS = [
@@ -579,7 +578,7 @@ function DpocSection({
 // ─── HAP ──────────────────────────────────────────────────────────────────────
 
 function HapSection({
-  aiFields, changedFields, getSpec, getBoolSpec, setSpec, setSpecMany, getNestedBool, setNestedBool, getSpecRaw, sc, sh, requestType,
+  aiFields, changedFields, getSpec, setSpec, setSpecMany, getNestedBool, setNestedBool, getSpecRaw, sc, sh, requestType,
 }: SectionProps) {
   const L = SPEC_TEXT_LIMITS.hap
   // Etiologia 7.1 e 7.2 são mutuamente exclusivas; ao trocar, limpa os campos da outra ramificação
