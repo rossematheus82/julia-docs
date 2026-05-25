@@ -1005,6 +1005,19 @@ export function LmeFormEditor({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cid10])
 
+  // DPI-FP: deriva a classificação a partir do CID (J84.1 = FPI; demais = não-FPI).
+  // Só sobrescreve se o campo ainda estiver vazio (não atropela escolha manual do médico).
+  useEffect(() => {
+    if (disease !== 'dpi-fp' || !cid10) return
+    const code = cid10.trim().toUpperCase()
+    const cls = code === 'J84.1' ? 'fpi' : 'nao_fpi'
+    const atual = typeof specificData.classificacao === 'string' ? specificData.classificacao.trim() : ''
+    if (atual === '') {
+      onSpecificDataChange({ ...specificData, classificacao: cls })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid10, disease])
+
   // Pre-fill peso/altura from patient profile if not already set
   useEffect(() => {
     const updates: Record<string, unknown> = {}
