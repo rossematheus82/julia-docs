@@ -6,6 +6,31 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 
 **Stack:** Next.js 14 (App Router) · TypeScript · Supabase (auth + DB) · pdf-lib · shadcn/ui · Tailwind · pnpm
 
+## Status / Deploy (2026-05-24)
+
+- **Repo:** [github.com/rossematheus82/julia-docs](https://github.com/rossematheus82/julia-docs)
+- **Produção:** Vercel (deploy automático a cada push em `main`)
+- **Migrations aplicadas no Supabase:**
+  - `0002_doctor_profile.sql` — perfil de médico atrelado ao usuário (`doctors.owner_user_id`, `doctors.cpf`, índice único por workspace, RLS `own_doctor_*`)
+  - `0003_lme_status_emitida.sql` — inclui `'emitida'` na check constraint de `lmes.status`
+
+## Modelo de usuários e workspaces
+
+- **Workspace = ambulatório.** Um usuário pode pertencer a vários (tabela `workspace_members`), com workspace ativo persistido em cookie `active_workspace_id` (helper `getActiveWorkspace()`).
+- **Médico = 1 por usuário por workspace**, identificado por `doctors.owner_user_id` (índice único `doctors_owner_per_workspace_unique`). LME só pode ser emitida com o perfil de médico do usuário logado.
+- **Pacientes / estabelecimentos** são compartilhados dentro do workspace (não por médico).
+- **Trocador de workspace** na sidebar; hub em `/configuracoes/workspace` (renomear, sair, listar membros, código de convite).
+
+## Permissões por LME (criador vs. demais)
+
+A LME tem `created_by_user_id`. Quem **não** é o criador, ao abrir `/lmes/[id]`:
+- vê um aviso âmbar nomeando o médico que emitiu;
+- não vê **Editar** nem **Excluir** (bloqueados também server-side em `editar/page.tsx` e na rota `DELETE /api/lmes/[id]`);
+- botão de PDF muda de "Gerar processo completo" para **"Baixar processo original"** (snapshots preservam o médico original);
+- ganha CTA **"Renovar / repetir em meu nome"** que abre `/lmes/[id]/renovar`.
+
+Em `/api/pdf/generate` (`type='all'`), o auto-update de `status='emitida'` + `next_renewal_date` só acontece se o requester é o criador — outros médicos não alteram o estado da LME alheia.
+
 ## Doenças suportadas
 
 | Código | Nome | CIDs principais |
@@ -17,9 +42,13 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 
 ## Fluxo principal
 
-1. **Wizard (nova LME)** — 6 passos: doença → tipo → paciente → médico/estabelecimento → prontuário (IA) → revisão → salva no Supabase como `rascunho`
-2. **Editar campos** — `LmeFormEditor` permite preencher/ajustar `lme_data` (LME comum) e `specific_form_data` (formulário específico da doença)
-3. **Gerar PDFs** — API `/api/pdf/generate` aceita `type: 'lme' | 'specific_form' | 'all'`. O tipo `'all'` gera o processo completo (LME + form esp. + prescrição + requerimento + termo de adesão) e marca a LME como `emitida`
+1. **Wizard (nova LME)** — 6 passos: doença → tipo → paciente → médico/estabelecimento → prontuário (IA opcional) → revisão. Validação centralizada em `nova/validate.ts` coleta **todos** os erros faltantes de uma vez e leva pro step com problema. A LME é salva já com `status='emitida'` — não passa mais por rascunho.
+   - Step 2 (tipo) reduzido a 2 opções: **"Processo Completo"** (`inicial`) e **"LME + Receita"** (`renovacao`). O valor `reavaliacao` ainda existe no enum do DB por compatibilidade.
+   - Step 5: editor visível por padrão; IA fica como assistente opcional colapsável (extração do prontuário faz *merge*, nunca sobrescreve campos preenchidos manualmente).
+2. **Editar campos** — `LmeFormEditor` permite preencher/ajustar `lme_data` e `specific_form_data`. Quando `request_type='renovacao'` o formulário específico é ocultado (renovação = só LME + receita).
+3. **Renovar** (`/lmes/[id]/renovar`) — médico fixado no usuário logado (sem seletor). O usuário escolhe o escopo: **"Apenas a LME (medicamentos)"** ou **"LME + formulário específico"**. Editor inline com dados pré-preenchidos da LME original; ao confirmar, a nova LME é criada já como `emitida` com `parent_lme_id` apontando pra original.
+4. **Gerar PDFs** — API `/api/pdf/generate` aceita `type: 'lme' | 'specific_form' | 'all'`. O tipo `'all'` gera o processo completo (LME + form esp. + prescrição + requerimento + termo de adesão).
+5. **Timeline do paciente** (`/pacientes/[id]`) — histórico vertical de LMEs do paciente com bolinha verde na mais recente, lista de medicamentos por LME e botões **Baixar** / **Renovar** inline.
 
 ## Arquivos-chave
 
@@ -74,14 +103,17 @@ templates-ses/                  # PDFs template do SES-MG (AcroForms)
 
 Tabela principal: **`lmes`**
 - `disease`: `'asma' | 'dpoc' | 'dpi-fp' | 'hap'`
-- `request_type`: `'inicial' | 'renovacao' | 'reavaliacao'`
-- `status`: `'rascunho' | 'emitida'`
+- `request_type`: `'inicial' | 'renovacao' | 'reavaliacao'` *(UI usa só os 2 primeiros; `reavaliacao` mantido por compat)*
+- `status`: `'rascunho' | 'enviada' | 'em_analise' | 'deferida' | 'devolvida' | 'indeferida' | 'emitida'` *(na prática só `emitida`; `rascunho` é legado e filtrado das listagens)*
+- `workspace_id` (FK obrigatória) + `created_by_user_id`
 - `lme_data`: JSONB — campos comuns do formulário LME (anamnese, medicamentos, peso, etc.)
 - `specific_form_data`: JSONB — campos do formulário específico da doença
-- `patient_snapshot / doctor_snapshot / facility_snapshot`: cópia dos dados no momento da criação
+- `patient_snapshot / doctor_snapshot / facility_snapshot`: cópia dos dados no momento da criação (preserva identidade do médico original mesmo se ele editar perfil depois)
 - `lme_pdf_url / specific_form_pdf_url / prescription_pdf_url`: URLs dos PDFs gerados
 - `parent_lme_id`: referência à LME anterior (renovação)
-- `next_renewal_date`: data de próxima renovação
+- `next_renewal_date`: data de próxima renovação (auto = hoje + 180 dias quando o criador gera o processo completo)
+
+Outras tabelas relevantes: `workspaces`, `workspace_members`, `patients`, `doctors`, `health_facilities` — todas escopadas por `workspace_id` via RLS.
 
 ## HAP — estrutura de dados
 
