@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LmeFormEditor } from '@/components/lme/lme-form-editor'
 import { ArrowLeft, Save, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { getCidsByDoenca } from '@/lib/cid10'
 import type { Disease, RequestType, Json } from '@/lib/supabase/types'
 
 interface Props {
@@ -28,8 +31,11 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
   const supabase = createClient()
   const [currentLmeData, setCurrentLmeData] = useState<Record<string, unknown>>(lmeData)
   const [currentSpecificData, setCurrentSpecificData] = useState<Record<string, unknown>>(specificFormData)
+  const [currentCid10, setCurrentCid10] = useState<string>(cid10 ?? '')
   const [saving, setSaving] = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
+
+  const cids = getCidsByDoenca(disease)
 
   async function saveDraft() {
     setSaving(true)
@@ -37,7 +43,9 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
       const { error } = await supabase
         .from('lmes')
         .update({
-          lme_data: currentLmeData as unknown as Json,
+          cid10: currentCid10,
+          // mantém o cid10 dentro de lme_data sincronizado (a rota de PDF prioriza raw.cid10)
+          lme_data: { ...currentLmeData, cid10: currentCid10 } as unknown as Json,
           specific_form_data: currentSpecificData as unknown as Json,
         })
         .eq('id', lmeId)
@@ -56,7 +64,9 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
       const { error } = await supabase
         .from('lmes')
         .update({
-          lme_data: currentLmeData as unknown as Json,
+          cid10: currentCid10,
+          // mantém o cid10 dentro de lme_data sincronizado (a rota de PDF prioriza raw.cid10)
+          lme_data: { ...currentLmeData, cid10: currentCid10 } as unknown as Json,
           specific_form_data: currentSpecificData as unknown as Json,
         })
         .eq('id', lmeId)
@@ -101,6 +111,21 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
         </div>
       </div>
 
+      <div className="bg-white border border-gray-200 rounded-lg p-5 mb-6">
+        <Label className="text-sm font-medium text-gray-700">CID-10 *</Label>
+        <p className="text-xs text-gray-500 mb-2">Pode ser corrigido aqui caso o processo tenha voltado por erro no CID.</p>
+        <Select value={currentCid10 || undefined} onValueChange={setCurrentCid10}>
+          <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione o CID-10" /></SelectTrigger>
+          <SelectContent>
+            {cids.map(cid => (
+              <SelectItem key={cid.codigo} value={cid.codigo}>
+                {cid.codigo} — {cid.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <LmeFormEditor
           lmeData={currentLmeData}
@@ -108,7 +133,7 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
           disease={disease}
           requestType={requestType}
           aiUsed={aiUsed}
-          cid10={cid10}
+          cid10={currentCid10}
           patientBirthDate={patientBirthDate}
           patientIncapable={patientIncapable}
           patientResponsibleName={patientResponsibleName}

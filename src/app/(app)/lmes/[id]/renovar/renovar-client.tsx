@@ -14,6 +14,7 @@ import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
 import type { Lme, Disease, RequestType, Json } from '@/lib/supabase/types'
 import { LmeFormEditor } from '@/components/lme/lme-form-editor'
+import { getCidsByDoenca } from '@/lib/cid10'
 import { cn } from '@/lib/utils'
 
 const DISEASE_LABELS: Record<string, string> = {
@@ -43,6 +44,8 @@ export function RenovarClient({
   const router = useRouter()
   const [mode, setMode] = useState<RenovarMode | null>(null)
   const [facilityId, setFacilityId] = useState(lme.facility_id)
+  const [currentCid10, setCurrentCid10] = useState<string>(lme.cid10 ?? '')
+  const cids = getCidsByDoenca(lme.disease as Disease)
   const [lmeData, setLmeData] = useState<Record<string, unknown>>(
     (lme.lme_data ?? {}) as Record<string, unknown>,
   )
@@ -80,9 +83,9 @@ export function RenovarClient({
         last_edited_by_user_id: null,
         disease: lme.disease,
         request_type: effectiveRequestType,
-        cid10: lme.cid10,
+        cid10: currentCid10,
         status: 'emitida' as const,
-        lme_data: lmeData as unknown as Json,
+        lme_data: { ...lmeData, cid10: currentCid10 } as unknown as Json,
         specific_form_data: (mode === 'lme_plus_specific' ? specificFormData : (lme.specific_form_data ?? {})) as unknown as Json,
         prescription_data: lme.prescription_data ?? {},
         patient_snapshot: lme.patient_snapshot,
@@ -216,6 +219,24 @@ export function RenovarClient({
         </CardContent>
       </Card>
 
+      {/* CID-10 — editável na renovação (corrigir caso o processo tenha voltado por erro no CID) */}
+      <Card>
+        <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4" /> CID-10</CardTitle></CardHeader>
+        <CardContent>
+          <Label className="mb-2 block text-xs">Confirme ou corrija o CID-10 da renovação</Label>
+          <Select value={currentCid10 || undefined} onValueChange={setCurrentCid10}>
+            <SelectTrigger><SelectValue placeholder="Selecione o CID-10" /></SelectTrigger>
+            <SelectContent>
+              {cids.map(cid => (
+                <SelectItem key={cid.codigo} value={cid.codigo}>
+                  {cid.codigo} — {cid.descricao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
       {/* Editor inline (só aparece quando o escopo foi escolhido) */}
       {mode && (
         <Card>
@@ -241,7 +262,7 @@ export function RenovarClient({
               patientBirthDate={patientBirthDate}
               patientIncapable={patientIncapable}
               patientResponsibleName={patientResponsibleName}
-              cid10={lme.cid10}
+              cid10={currentCid10}
             />
           </CardContent>
         </Card>
