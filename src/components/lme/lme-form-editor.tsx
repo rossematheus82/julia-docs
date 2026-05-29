@@ -295,7 +295,7 @@ function AsmaSection({
       {/* Diagnóstico diferencial */}
       <div>
         <p className="text-sm font-medium text-gray-700 mb-2">Diagnósticos diferenciais excluídos</p>
-        <div className="grid grid-cols-2 gap-2 pl-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2">
           {DIAG_ITEMS.map(({ key, label }) => (
             <CBRow key={key} label={label} checked={getNestedBool('diag_diferencial', key)} onChange={v => setNestedBool('diag_diferencial', key, v)} />
           ))}
@@ -507,7 +507,7 @@ function DpocSection({
       </div>
 
       {getBoolSpec('exacerbacoes_12m') && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <FL label="Exacerbações moderadas (qtd)" fieldKey="spec.exacerbacoes_moderadas_qtd" aiFields={aiFields} changedFields={changedFields} value={getSpec('exacerbacoes_moderadas_qtd')} />
             <Input placeholder="0" value={getSpec('exacerbacoes_moderadas_qtd')} onChange={e => setSpec('exacerbacoes_moderadas_qtd', e.target.value)} />
@@ -522,7 +522,7 @@ function DpocSection({
       {/* Outros diagnósticos */}
       <div>
         <p className="text-sm font-medium text-gray-700 mb-2">Outros diagnósticos</p>
-        <div className="grid grid-cols-2 gap-2 pl-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2">
           {OUTROS_DIAG_ITEMS.map(({ key, label }) => (
             <CBRow key={key} label={label} checked={getNestedBool('outros_diagnosticos', key)} onChange={v => setNestedBool('outros_diagnosticos', key, v)} />
           ))}
@@ -736,7 +736,7 @@ function HapSection({
       {/* Cateterismo cardíaco direito */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-700">Cateterismo cardíaco direito</p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <FL label="PAPm (mmHg)" fieldKey="spec.papm" aiFields={aiFields} changedFields={changedFields} value={getSpec('papm')} />
             <Input placeholder="Ex: 35" value={getSpec('papm')} onChange={e => setSpec('papm', e.target.value)} />
@@ -879,10 +879,11 @@ function HapSection({
         </div>
       </div>
 
-      {/* 12. Exames complementares */}
+      {/* 12. Exames complementares — rolagem horizontal no mobile (tabela com colunas fixas) */}
       <div>
         <p className="text-sm font-medium text-gray-700 mb-2">12. Exames complementares</p>
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+        <div className="border border-gray-200 rounded-lg overflow-hidden min-w-[440px]">
           <div className="grid grid-cols-[1fr_120px_160px] gap-0 bg-gray-50 border-b border-gray-200 px-3 py-1.5">
             <span className="text-xs font-medium text-gray-500">Exame</span>
             <span className="text-xs font-medium text-gray-500">Data</span>
@@ -911,6 +912,7 @@ function HapSection({
               </div>
             </div>
           ))}
+        </div>
         </div>
       </div>
 
@@ -1154,7 +1156,7 @@ export function LmeFormEditor({
           <p className="text-xs text-gray-400 mt-1">Definido pelo CID — não editável.</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <FL label="Peso (kg)" fieldKey="peso_kg" aiFields={aiFields} changedFields={changedFields} value={getLme('peso_kg') || patientWeight} />
             <Input placeholder={patientWeight ?? 'Ex: 70'} value={getLme('peso_kg')} onChange={e => setLme('peso_kg', e.target.value)} />

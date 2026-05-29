@@ -243,7 +243,7 @@ export default function NovoPacientePage() {
               {errors.mother_name && <p className="text-xs text-red-500 mt-1">{errors.mother_name.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>{fieldLabel('CPF *', 'cpf')}</Label>
               <Input {...register('cpf')} value={v.cpf ?? ''} className="mt-1" placeholder="000.000.000-00" />
@@ -255,7 +255,7 @@ export default function NovoPacientePage() {
               {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>{fieldLabel('Data de nascimento *', 'birth_date')}</Label>
               <DateInput value={v.birth_date ?? ''} onChange={val => setValue('birth_date', val)} className="mt-1" />
@@ -282,7 +282,7 @@ export default function NovoPacientePage() {
               {errors.sex && <p className="text-xs text-red-500 mt-1">{errors.sex.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>{fieldLabel('Raça/Cor *', 'race_ethnicity')}</Label>
               <Controller
@@ -315,7 +315,7 @@ export default function NovoPacientePage() {
         {/* Dados clínicos */}
         <section className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
           <h2 className="font-semibold text-gray-900">Dados clínicos</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>{fieldLabel('Peso (kg) *', 'weight_kg')}</Label>
               <Input {...register('weight_kg')} value={v.weight_kg ?? ''} type="number" step="0.1" className="mt-1" placeholder="0.0" />
@@ -332,7 +332,7 @@ export default function NovoPacientePage() {
         {/* Contato */}
         <section className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
           <h2 className="font-semibold text-gray-900">Contato e endereço</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>{fieldLabel('Telefone *', 'phone')}</Label>
               <Input {...register('phone')} value={v.phone ?? ''} className="mt-1" placeholder="(00) 00000-0000" />

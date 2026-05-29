@@ -26,13 +26,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!activeWorkspace) redirect('/onboarding')
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar
         activeWorkspace={activeWorkspace}
         workspaces={workspaces}
         userEmail={user.email ?? ''}
       />
-      <main className="flex-1 overflow-auto">
+      {/* pt-14 reserva espaço pra barra superior fixa no mobile; md:pl-64 abre espaço pra sidebar fixa no desktop */}
+      <main className="md:pl-64 pt-14 md:pt-0 min-h-screen">
         {children}
       </main>
     </div>

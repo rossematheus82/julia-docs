@@ -125,7 +125,7 @@ export default function EditarPacientePage() {
               {errors.mother_name && <p className="text-xs text-red-500 mt-1">{errors.mother_name.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>CPF *</Label>
               <Input {...register('cpf')} value={v.cpf ?? ''} className="mt-1" placeholder="000.000.000-00" />
@@ -137,7 +137,7 @@ export default function EditarPacientePage() {
               {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Data de nascimento *</Label>
               <DateInput value={v.birth_date ?? ''} onChange={val => setValue('birth_date', val)} className="mt-1" />
@@ -162,7 +162,7 @@ export default function EditarPacientePage() {
               {errors.sex && <p className="text-xs text-red-500 mt-1">{errors.sex.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Raça/Cor *</Label>
               <Controller
@@ -192,7 +192,7 @@ export default function EditarPacientePage() {
 
         <section className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
           <h2 className="font-semibold text-gray-900">Dados clínicos</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Peso (kg) *</Label>
               <Input {...register('weight_kg')} value={v.weight_kg ?? ''} type="number" step="0.1" className="mt-1" />
@@ -208,7 +208,7 @@ export default function EditarPacientePage() {
 
         <section className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
           <h2 className="font-semibold text-gray-900">Contato e endereço</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Telefone *</Label>
               <Input {...register('phone')} value={v.phone ?? ''} className="mt-1" />

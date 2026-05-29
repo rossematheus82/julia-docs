@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Users, FileText, Plus, Settings,
-  LogOut, Building2, ChevronRight, Activity, ChevronsUpDown, Check, Stethoscope,
+  LogOut, Building2, ChevronRight, Activity, ChevronsUpDown, Check, Stethoscope, Menu, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,10 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
   const router = useRouter()
   const supabase = createClient()
   const hasMultiple = workspaces.length > 1
+  const [open, setOpen] = useState(false)
+
+  // Fecha o drawer ao navegar (no mobile)
+  useEffect(() => { setOpen(false) }, [pathname])
 
   async function switchWorkspace(workspaceId: string) {
     if (workspaceId === activeWorkspace.id) return
@@ -68,16 +73,57 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
   }
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r border-gray-200 flex flex-col">
-      {/* Header com workspace switcher */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center gap-2 mb-3">
-          <img src="/logo-icon.svg" alt="Julia Docs" className="h-9 w-9 flex-shrink-0" />
-          <span className="text-base leading-none">
-            <span className="font-bold text-blue-900">Júlia</span>
-            <span className="font-normal text-blue-900">Docs</span>
-          </span>
-        </div>
+    <>
+      {/* Barra superior (apenas mobile) com botão de menu */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white border-b border-gray-200 flex items-center gap-3 px-4">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="p-1.5 -ml-1.5 rounded-md hover:bg-gray-100"
+          aria-label="Abrir menu"
+        >
+          <Menu className="h-5 w-5 text-gray-700" />
+        </button>
+        <img src="/logo-icon.svg" alt="Júlia Docs" className="h-7 w-7" />
+        <span className="text-base leading-none">
+          <span className="font-bold text-blue-900">Júlia</span>
+          <span className="font-normal text-blue-900">Docs</span>
+        </span>
+      </div>
+
+      {/* Backdrop (mobile, quando o drawer está aberto) */}
+      {open && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/40"
+          onClick={() => setOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 md:translate-x-0',
+          open ? 'translate-x-0' : '-translate-x-full',
+        )}
+      >
+        {/* Header com workspace switcher */}
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-3">
+            <img src="/logo-icon.svg" alt="Julia Docs" className="h-9 w-9 flex-shrink-0" />
+            <span className="text-base leading-none">
+              <span className="font-bold text-blue-900">Júlia</span>
+              <span className="font-normal text-blue-900">Docs</span>
+            </span>
+            {/* Fechar (apenas mobile) */}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="md:hidden ml-auto p-1.5 rounded-md hover:bg-gray-100"
+              aria-label="Fechar menu"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -170,5 +216,6 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
         </Button>
       </div>
     </aside>
+    </>
   )
 }

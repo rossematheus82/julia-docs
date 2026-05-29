@@ -162,7 +162,7 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
               <Input {...register('name')} value={v.name ?? ''} className="mt-1" placeholder="Ex: Ambulatório de Pneumologia" />
               {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>CNES</Label>
                 <Input {...register('cnes')} value={v.cnes ?? ''} className="mt-1" placeholder="0000000" />

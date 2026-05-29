@@ -39,7 +39,7 @@ export function Step6Review({ data, patients, doctors, facilities }: Props) {
         <p className="text-sm text-gray-500">Confirme os dados antes de criar a LME</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Doença e tipo */}
         <div className="col-span-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center gap-3">
