@@ -132,7 +132,7 @@ export default function EditarPacientePage() {
               {errors.cpf && <p className="text-xs text-red-500 mt-1">{errors.cpf.message}</p>}
             </div>
             <div>
-              <Label>CNS *</Label>
+              <Label>CNS</Label>
               <Input {...register('cns')} value={v.cns ?? ''} className="mt-1" />
               {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>

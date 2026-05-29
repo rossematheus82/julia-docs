@@ -250,7 +250,7 @@ export default function NovoPacientePage() {
               {errors.cpf && <p className="text-xs text-red-500 mt-1">{errors.cpf.message}</p>}
             </div>
             <div>
-              <Label>{fieldLabel('CNS (Cartão Nacional de Saúde) *', 'cns')}</Label>
+              <Label>{fieldLabel('CNS (Cartão Nacional de Saúde)', 'cns')}</Label>
               <Input {...register('cns')} value={v.cns ?? ''} className="mt-1" placeholder="000 0000 0000 0000" />
               {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>

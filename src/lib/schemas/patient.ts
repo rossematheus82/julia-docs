@@ -10,10 +10,11 @@ export const PatientSchema = z.object({
     /^\d{11}$|^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
     'CPF inválido — informe 11 dígitos (ex: 000.000.000-00)'
   ),
-  cns: z.string().min(1, 'CNS obrigatório').regex(
+  // CNS é opcional — basta CPF para identificar o paciente na LME. Se preenchido, valida o formato.
+  cns: z.string().regex(
     /^\d{15}$/,
     'CNS inválido — deve ter 15 dígitos numéricos'
-  ),
+  ).optional().or(z.literal('')),
   birth_date: z.string().min(1, 'Data de nascimento obrigatória').regex(
     /^\d{4}-\d{2}-\d{2}$/,
     'Data de nascimento inválida'
