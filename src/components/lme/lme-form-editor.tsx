@@ -432,13 +432,15 @@ function AsmaSection({
 // ─── DPOC ─────────────────────────────────────────────────────────────────────
 
 function DpocSection({
-  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getNestedBool, setNestedBool, getNestedText, setNestedText, sc, sh, requestType,
+  aiFields, changedFields, getSpec, getBoolSpec, setSpec, getSpecRaw, getNestedBool, setNestedBool, getNestedText, setNestedText, sc, sh, requestType,
 }: SectionProps) {
   const L = SPEC_TEXT_LIMITS.dpoc
-  const HISTORIA_ITEMS = [
-    { key: 'tabagista', label: 'Tabagista ou ex-tabagista' },
-    { key: 'exposicao_poluentes_ambientais', label: 'Exposição a poluentes ambientais' },
-    { key: 'exposicao_poluentes_ocupacionais', label: 'Exposição a poluentes ocupacionais' },
+  // `spec` = campo de texto inline que aparece logo abaixo do item quando marcado
+  // (igual à LME do SES-MG, que tem "Especificar: ___" ao lado do item).
+  const HISTORIA_ITEMS: { key: string; label: string; spec?: { field: string; placeholder: string } }[] = [
+    { key: 'tabagista', label: 'Tabagista ou ex-tabagista', spec: { field: 'macos_ano', placeholder: 'Informar quantidade de maços/ano (ex: 40)' } },
+    { key: 'exposicao_poluentes_ambientais', label: 'Exposição a poluentes ambientais', spec: { field: 'poluentes_ambientais_especificacao', placeholder: 'Especificar poluentes ambientais...' } },
+    { key: 'exposicao_poluentes_ocupacionais', label: 'Exposição a poluentes ocupacionais', spec: { field: 'poluentes_ocupacionais_especificacao', placeholder: 'Especificar poluentes ocupacionais...' } },
     { key: 'dispneia_controlada', label: 'Dispneia controlada' },
     { key: 'dispneia_persistente', label: 'Dispneia persistente' },
     { key: 'respiracao_ofegante', label: 'Respiração ofegante' },
@@ -449,7 +451,7 @@ function DpocSection({
     { key: 'deficiencia_alfa1', label: 'Deficiência de alfa-1 antitripsina' },
     { key: 'historia_familiar', label: 'História familiar de DPOC' },
     { key: 'fatores_infancia', label: 'Fatores relacionados à infância' },
-    { key: 'outros', label: 'Outros' },
+    { key: 'outros', label: 'Outros', spec: { field: 'outros_especificacao', placeholder: 'Especificar...' } },
   ]
   const OUTROS_DIAG_ITEMS = [
     { key: 'asma', label: 'Asma' },
@@ -478,40 +480,25 @@ function DpocSection({
         </Select>
       </div>
 
-      {/* História clínica */}
+      {/* História clínica — item + caixa "Especificar" inline (igual LME SES-MG) */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-2">História clínica</p>
-        <div className="grid grid-cols-2 gap-2 pl-2">
-          {HISTORIA_ITEMS.map(({ key, label }) => (
-            <CBRow key={key} label={label} checked={getNestedBool('historia', key)} onChange={v => setNestedBool('historia', key, v)} />
+        <p className="text-sm font-medium text-gray-700 mb-2">3.1 História clínica — assinalar características</p>
+        <div className="space-y-2 pl-2">
+          {HISTORIA_ITEMS.map(({ key, label, spec }) => (
+            <div key={key}>
+              <CBRow label={label} checked={getNestedBool('historia', key)} onChange={v => setNestedBool('historia', key, v)} />
+              {spec && getNestedBool('historia', key) && (
+                <Input
+                  className="mt-1 ml-6 h-8 text-sm"
+                  placeholder={spec.placeholder}
+                  value={getNestedText('historia', spec.field)}
+                  onChange={e => setNestedText('historia', spec.field, e.target.value)}
+                />
+              )}
+            </div>
           ))}
         </div>
       </div>
-
-      {getNestedBool('historia', 'tabagista') && (
-        <div>
-          <FL label="Carga tabágica (maços/ano)" fieldKey="spec.historia.macos_ano" aiFields={aiFields} changedFields={changedFields} value={getNestedText('historia', 'macos_ano')} />
-          <Input placeholder="Ex: 40" value={getNestedText('historia', 'macos_ano')} onChange={e => setNestedText('historia', 'macos_ano', e.target.value)} />
-        </div>
-      )}
-      {getNestedBool('historia', 'exposicao_poluentes_ambientais') && (
-        <div>
-          <FL label="Especificar poluentes ambientais" fieldKey="spec.historia.poluentes_ambientais_especificacao" aiFields={aiFields} changedFields={changedFields} value={getNestedText('historia', 'poluentes_ambientais_especificacao')} />
-          <Input placeholder="Especifique..." value={getNestedText('historia', 'poluentes_ambientais_especificacao')} onChange={e => setNestedText('historia', 'poluentes_ambientais_especificacao', e.target.value)} />
-        </div>
-      )}
-      {getNestedBool('historia', 'exposicao_poluentes_ocupacionais') && (
-        <div>
-          <FL label="Especificar poluentes ocupacionais" fieldKey="spec.historia.poluentes_ocupacionais_especificacao" aiFields={aiFields} changedFields={changedFields} value={getNestedText('historia', 'poluentes_ocupacionais_especificacao')} />
-          <Input placeholder="Especifique..." value={getNestedText('historia', 'poluentes_ocupacionais_especificacao')} onChange={e => setNestedText('historia', 'poluentes_ocupacionais_especificacao', e.target.value)} />
-        </div>
-      )}
-      {getNestedBool('historia', 'outros') && (
-        <div>
-          <FL label="Especificar outros" fieldKey="spec.historia.outros_especificacao" aiFields={aiFields} changedFields={changedFields} value={getNestedText('historia', 'outros_especificacao')} />
-          <Input placeholder="Especifique..." value={getNestedText('historia', 'outros_especificacao')} onChange={e => setNestedText('historia', 'outros_especificacao', e.target.value)} />
-        </div>
-      )}
 
       {/* Exacerbações */}
       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -542,10 +529,19 @@ function DpocSection({
         </div>
       </div>
 
-      {/* Em uso de medicamento para DPOC */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <p className="text-sm font-medium text-gray-800">Paciente em uso de medicamento para DPOC?</p>
-        <Switch checked={getBoolSpec('em_uso_medicamento')} onCheckedChange={v => setSpec('em_uso_medicamento', v)} />
+      {/* 4. Em uso de medicamento para DPOC — SIM/NÃO explícito (não força NÃO se não respondido) */}
+      <div className="p-3 bg-gray-50 rounded-lg">
+        <p className="text-sm font-medium text-gray-800">4. Paciente em uso de algum medicamento para tratamento da DPOC?</p>
+        <div className="flex gap-6 mt-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input type="radio" name="dpoc_em_uso" checked={getSpecRaw('em_uso_medicamento') === true} onChange={() => setSpec('em_uso_medicamento', true)} className="accent-blue-600" />
+            <span className="text-sm text-gray-700">SIM</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input type="radio" name="dpoc_em_uso" checked={getSpecRaw('em_uso_medicamento') === false} onChange={() => setSpec('em_uso_medicamento', false)} className="accent-blue-600" />
+            <span className="text-sm text-gray-700">NÃO</span>
+          </label>
+        </div>
       </div>
 
       {/* Tratamentos atuais */}

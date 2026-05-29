@@ -46,8 +46,8 @@ export const DpocFormSchema = z.object({
     icc: z.boolean().default(false),
   }),
 
-  // 4. Tratamentos atuais
-  em_uso_medicamento: z.boolean().default(false),
+  // 4. Tratamentos atuais (tri-estado: SIM / NÃO / não respondido)
+  em_uso_medicamento: z.boolean().optional(),
   tratamentos_atuais: z.string().optional(),
 
   // 5. Outras observações

@@ -59,7 +59,8 @@ export function buildDpocMappings(data: DpocFormData, fillDate: string) {
       // Seção 3.2 – Houve exacerbações? (Button39: #0=SIM<1>, #1=NÃO<2>)
       Button39: data.exacerbacoes_12m ? '<1>' : '<2>',
       // Seção 4 – Em uso de medicamento p/ DPOC? (Button41: #0=SIM<1>, #1=NÃO<2>)
-      Button41: data.em_uso_medicamento ? '<1>' : '<2>',
+      // Tri-estado: só marca quando respondido. Não força NÃO quando indefinido.
+      Button41: data.em_uso_medicamento === true ? '<1>' : data.em_uso_medicamento === false ? '<2>' : '',
     },
     // Seção 3.2 – Tipo de exacerbação (Button40: #0=Moderada, #1=Grave). Independentes →
     // marca cada um conforme a quantidade informada.
