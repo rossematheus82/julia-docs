@@ -6,13 +6,18 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 
 **Stack:** Next.js 14 (App Router) · TypeScript · Supabase (auth + DB) · pdf-lib · shadcn/ui · Tailwind · pnpm
 
-## Status / Deploy (2026-05-24)
+## Status / Deploy (2026-05-28)
 
 - **Repo:** [github.com/rossematheus82/julia-docs](https://github.com/rossematheus82/julia-docs)
 - **Produção:** Vercel (deploy automático a cada push em `main`)
 - **Migrations aplicadas no Supabase:**
   - `0002_doctor_profile.sql` — perfil de médico atrelado ao usuário (`doctors.owner_user_id`, `doctors.cpf`, índice único por workspace, RLS `own_doctor_*`)
   - `0003_lme_status_emitida.sql` — inclui `'emitida'` na check constraint de `lmes.status`
+- **Ajustes recentes (2026-05-28):**
+  - DPOC: "em uso de medicamento" virou SIM/NÃO explícito (radio, tri-estado — não força NÃO quando não respondido); caixas "Especificar" de poluentes ambientais/ocupacionais agora aparecem inline sob o item marcado.
+  - Cadastro de paciente: campos obrigatórios reforçados (ver seção própria).
+  - Dados do paciente fluem do cadastro **atual** para o PDF (a rota busca o registro completo, não o snapshot); peso/altura pré-preenchem no wizard.
+  - CID-10 passou a ser **editável** na tela de editar (mesmo com LME emitida) e na renovação.
 
 ## Modelo de usuários e workspaces
 
@@ -31,6 +36,17 @@ A LME tem `created_by_user_id`. Quem **não** é o criador, ao abrir `/lmes/[id]
 
 Em `/api/pdf/generate` (`type='all'`), o auto-update de `status='emitida'` + `next_renewal_date` só acontece se o requester é o criador — outros médicos não alteram o estado da LME alheia.
 
+## Cadastro de paciente
+
+Schema único `PatientSchema` (`src/lib/schemas/patient.ts`, zod 4) usado em `/pacientes/novo` e `/pacientes/[id]/editar`.
+
+- **Obrigatórios:** nome completo, nome da mãe, CPF, CNS, data de nascimento, sexo, raça/cor, peso, altura, telefone, endereço. Responsável legal é obrigatório quando `is_incapable=true` (validado via `superRefine`).
+- **Opcionais (únicas exceções):** nome social, etnia (detalhe, só p/ indígena) e e-mail.
+- Os dois formulários exibem `*` e mensagem de erro por campo.
+
+**Fluxo cadastro → LME:** em `/api/pdf/generate`, os dados do paciente vêm do **registro atual** (a rota faz `select` completo e sobrepõe o `patient_snapshot` com os campos não-vazios) — garante peso, altura, nome da mãe, telefone etc. no PDF, inclusive em LMEs antigas. No wizard, peso/altura **pré-preenchem** no `LmeFormEditor` (props `patientWeight`/`patientHeight`).
+> A LME do SES-MG **não tem** campos para sexo nem endereço; a data de nascimento alimenta a *idade* no formulário específico e a prescrição/requerimento.
+
 ## Doenças suportadas
 
 | Código | Nome | CIDs principais |
@@ -45,8 +61,8 @@ Em `/api/pdf/generate` (`type='all'`), o auto-update de `status='emitida'` + `ne
 1. **Wizard (nova LME)** — 6 passos: doença → tipo → paciente → médico/estabelecimento → prontuário (IA opcional) → revisão. Validação centralizada em `nova/validate.ts` coleta **todos** os erros faltantes de uma vez e leva pro step com problema. A LME é salva já com `status='emitida'` — não passa mais por rascunho.
    - Step 2 (tipo) reduzido a 2 opções: **"Processo Completo"** (`inicial`) e **"LME + Receita"** (`renovacao`). O valor `reavaliacao` ainda existe no enum do DB por compatibilidade.
    - Step 5: editor visível por padrão; IA fica como assistente opcional colapsável (extração do prontuário faz *merge*, nunca sobrescreve campos preenchidos manualmente).
-2. **Editar campos** — `LmeFormEditor` permite preencher/ajustar `lme_data` e `specific_form_data`. Quando `request_type='renovacao'` o formulário específico é ocultado (renovação = só LME + receita).
-3. **Renovar** (`/lmes/[id]/renovar`) — médico fixado no usuário logado (sem seletor). O usuário escolhe o escopo: **"Apenas a LME (medicamentos)"** ou **"LME + formulário específico"**. Editor inline com dados pré-preenchidos da LME original; ao confirmar, a nova LME é criada já como `emitida` com `parent_lme_id` apontando pra original.
+2. **Editar campos** — `LmeFormEditor` permite preencher/ajustar `lme_data` e `specific_form_data`. Quando `request_type='renovacao'` o formulário específico é ocultado (renovação = só LME + receita). Inclui **seletor de CID-10** (corrigir processo que voltou por erro de CID) — acessível pelo criador mesmo com a LME já `emitida`. Ao salvar, o `cid10` é gravado na coluna **e** dentro de `lme_data` (a rota de PDF prioriza `lme_data.cid10`), e o diagnóstico derivado é atualizado.
+3. **Renovar** (`/lmes/[id]/renovar`) — médico fixado no usuário logado (sem seletor). O usuário escolhe o escopo: **"Apenas a LME (medicamentos)"** ou **"LME + formulário específico"**, e pode **confirmar/corrigir o CID-10**. Editor inline com dados pré-preenchidos da LME original; ao confirmar, a nova LME é criada já como `emitida` com `parent_lme_id` apontando pra original.
 4. **Gerar PDFs** — API `/api/pdf/generate` aceita `type: 'lme' | 'specific_form' | 'all'`. O tipo `'all'` gera o processo completo (LME + form esp. + prescrição + requerimento + termo de adesão).
 5. **Timeline do paciente** (`/pacientes/[id]`) — histórico vertical de LMEs do paciente com bolinha verde na mais recente, lista de medicamentos por LME e botões **Baixar** / **Renovar** inline.
 
