@@ -44,13 +44,14 @@ export async function POST(request: NextRequest) {
 
   if (!lme) return NextResponse.json({ error: 'LME não encontrada' }, { status: 404 })
 
-  // Capacidade civil, raça e responsável vêm do CADASTRO ATUAL (o snapshot não inclui raça
-  // e pode estar desatualizado se o paciente foi editado depois da criação da LME).
+  // Dados do paciente vêm do CADASTRO ATUAL (o snapshot pode estar incompleto/desatualizado).
+  // Buscamos todos os campos usados na LME/processo para que nome, mãe, CPF, CNS, nascimento,
+  // sexo, raça, peso, altura, telefone, e-mail, endereço e capacidade civil sejam preenchidos.
   let currentPatient: Snap | null = null
   if (lme.patient_id) {
     const { data: cur } = await supabase
       .from('patients')
-      .select('is_incapable, race_ethnicity, ethnicity_detail, responsible_name')
+      .select('full_name, social_name, mother_name, cpf, cns, birth_date, sex, race_ethnicity, ethnicity_detail, weight_kg, height_cm, phone, email, address, is_incapable, responsible_name')
       .eq('id', lme.patient_id)
       .single()
     currentPatient = (cur ?? null) as Snap | null
@@ -59,13 +60,10 @@ export async function POST(request: NextRequest) {
   try {
     const fillDate = dataHoje()
     const snapshot = (lme.patient_snapshot ?? {}) as Snap
+    // Cadastro atual (campos não-vazios) sobrepõe o snapshot — garante que peso, altura,
+    // nome da mãe, telefone etc. fluam pro PDF mesmo em LMEs criadas antes deste ajuste.
     const patient: Snap = currentPatient
-      ? { ...snapshot,
-          is_incapable:     currentPatient.is_incapable     ?? snapshot.is_incapable,
-          race_ethnicity:   currentPatient.race_ethnicity   ?? snapshot.race_ethnicity,
-          ethnicity_detail: currentPatient.ethnicity_detail ?? snapshot.ethnicity_detail,
-          responsible_name: currentPatient.responsible_name ?? snapshot.responsible_name,
-        }
+      ? { ...snapshot, ...Object.fromEntries(Object.entries(currentPatient).filter(([, val]) => val != null && val !== '')) }
       : snapshot
     const doctor   = (lme.doctor_snapshot   ?? {}) as Snap
     const facility = (lme.facility_snapshot ?? {}) as Snap

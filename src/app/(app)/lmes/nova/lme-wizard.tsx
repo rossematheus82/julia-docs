@@ -16,7 +16,7 @@ import { Step6Review } from './steps/step6-review'
 import type { Disease, RequestType, Json } from '@/lib/supabase/types'
 import { getCidsByDoenca } from '@/lib/cid10'
 
-export interface PatientItem { id: string; full_name: string; birth_date?: string | null; cpf?: string | null; cns?: string | null; is_incapable?: boolean | null; responsible_name?: string | null }
+export interface PatientItem { id: string; full_name: string; birth_date?: string | null; cpf?: string | null; cns?: string | null; is_incapable?: boolean | null; responsible_name?: string | null; weight_kg?: number | null; height_cm?: number | null }
 export interface DoctorItem { id: string; full_name: string; crm: string; crm_uf: string; specialty?: string | null }
 export interface FacilityItem { id: string; name: string; cnes?: string | null; city?: string | null; state?: string | null }
 

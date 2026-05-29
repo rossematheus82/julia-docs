@@ -120,27 +120,31 @@ export default function EditarPacientePage() {
               <Input {...register('social_name')} value={v.social_name ?? ''} className="mt-1" />
             </div>
             <div>
-              <Label>Nome da mãe</Label>
+              <Label>Nome da mãe *</Label>
               <Input {...register('mother_name')} value={v.mother_name ?? ''} className="mt-1" />
+              {errors.mother_name && <p className="text-xs text-red-500 mt-1">{errors.mother_name.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>CPF</Label>
+              <Label>CPF *</Label>
               <Input {...register('cpf')} value={v.cpf ?? ''} className="mt-1" placeholder="000.000.000-00" />
+              {errors.cpf && <p className="text-xs text-red-500 mt-1">{errors.cpf.message}</p>}
             </div>
             <div>
-              <Label>CNS</Label>
+              <Label>CNS *</Label>
               <Input {...register('cns')} value={v.cns ?? ''} className="mt-1" />
+              {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Data de nascimento</Label>
+              <Label>Data de nascimento *</Label>
               <DateInput value={v.birth_date ?? ''} onChange={val => setValue('birth_date', val)} className="mt-1" />
+              {errors.birth_date && <p className="text-xs text-red-500 mt-1">{errors.birth_date.message}</p>}
             </div>
             <div>
-              <Label>Sexo</Label>
+              <Label>Sexo *</Label>
               <Controller
                 control={control}
                 name="sex"
@@ -155,11 +159,12 @@ export default function EditarPacientePage() {
                   </Select>
                 )}
               />
+              {errors.sex && <p className="text-xs text-red-500 mt-1">{errors.sex.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Raça/Etnia</Label>
+              <Label>Raça/Cor *</Label>
               <Controller
                 control={control}
                 name="race_ethnicity"
@@ -176,6 +181,7 @@ export default function EditarPacientePage() {
                   </Select>
                 )}
               />
+              {errors.race_ethnicity && <p className="text-xs text-red-500 mt-1">{errors.race_ethnicity.message}</p>}
             </div>
             <div>
               <Label>Etnia (se indígena)</Label>
@@ -188,12 +194,14 @@ export default function EditarPacientePage() {
           <h2 className="font-semibold text-gray-900">Dados clínicos</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Peso (kg)</Label>
+              <Label>Peso (kg) *</Label>
               <Input {...register('weight_kg')} value={v.weight_kg ?? ''} type="number" step="0.1" className="mt-1" />
+              {errors.weight_kg && <p className="text-xs text-red-500 mt-1">{errors.weight_kg.message}</p>}
             </div>
             <div>
-              <Label>Altura (cm)</Label>
+              <Label>Altura (cm) *</Label>
               <Input {...register('height_cm')} value={v.height_cm ?? ''} type="number" className="mt-1" />
+              {errors.height_cm && <p className="text-xs text-red-500 mt-1">{errors.height_cm.message}</p>}
             </div>
           </div>
         </section>
@@ -202,8 +210,9 @@ export default function EditarPacientePage() {
           <h2 className="font-semibold text-gray-900">Contato e endereço</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Telefone</Label>
+              <Label>Telefone *</Label>
               <Input {...register('phone')} value={v.phone ?? ''} className="mt-1" />
+              {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>}
             </div>
             <div>
               <Label>E-mail</Label>
@@ -212,8 +221,9 @@ export default function EditarPacientePage() {
             </div>
           </div>
           <div>
-            <Label>Endereço completo</Label>
+            <Label>Endereço completo *</Label>
             <Input {...register('address')} value={v.address ?? ''} className="mt-1" />
+            {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
           </div>
         </section>
 
@@ -231,6 +241,7 @@ export default function EditarPacientePage() {
             <div>
               <Label>Nome do responsável legal *</Label>
               <Input {...register('responsible_name')} value={v.responsible_name ?? ''} className="mt-1" />
+              {errors.responsible_name && <p className="text-xs text-red-500 mt-1">{errors.responsible_name.message}</p>}
             </div>
           )}
         </section>

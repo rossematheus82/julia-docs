@@ -22,7 +22,7 @@ export default async function NovaLmePage({
     { data: myDoctor },
     { data: facilities },
   ] = await Promise.all([
-    supabase.from('patients').select('id, full_name, birth_date, cpf, cns, sex, weight_kg, height_cm, mother_name, address, social_name, is_incapable, responsible_name')
+    supabase.from('patients').select('id, full_name, birth_date, cpf, cns, sex, race_ethnicity, ethnicity_detail, weight_kg, height_cm, mother_name, address, social_name, phone, email, is_incapable, responsible_name')
       .eq('workspace_id', active.workspaceId).order('full_name'),
     // Apenas o médico do usuário logado (perfil próprio neste workspace)
     supabase.from('doctors').select('id, full_name, crm, crm_uf, specialty, cns')

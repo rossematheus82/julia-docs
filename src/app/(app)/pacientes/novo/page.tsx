@@ -238,27 +238,31 @@ export default function NovoPacientePage() {
               <Input {...register('social_name')} value={v.social_name ?? ''} className="mt-1" placeholder="Se diferente do nome civil" />
             </div>
             <div>
-              <Label>{fieldLabel('Nome da mãe', 'mother_name')}</Label>
+              <Label>{fieldLabel('Nome da mãe *', 'mother_name')}</Label>
               <Input {...register('mother_name')} value={v.mother_name ?? ''} className="mt-1" />
+              {errors.mother_name && <p className="text-xs text-red-500 mt-1">{errors.mother_name.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>{fieldLabel('CPF', 'cpf')}</Label>
+              <Label>{fieldLabel('CPF *', 'cpf')}</Label>
               <Input {...register('cpf')} value={v.cpf ?? ''} className="mt-1" placeholder="000.000.000-00" />
+              {errors.cpf && <p className="text-xs text-red-500 mt-1">{errors.cpf.message}</p>}
             </div>
             <div>
-              <Label>{fieldLabel('CNS (Cartão Nacional de Saúde)', 'cns')}</Label>
+              <Label>{fieldLabel('CNS (Cartão Nacional de Saúde) *', 'cns')}</Label>
               <Input {...register('cns')} value={v.cns ?? ''} className="mt-1" placeholder="000 0000 0000 0000" />
+              {errors.cns && <p className="text-xs text-red-500 mt-1">{errors.cns.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>{fieldLabel('Data de nascimento', 'birth_date')}</Label>
+              <Label>{fieldLabel('Data de nascimento *', 'birth_date')}</Label>
               <DateInput value={v.birth_date ?? ''} onChange={val => setValue('birth_date', val)} className="mt-1" />
+              {errors.birth_date && <p className="text-xs text-red-500 mt-1">{errors.birth_date.message}</p>}
             </div>
             <div>
-              <Label>{fieldLabel('Sexo', 'sex')}</Label>
+              <Label>{fieldLabel('Sexo *', 'sex')}</Label>
               <Controller
                 control={control}
                 name="sex"
@@ -275,11 +279,12 @@ export default function NovoPacientePage() {
                   </Select>
                 )}
               />
+              {errors.sex && <p className="text-xs text-red-500 mt-1">{errors.sex.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>{fieldLabel('Raça/Etnia', 'race_ethnicity')}</Label>
+              <Label>{fieldLabel('Raça/Cor *', 'race_ethnicity')}</Label>
               <Controller
                 control={control}
                 name="race_ethnicity"
@@ -298,6 +303,7 @@ export default function NovoPacientePage() {
                   </Select>
                 )}
               />
+              {errors.race_ethnicity && <p className="text-xs text-red-500 mt-1">{errors.race_ethnicity.message}</p>}
             </div>
             <div>
               <Label>Etnia (se indígena)</Label>
@@ -311,12 +317,14 @@ export default function NovoPacientePage() {
           <h2 className="font-semibold text-gray-900">Dados clínicos</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>{fieldLabel('Peso (kg)', 'weight_kg')}</Label>
+              <Label>{fieldLabel('Peso (kg) *', 'weight_kg')}</Label>
               <Input {...register('weight_kg')} value={v.weight_kg ?? ''} type="number" step="0.1" className="mt-1" placeholder="0.0" />
+              {errors.weight_kg && <p className="text-xs text-red-500 mt-1">{errors.weight_kg.message}</p>}
             </div>
             <div>
-              <Label>{fieldLabel('Altura (cm)', 'height_cm')}</Label>
+              <Label>{fieldLabel('Altura (cm) *', 'height_cm')}</Label>
               <Input {...register('height_cm')} value={v.height_cm ?? ''} type="number" className="mt-1" placeholder="0" />
+              {errors.height_cm && <p className="text-xs text-red-500 mt-1">{errors.height_cm.message}</p>}
             </div>
           </div>
         </section>
@@ -326,8 +334,9 @@ export default function NovoPacientePage() {
           <h2 className="font-semibold text-gray-900">Contato e endereço</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>{fieldLabel('Telefone', 'phone')}</Label>
+              <Label>{fieldLabel('Telefone *', 'phone')}</Label>
               <Input {...register('phone')} value={v.phone ?? ''} className="mt-1" placeholder="(00) 00000-0000" />
+              {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>}
             </div>
             <div>
               <Label>{fieldLabel('E-mail', 'email')}</Label>
@@ -336,8 +345,9 @@ export default function NovoPacientePage() {
             </div>
           </div>
           <div>
-            <Label>{fieldLabel('Endereço completo', 'address')}</Label>
+            <Label>{fieldLabel('Endereço completo *', 'address')}</Label>
             <Input {...register('address')} value={v.address ?? ''} className="mt-1" placeholder="Rua, número, bairro, cidade - UF" />
+            {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
           </div>
         </section>
 
@@ -356,6 +366,7 @@ export default function NovoPacientePage() {
             <div>
               <Label>{fieldLabel('Nome do responsável legal *', 'responsible_name')}</Label>
               <Input {...register('responsible_name')} value={v.responsible_name ?? ''} className="mt-1" />
+              {errors.responsible_name && <p className="text-xs text-red-500 mt-1">{errors.responsible_name.message}</p>}
             </div>
           )}
         </section>

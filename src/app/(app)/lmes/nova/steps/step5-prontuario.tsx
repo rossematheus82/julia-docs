@@ -26,6 +26,8 @@ export function Step5Prontuario({ data, update, patients }: Props) {
   const patientBirthDate = patient?.birth_date ?? null
   const patientIncapable = patient?.is_incapable ?? false
   const patientResponsibleName = patient?.responsible_name ?? null
+  const patientWeight = patient?.weight_kg != null ? String(patient.weight_kg) : null
+  const patientHeight = patient?.height_cm != null ? String(patient.height_cm) : null
 
   const [showAi, setShowAi] = useState(false)
   const [prontuario, setProntuario] = useState('')
@@ -141,6 +143,8 @@ export function Step5Prontuario({ data, update, patients }: Props) {
         patientBirthDate={patientBirthDate}
         patientIncapable={patientIncapable}
         patientResponsibleName={patientResponsibleName}
+        patientWeight={patientWeight}
+        patientHeight={patientHeight}
         onLmeDataChange={lme_data => update({ lme_data })}
         onSpecificDataChange={specific_form_data => update({ specific_form_data })}
       />
