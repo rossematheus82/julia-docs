@@ -6,18 +6,21 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 
 **Stack:** Next.js 14 (App Router) · TypeScript · Supabase (auth + DB) · pdf-lib · shadcn/ui · Tailwind · pnpm
 
-## Status / Deploy (2026-05-28)
+## Status / Deploy (2026-05-30)
 
 - **Repo:** [github.com/rossematheus82/julia-docs](https://github.com/rossematheus82/julia-docs)
 - **Produção:** Vercel (deploy automático a cada push em `main`)
 - **Migrations aplicadas no Supabase:**
   - `0002_doctor_profile.sql` — perfil de médico atrelado ao usuário (`doctors.owner_user_id`, `doctors.cpf`, índice único por workspace, RLS `own_doctor_*`)
   - `0003_lme_status_emitida.sql` — inclui `'emitida'` na check constraint de `lmes.status`
-- **Ajustes recentes (2026-05-28):**
+- **Ajustes recentes (2026-05-28 a 30):**
   - DPOC: "em uso de medicamento" virou SIM/NÃO explícito (radio, tri-estado — não força NÃO quando não respondido); caixas "Especificar" de poluentes ambientais/ocupacionais agora aparecem inline sob o item marcado.
-  - Cadastro de paciente: campos obrigatórios reforçados (ver seção própria).
+  - Cadastro de paciente: campos obrigatórios reforçados (ver seção própria); **CNS voltou a ser opcional** (basta CPF) após ajuste 2026-05-29.
   - Dados do paciente fluem do cadastro **atual** para o PDF (a rota busca o registro completo, não o snapshot); peso/altura pré-preenchem no wizard.
   - CID-10 passou a ser **editável** na tela de editar (mesmo com LME emitida) e na renovação.
+  - **Responsivo mobile:** sidebar vira drawer com hambúrguer abaixo de `md` (768px), barra superior fixa no mobile (`pt-14`), grids de 2/3 colunas dos formulários empilham (`grid-cols-1 sm:grid-cols-2`), tabela de exames HAP rola horizontalmente. Layout passou de flex+`w-64` para sidebar `fixed` + `md:pl-64` no `<main>`.
+  - **Dashboard em horário de Brasília:** Vercel roda em UTC — cabeçalho e queries de renovação/mês usam `Intl.DateTimeFormat('America/Sao_Paulo')`. Outras páginas que exibem datas (detalhes de LME, timeline) ainda usam o fuso do servidor — corrigir se aparecer reclamação.
+  - **HAP — "Detalhar" do risco (seção 9):** `Text15` (caixa livre logo abaixo da linha tracejada) era duplicata equivocada de `outras_observacoes`; agora recebe `risco_detalhe` (cap 700 chars). `outras_observacoes` segue apenas em `Text34` (p3).
 
 ## Modelo de usuários e workspaces
 
