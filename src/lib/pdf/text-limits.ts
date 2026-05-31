@@ -25,9 +25,8 @@ export const SPEC_TEXT_LIMITS: Record<string, Record<string, number>> = {
     teste_no_justificativa_nao_realizacao: 45,
     exame_resultado: 85,
     // Detalhamento do risco — caixa livre logo abaixo da linha "Detalhar:" na seção 9
-    // (Text15, p2, ~470x99). Limite mais baixo que outras_observacoes porque a caixa
-    // é menor e o texto é mais focado.
-    risco_detalhe: 250,
+    // (Text15, p2, ~470x99 → ~9 linhas × 94 chars ≈ 778 chars; cap com folga).
+    risco_detalhe: 700,
   },
 }
 
