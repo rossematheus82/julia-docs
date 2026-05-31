@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Bell, FileText, Users, Clock, RefreshCw } from 'lucide-react'
-import { differenceInDays, format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { differenceInDays, parseISO } from 'date-fns'
+
+// Vercel roda em UTC — datas/queries são calculadas em horário de Brasília (America/Sao_Paulo).
+const TZ = 'America/Sao_Paulo'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP'
@@ -23,9 +25,17 @@ export default async function DashboardPage() {
 
   type RenewalLme = { id: string; next_renewal_date: string | null; disease: string; patient: { full_name: string } | null; doctor: { full_name: string } | null }
 
-  const today = new Date()
-  const in30Days = new Date(today)
-  in30Days.setDate(today.getDate() + 30)
+  // Hoje no calendário de Brasília (YYYY-MM-DD)
+  const todayBR = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+  const [yStr, mStr, dStr] = todayBR.split('-')
+  // Meia-noite "do dia BR" representada como UTC — usada em differenceInDays p/ contar dias de calendário.
+  const todayMidnightUTC = new Date(Date.UTC(Number(yStr), Number(mStr) - 1, Number(dStr)))
+  const in30 = new Date(todayMidnightUTC); in30.setUTCDate(in30.getUTCDate() + 30)
+  const in30BR = in30.toISOString().slice(0, 10)
+  // Início do mês em horário de Brasília (offset explícito p/ o Postgres parsear correto)
+  const monthStartBR = `${yStr}-${mStr}-01T00:00:00-03:00`
+  // Cabeçalho legível em pt-BR no fuso de Brasília
+  const displayDate = new Intl.DateTimeFormat('pt-BR', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())
 
   const [
     { data: renewalAlerts },
@@ -38,8 +48,8 @@ export default async function DashboardPage() {
       .select('id, next_renewal_date, patient:patients(full_name), disease, doctor:doctors(full_name)')
       .eq('workspace_id', workspaceId)
       .eq('status', 'emitida')
-      .lte('next_renewal_date', in30Days.toISOString().split('T')[0])
-      .gte('next_renewal_date', today.toISOString().split('T')[0])
+      .lte('next_renewal_date', in30BR)
+      .gte('next_renewal_date', todayBR)
       .order('next_renewal_date', { ascending: true })
       .limit(10),
     // Apenas para contar "LMEs este mês" — não exibimos mais a lista de recentes
@@ -47,7 +57,7 @@ export default async function DashboardPage() {
       .from('lmes')
       .select('id, created_at')
       .eq('workspace_id', workspaceId)
-      .gte('created_at', new Date(today.getFullYear(), today.getMonth(), 1).toISOString()),
+      .gte('created_at', monthStartBR),
     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
     supabase.from('lmes').select('*', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
   ])
@@ -58,7 +68,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 text-sm">{format(today, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
+          <p className="text-gray-500 text-sm">{displayDate}</p>
         </div>
         <Link href="/lmes/nova">
           <Button className="gap-2">
@@ -100,7 +110,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {(renewalAlerts as unknown as RenewalLme[])?.map(lme => {
-              const days = differenceInDays(parseISO(lme.next_renewal_date!), today)
+              const days = differenceInDays(parseISO(lme.next_renewal_date!), todayMidnightUTC)
               const patient = lme.patient
               const doctor = lme.doctor
               return (
