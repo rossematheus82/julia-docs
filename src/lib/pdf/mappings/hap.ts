@@ -41,7 +41,7 @@ import { formatarData } from '@/lib/utils/date'
 //   Text12   = Bosentana posologia               (x=227, y=670)
 //   Text13   = Sildenafil posologia              (x=227, y=640)
 //   Text14   = Iloprosta posologia               (x=227, y=613)
-//   Text15   = outras observações                (x=77,  y=454 — large)
+//   Text15   = detalhar risco (sec. 9)           (x=77,  y=454 — caixa livre abaixo de "Detalhar:")
 //   Button60 = risco estratificado (3 opções: baixo/intermediário/alto)
 //   Button61 = classe funcional    (4 opções: I/II/III/IV)
 //   Button62-66 = situações específicas SIM/NÃO
@@ -57,7 +57,7 @@ import { formatarData } from '@/lib/utils/date'
 //     Text25 = eco (y=701), Text26 = ecg (y=675), Text67 = espiro (y=646),
 //     Text28 = tc6m (y=618), Text29 = polisso (y=591), Text30 = angiotc (y=550),
 //     Text31 = usg (y=523), Text68 = gasometria (y=496), Text33 = rx (y=469)
-//   Text34 = campo texto largo (sec. 12 extended)
+//   Text34 = outras observações (sec. 13)
 //   Text35 = data preenchimento DIA  (x=189, y=301)
 //   Text36 = data preenchimento MÊS  (x=227, y=303)
 //   Text37 = data preenchimento ANO  (x=265, y=301)
@@ -110,8 +110,9 @@ export function buildHapMappings(data: HapFormData, fillDate: string) {
       Text12: m.bosentana_posologia    ?? '',
       Text13: m.sildenafil_posologia   ?? '',
       Text14: m.iloprosta_posologia    ?? '',
-      // Seção 13 – Outras observações (p2 Text15 e p3 Text34 — mapeamos ambos por segurança)
-      Text15: data.outras_observacoes ?? '',
+      // Seção 9 – Detalhar critérios do risco (p2, caixa livre logo abaixo da linha "Detalhar:")
+      Text15: data.risco_detalhe ?? '',
+      // Seção 13 – Outras observações (p3, caixa grande no fim da seção)
       Text34: data.outras_observacoes ?? '',
       // Seção 12 – Exames complementares (p3)
       // Todos os 9 exames têm campo de data (left col) + resultado (right col)
@@ -141,8 +142,9 @@ export function buildHapMappings(data: HapFormData, fillDate: string) {
       Text31: ex.usg_abdominal?.resultado         ?? '',
       Text68: ex.gasometria?.resultado            ?? '',
       Text33: ex.rx_torax?.resultado              ?? '',
-      // Campo 13 – outras observações (p2 Text15 e p3 Text34)
-      Text15: data.outras_observacoes ?? '',
+      // Campo 9 – detalhar critérios do risco (p2)
+      Text15: data.risco_detalhe ?? '',
+      // Campo 13 – outras observações (p3)
       Text34: data.outras_observacoes ?? '',
     },
     checkboxes: {

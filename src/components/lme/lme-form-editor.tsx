@@ -723,11 +723,12 @@ function HapSection({
         {getSpec('risco') && (
           <div>
             <FL label="Detalhar critérios de estratificação" fieldKey="spec.risco_detalhe" aiFields={aiFields} changedFields={changedFields} value={getSpec('risco_detalhe')} />
-            <Textarea
-              className="min-h-20 text-sm"
+            <TextareaCounted
+              className="min-h-20"
+              maxLength={L.risco_detalhe}
               placeholder="Descreva os critérios utilizados para estratificação de risco..."
               value={getSpec('risco_detalhe')}
-              onChange={e => setSpec('risco_detalhe', e.target.value)}
+              onChange={v => setSpec('risco_detalhe', v)}
             />
           </div>
         )}
