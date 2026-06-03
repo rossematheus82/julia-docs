@@ -256,16 +256,25 @@ function AsmaSection({
   aiFields, changedFields, getSpec, setSpec, getNestedBool, setNestedBool, getSpecRaw, sc, sh, requestType,
 }: SectionProps) {
   const L = SPEC_TEXT_LIMITS.asma
+  // Ordem e rótulos conforme o formulário oficial (seção 3.2, 18 itens)
   const DIAG_ITEMS = [
     { key: 'corpo_estranho_inalado', label: 'Corpo estranho inalado' },
     { key: 'rinossinusite', label: 'Rinossinusite' },
     { key: 'disfuncao_cordas_vocais', label: 'Disfunção de cordas vocais' },
+    { key: 'obstrucao_vias_aereas_centrais', label: 'Obstrução das vias aéreas centrais' },
+    { key: 'hiperventilacao_psicogenica', label: 'Hiperventilação psicogênica' },
     { key: 'dpoc', label: 'DPOC' },
     { key: 'bronquiectasias', label: 'Bronquiectasias' },
-    { key: 'refluxo_gastroesofagico', label: 'Refluxo gastroesofágico' },
-    { key: 'insuficiencia_cardiaca', label: 'Insuficiência cardíaca' },
+    { key: 'refluxo_gastroesofagico', label: 'Doença do refluxo gastroesofágico' },
+    { key: 'micoses_bronco_pulmonares', label: 'Micoses bronco pulmonares alérgicas' },
     { key: 'tuberculose_pulmonar', label: 'Tuberculose pulmonar' },
+    { key: 'bronquite_eosinofilica', label: 'Bronquite eosinofílica não asmática' },
+    { key: 'deficiencia_alfa1_antitripsina', label: 'Deficiência de alfa-1-antitripsina' },
     { key: 'tromboembolismo_pulmonar', label: 'Tromboembolismo pulmonar' },
+    { key: 'hipertensao_arterial_pulmonar', label: 'Hipertensão arterial pulmonar' },
+    { key: 'doencas_pulmonares_intersticiais', label: 'Doenças pulmonares intersticiais' },
+    { key: 'insuficiencia_cardiaca', label: 'Insuficiência cardíaca' },
+    { key: 'cancer_pulmao', label: 'Câncer de pulmão' },
     { key: 'tosse_medicamentos', label: 'Tosse por medicamentos' },
   ]
 
@@ -294,7 +303,8 @@ function AsmaSection({
 
       {/* Diagnóstico diferencial */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-2">Diagnósticos diferenciais excluídos</p>
+        <p className="text-sm font-medium text-gray-700 mb-2">Diagnóstico diferencial</p>
+        <p className="text-xs text-gray-500 mb-2">Informar se o(a) paciente apresenta alguma das condições abaixo:</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2">
           {DIAG_ITEMS.map(({ key, label }) => (
             <CBRow key={key} label={label} checked={getNestedBool('diag_diferencial', key)} onChange={v => setNestedBool('diag_diferencial', key, v)} />
