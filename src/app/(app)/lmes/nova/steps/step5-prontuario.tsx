@@ -48,9 +48,13 @@ export function Step5Prontuario({ data, update, patients }: Props) {
       if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? 'Erro na extração') }
       const json = await res.json() as ExtractionResult
       setResult(json)
+      // O CID é pré-selecionado pelo médico (data.cid10) e o diagnóstico deriva dele —
+      // a IA nunca deve influenciar esses campos, então descartamos se vierem na extração.
+      const { cid10: _cid, diagnostico: _diag, ...lmeFromAi } = json.lme?.data ?? {}
+      void _cid; void _diag
       // Faz merge — não sobrescreve o que o médico já preencheu manualmente
       update({
-        lme_data: { ...(json.lme?.data ?? {}), ...data.lme_data },
+        lme_data: { ...lmeFromAi, ...data.lme_data },
         specific_form_data: { ...(json.specific?.data ?? {}), ...data.specific_form_data },
         aiUsed: true,
       })

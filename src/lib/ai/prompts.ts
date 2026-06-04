@@ -35,7 +35,7 @@ Analise o prontuário/evolução médica abaixo e extraia as informações para 
 4. Retorne um array "warnings" com alertas sobre campos importantes que não foram encontrados
 5. Extraia datas no formato DD/MM/AAAA
 6. Para pesos e alturas, extraia apenas os números
-7. Para CID-10, use o formato exato (ex: J45.0, J44.9)
+7. NÃO extraia nem sugira CID-10 ou diagnóstico — o CID já é selecionado pelo médico antes desta etapa
 
 ## Campos esperados
 ${fieldDescriptions}
@@ -58,8 +58,6 @@ export function getLmeFieldDescriptions(): string {
 - mae_nome: Nome completo da mãe do paciente
 - peso_kg: Peso em kg (número)
 - altura_cm: Altura em cm (número)
-- cid10: Código CID-10 principal
-- diagnostico: Diagnóstico por extenso
 - anamnese: Resumo clínico / anamnese do paciente
 - tratamento_previo: true se já fez tratamento, false se não
 - tratamento_previo_descricao: Descrição do tratamento prévio (se houver)
@@ -117,7 +115,6 @@ export function getDpiFpFieldDescriptions(): string {
 export function getHapFieldDescriptions(): string {
   return `
 - data_nascimento: Data de nascimento do paciente
-- cid10: Código CID-10 da HAP
 - grupo_hp: Grupo de hipertensão pulmonar (I, II, III, IV ou V)
 - doenca_coracao_esquerdo: true/false
 - doenca_pulmonar_cronica: true/false
