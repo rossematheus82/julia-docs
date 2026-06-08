@@ -57,6 +57,19 @@ export async function POST(request: NextRequest) {
     currentPatient = (cur ?? null) as Snap | null
   }
 
+  // Dados do MÉDICO: só relemos do cadastro atual quando quem gera é o criador da LME.
+  // Assim, edições no próprio perfil (ex.: CNS preenchido depois) refletem no PDF, mas
+  // outro médico que baixa o "processo original" continua vendo o snapshot do emissor.
+  let currentDoctor: Snap | null = null
+  if (lme.doctor_id && lme.created_by_user_id === user.id) {
+    const { data: dCur } = await supabase
+      .from('doctors')
+      .select('full_name, crm, crm_uf, cns')
+      .eq('id', lme.doctor_id)
+      .single()
+    currentDoctor = (dCur ?? null) as Snap | null
+  }
+
   try {
     const fillDate = dataHoje()
     const snapshot = (lme.patient_snapshot ?? {}) as Snap
@@ -65,7 +78,12 @@ export async function POST(request: NextRequest) {
     const patient: Snap = currentPatient
       ? { ...snapshot, ...Object.fromEntries(Object.entries(currentPatient).filter(([, val]) => val != null && val !== '')) }
       : snapshot
-    const doctor   = (lme.doctor_snapshot   ?? {}) as Snap
+    const doctorSnap = (lme.doctor_snapshot ?? {}) as Snap
+    // Cadastro atual (campos não-vazios) sobrepõe o snapshot do médico — só quando o
+    // requester é o criador (currentDoctor só é buscado nesse caso).
+    const doctor: Snap = currentDoctor
+      ? { ...doctorSnap, ...Object.fromEntries(Object.entries(currentDoctor).filter(([, val]) => val != null && val !== '')) }
+      : doctorSnap
     const facility = (lme.facility_snapshot ?? {}) as Snap
     const raw      = (lme.lme_data          ?? {}) as Snap
 
