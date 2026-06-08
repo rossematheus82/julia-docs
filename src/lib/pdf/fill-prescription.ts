@@ -73,18 +73,61 @@ function textLine(
   page.drawText(text, { x, y, size, font, color })
 }
 
+/**
+ * Quebra `text` em linhas que caibam em `maxWidth`, respeitando quebras
+ * explícitas (`\n`) e quebrando palavras longas demais por caractere.
+ */
+function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  const out: string[] = []
+  for (const rawLine of text.split('\n')) {
+    const words = rawLine.split(/\s+/).filter(Boolean)
+    if (words.length === 0) { out.push(''); continue }
+    let line = ''
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w
+      if (font.widthOfTextAtSize(test, size) <= maxWidth) {
+        line = test
+        continue
+      }
+      if (line) { out.push(line); line = '' }
+      if (font.widthOfTextAtSize(w, size) > maxWidth) {
+        // palavra mais larga que a coluna: quebra por caractere
+        let chunk = ''
+        for (const ch of w) {
+          if (font.widthOfTextAtSize(chunk + ch, size) <= maxWidth) chunk += ch
+          else { if (chunk) out.push(chunk); chunk = ch }
+        }
+        line = chunk
+      } else {
+        line = w
+      }
+    }
+    if (line) out.push(line)
+  }
+  return out
+}
+
 export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> {
   const doc  = await PDFDocument.create()
   const bold = await doc.embedFont(StandardFonts.HelveticaBold)
   const reg  = await doc.embedFont(StandardFonts.Helvetica)
 
   // A4: 595 × 842 pt
-  const page  = doc.addPage([595, 842])
+  let page    = doc.addPage([595, 842])
   const W     = 595
   const margin = 50
   const right  = W - margin
+  const bottomMargin = 60
 
   let y = 810
+
+  // Abre nova página quando faltar espaço para o próximo bloco.
+  function ensureSpace(needed: number) {
+    if (y - needed < bottomMargin) {
+      page = doc.addPage([595, 842])
+      y = 810
+    }
+  }
 
   // ── Header: estabelecimento ───────────────────────────────────────────────
   page.drawRectangle({ x: margin, y: y - 48, width: right - margin, height: 52, color: LIGHT })
@@ -142,6 +185,17 @@ export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> 
     const medLine = `${med.nome} ${med.apresentacao}`.trim()
     const qtdLine = `Qtd.: ${med.quantidade}`
 
+    // Pré-calcula a quebra da posologia (indentação pendente sob "Posologia: ").
+    const posoLabel = 'Posologia: '
+    const posoContentX = margin + 16 + reg.widthOfTextAtSize(posoLabel, 10)
+    const posoLines = med.posologia
+      ? wrapText(med.posologia, reg, 10, right - posoContentX)
+      : []
+
+    // Garante que o bloco inteiro do medicamento caiba na página.
+    const blockHeight = 14 + 12 + (med.posologia ? Math.max(posoLines.length, 1) * 12 : 0) + 6
+    ensureSpace(blockHeight)
+
     textLine(page, numLabel, margin, y, bold, 11)
     textLine(page, medLine, margin + 16, y, bold, 11)
     y -= 14
@@ -150,14 +204,19 @@ export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> 
     y -= 12
 
     if (med.posologia) {
-      textLine(page, `Posologia: ${med.posologia}`, margin + 16, y, reg, 10)
-      y -= 12
+      textLine(page, posoLabel, margin + 16, y, reg, 10)
+      const lines = posoLines.length ? posoLines : ['']
+      lines.forEach(ln => {
+        textLine(page, ln, posoContentX, y, reg, 10)
+        y -= 12
+      })
     }
 
     y -= 6
   })
 
   y -= 4
+  ensureSpace(70) // mantém divisória, CID e assinatura juntos
   drawLine(page, margin, y + 2, right)
   y -= 12
 

@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AlertTriangle } from 'lucide-react'
 import type { Disease, RequestType } from '@/lib/supabase/types'
-import { MEDICAMENTOS, getMedicamentosByDoenca } from '@/lib/medicamentos'
+import { MEDICAMENTOS, getMedicamentosByDoenca, getSugestaoPosologia } from '@/lib/medicamentos'
 import { CIDS_PRINCIPAIS } from '@/lib/cid10'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -44,6 +44,10 @@ const diagnosticosConhecidos = new Set(Object.values(diagnosticoPorCID))
 
 function defaultQuantidades(): MedQuantidades {
   return { mes1: '1', mes2: '1', mes3: '1', mes4: '1', mes5: '1', mes6: '1' }
+}
+
+function quantidadesFromTupla(t: [string, string, string, string, string, string]): MedQuantidades {
+  return { mes1: t[0], mes2: t[1], mes3: t[2], mes4: t[3], mes5: t[4], mes6: t[5] }
 }
 
 function calcIdadeAnos(birthDate: string): number {
@@ -1104,11 +1108,13 @@ export function LmeFormEditor({
     } else {
       if (medicamentos.length >= 6) return
       const existing = medicamentos.find(m => m.medId === medId)
+      const sugestao = getSugestaoPosologia(medId, requestType)
       setMedicamentos([...medicamentos, existing ?? {
         medId,
         nome: catalog.nome,
         apresentacao: catalog.apresentacao,
-        quantidades: defaultQuantidades(),
+        quantidades: sugestao?.quantidades ? quantidadesFromTupla(sugestao.quantidades) : defaultQuantidades(),
+        ...(sugestao ? { posologia: sugestao.posologia } : {}),
       }])
     }
   }
@@ -1294,9 +1300,10 @@ export function LmeFormEditor({
                       </div>
                       <div>
                         <Label className="text-xs text-gray-500">Posologia</Label>
-                        <Input
-                          className="h-7 text-xs mt-0.5"
-                          placeholder="Ex: 1 inalação 2x ao dia"
+                        <Textarea
+                          className="text-xs mt-0.5 min-h-[2.25rem]"
+                          rows={2}
+                          placeholder="Ex: 1 inalação 2x ao dia (Enter quebra a linha na receita)"
                           value={med.posologia ?? ''}
                           onChange={e => updatePosologia(opt.id, e.target.value)}
                         />
