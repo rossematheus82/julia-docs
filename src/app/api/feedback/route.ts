@@ -28,6 +28,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Envio de feedback ainda não configurado. Avise o responsável.' }, { status: 501 })
   }
 
+  // reply_to PRECISA ser e-mail válido (o Resend rejeita telefone/texto livre).
+  const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+  const replyTo = isEmail(contato) ? contato : (user.email && isEmail(user.email) ? user.email : undefined)
+
   const label = TIPO_LABELS[tipo]
   const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
   const html = `
@@ -46,7 +50,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from: FEEDBACK_FROM,
         to: [FEEDBACK_TO],
-        reply_to: contato || user.email || undefined,
+        ...(replyTo ? { reply_to: replyTo } : {}),
         subject: `[Julia Docs] ${label} de ${user.email ?? 'usuário'}`,
         html,
       }),
