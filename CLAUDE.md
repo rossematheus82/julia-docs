@@ -169,6 +169,10 @@ SUPABASE_SERVICE_ROLE_KEY=
 AI_PROVIDER=groq        # 'groq' (padrão) ou 'gemini'
 GROQ_API_KEY=           # provedor padrão
 GEMINI_API_KEY=         # usado quando AI_PROVIDER=gemini (aceita GOOGLE_API_KEY também)
+# Feedback (botão flutuante Sugestões/Reportar erro -> e-mail via Resend)
+RESEND_API_KEY=         # sem ela, o envio de feedback retorna 501
+FEEDBACK_TO=            # destino (padrão: drmatheusrosse@gmail.com)
+FEEDBACK_FROM=          # remetente (padrão: onboarding@resend.dev)
 ```
 
 ## Comandos úteis

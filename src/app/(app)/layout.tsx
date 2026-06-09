@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { Sidebar } from '@/components/sidebar'
+import { FeedbackWidget } from '@/components/feedback-widget'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -36,6 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="md:pl-64 pt-14 md:pt-0 min-h-screen">
         {children}
       </main>
+      <FeedbackWidget />
     </div>
   )
 }
