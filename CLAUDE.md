@@ -161,7 +161,10 @@ Datas são separadas em campos individuais (dia, mês, ano) usando `splitIso()`.
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-ANTHROPIC_API_KEY=      # ou GROQ_API_KEY / OPENAI_API_KEY
+# IA — apenas provedores gratuitos (Claude/OpenAI removidos)
+AI_PROVIDER=groq        # 'groq' (padrão) ou 'gemini'
+GROQ_API_KEY=           # provedor padrão
+GEMINI_API_KEY=         # usado quando AI_PROVIDER=gemini (aceita GOOGLE_API_KEY também)
 ```
 
 ## Comandos úteis

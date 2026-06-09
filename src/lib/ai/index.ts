@@ -1,8 +1,7 @@
 import { z } from 'zod'
 import type { Disease, RequestType } from '../supabase/types'
-import { ClaudeProvider } from './claude-provider'
-import { OpenAIProvider } from './openai-provider'
 import { GroqProvider } from './groq-provider'
+import { GeminiProvider } from './gemini-provider'
 
 export type ConfidenceLevel = 'high' | 'medium' | 'low'
 
@@ -36,10 +35,10 @@ export interface AIProvider {
 }
 
 function getProvider(): AIProvider {
-  const provider = process.env.AI_PROVIDER ?? 'claude'
-  if (provider === 'openai') return new OpenAIProvider()
-  if (provider === 'groq')   return new GroqProvider()
-  return new ClaudeProvider()
+  // Apenas provedores gratuitos: Groq (padrão) e Gemini.
+  const provider = process.env.AI_PROVIDER ?? 'groq'
+  if (provider === 'gemini') return new GeminiProvider()
+  return new GroqProvider()
 }
 
 export const aiProvider: AIProvider = getProvider()
