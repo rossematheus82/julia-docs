@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import type { WizardData, DoctorItem, FacilityItem } from '../lme-wizard'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -15,6 +16,15 @@ interface Props {
 
 export function Step4DoctorFacility({ data, update, doctors, facilities }: Props) {
   const meuMedico = doctors[0]
+  const unicoEstab = facilities.length === 1 ? facilities[0] : null
+
+  // Com um único estabelecimento, seleciona automaticamente (sem precisar escolher).
+  useEffect(() => {
+    if (unicoEstab && data.facility_id !== unicoEstab.id) {
+      update({ facility_id: unicoEstab.id })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unicoEstab?.id])
 
   return (
     <div className="space-y-6">
@@ -56,6 +66,16 @@ export function Step4DoctorFacility({ data, update, doctors, facilities }: Props
               <Link href="/configuracoes/estabelecimentos" target="_blank" className="text-blue-600 hover:underline">
                 Cadastrar estabelecimento
               </Link>
+            </div>
+          ) : unicoEstab ? (
+            <div className="p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800">
+              <strong>{unicoEstab.name}</strong>
+              {unicoEstab.cnes ? ` — CNES ${unicoEstab.cnes}` : ''}
+              {unicoEstab.city ? ` — ${unicoEstab.city}${unicoEstab.state ? `/${unicoEstab.state}` : ''}` : ''}
+              <div className="text-xs text-gray-400 mt-0.5">
+                Selecionado automaticamente (único cadastrado).{' '}
+                <Link href="/configuracoes/estabelecimentos" target="_blank" className="hover:underline">Gerenciar</Link>
+              </div>
             </div>
           ) : (
             <Select value={data.facility_id ?? undefined} onValueChange={v => update({ facility_id: v })}>
