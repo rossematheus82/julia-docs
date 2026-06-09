@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Plus, FileText, Edit, Phone, Mail, MapPin, User } from 'lucide-react'
 import { DeletePatientButton } from './delete-patient-button'
 import { TimelineActions } from './timeline-actions'
+import { lmeCode } from '@/lib/lme-code'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -231,6 +232,9 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
                               <span className="text-xs text-gray-500 font-medium tabular-nums">
                                 {format(parseISO(lme.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                               </span>
+                              <span className="text-[10px] font-mono font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                {lmeCode({ id: lme.id, disease: lme.disease, createdAt: lme.created_at })}
+                              </span>
                               <span className="text-sm font-semibold text-gray-900">
                                 {tipoLabel}
                               </span>
@@ -251,7 +255,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
                                 Renovar até {format(parseISO(lme.next_renewal_date), 'dd/MM/yyyy')}
                               </p>
                             )}
-                            <TimelineActions lmeId={lme.id} disease={lme.disease} showRenew={isMostRecent} />
+                            <TimelineActions lmeId={lme.id} disease={lme.disease} showRenew />
                           </div>
                         </Link>
                       </div>

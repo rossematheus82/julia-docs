@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Settings, Copy, RefreshCw, Users, Check, Crown, Building2, Plus, LogOut, ArrowRightLeft } from 'lucide-react'
+import { Settings, Copy, RefreshCw, Users, Check, Crown, Building2, Plus, LogOut, ArrowRightLeft, UserMinus } from 'lucide-react'
 import { toast } from 'sonner'
 
 function generateInviteCode(): string {
@@ -19,7 +19,7 @@ function generateInviteCode(): string {
 }
 
 interface Workspace { id: string; name: string; invite_code: string; role: string; joined_at: string }
-interface Member { id: string; role: string; user_id: string; joined_at: string }
+interface Member { id: string; role: string; user_id: string; joined_at: string; name?: string | null; crm?: string | null }
 
 interface Props {
   activeWorkspace: Workspace
@@ -42,8 +42,27 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
   const [copied, setCopied] = useState(false)
   const [switching, setSwitching] = useState<string | null>(null)
   const [leaving, setLeaving] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<string | null>(null)
 
   const isOwner = activeWorkspace.role === 'owner'
+
+  async function removeMember(member: Member) {
+    const label = member.name ?? `Membro ${member.id.slice(0, 8)}`
+    if (!confirm(`Remover ${label} do ambulatório?\n\nOs pacientes e as LMEs criados por ele permanecem no ambulatório — só o acesso dele é revogado.`)) return
+    setRemoving(member.id)
+    const res = await fetch('/api/workspaces/members/remove', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberId: member.id }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      toast.error(body.error ?? 'Erro ao remover membro')
+      setRemoving(null)
+      return
+    }
+    toast.success(`${label} removido.`)
+    router.refresh()
+  }
 
   async function saveName() {
     if (!name.trim() || name === activeWorkspace.name) return
@@ -234,30 +253,52 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {members.map(member => (
-            <div key={member.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  {member.role === 'owner' ? (
-                    <Crown className="h-3.5 w-3.5 text-blue-600" />
-                  ) : (
-                    <span className="text-xs font-medium text-blue-600">M</span>
+          {members.map(member => {
+            const isSelf = member.user_id === currentUserId
+            const baseName = member.name ?? (isSelf ? 'Você' : `Membro ${member.id.slice(0, 8)}`)
+            const displayName = member.name && isSelf ? `${member.name} (você)` : baseName
+            const initial = member.name ? member.name.trim().charAt(0).toUpperCase() : 'M'
+            const canRemove = isOwner && member.role !== 'owner' && !isSelf
+            return (
+              <div key={member.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    {member.role === 'owner' ? (
+                      <Crown className="h-3.5 w-3.5 text-blue-600" />
+                    ) : (
+                      <span className="text-xs font-medium text-blue-600">{initial}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {displayName}
+                      {member.crm && <span className="text-xs font-normal text-gray-400 ml-1.5">CRM {member.crm}</span>}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Entrou em {new Date(member.joined_at).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className="text-xs">
+                    {ROLE_LABELS[member.role] ?? member.role}
+                  </Badge>
+                  {canRemove && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-red-600 border-red-200 hover:bg-red-50"
+                      onClick={() => removeMember(member)}
+                      disabled={removing === member.id}
+                    >
+                      <UserMinus className="h-3.5 w-3.5" />
+                      {removing === member.id ? 'Removendo...' : 'Remover'}
+                    </Button>
                   )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {member.user_id === currentUserId ? 'Você' : `Membro ${member.id.slice(0, 8)}`}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    Entrou em {new Date(member.joined_at).toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {ROLE_LABELS[member.role] ?? member.role}
-              </Badge>
-            </div>
-          ))}
+            )
+          })}
         </CardContent>
       </Card>
     </div>

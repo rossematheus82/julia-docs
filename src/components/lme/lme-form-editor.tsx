@@ -13,6 +13,7 @@ import { AlertTriangle } from 'lucide-react'
 import type { Disease, RequestType } from '@/lib/supabase/types'
 import { MEDICAMENTOS, getMedicamentosByDoenca, getSugestaoPosologia } from '@/lib/medicamentos'
 import { CIDS_PRINCIPAIS } from '@/lib/cid10'
+import { AnamneseImproveDialog } from '@/components/lme/anamnese-improve-dialog'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -1005,6 +1006,7 @@ export function LmeFormEditor({
   const [changedFields, setChangedFields] = useState<Set<string>>(new Set())
   const markChanged = (key: string) => setChangedFields(prev => new Set(Array.from(prev).concat(key)))
 
+
   // Auto-preenche o diagnóstico a partir do nome da doença do CID.
   // Atualiza ao trocar o CID, mas preserva texto que o médico tenha customizado.
   useEffect(() => {
@@ -1155,7 +1157,15 @@ export function LmeFormEditor({
         <p className={sh}>Dados da LME</p>
 
         <div>
-          <FL label="Anamnese / História clínica *" fieldKey="anamnese" aiFields={aiFields} changedFields={changedFields} value={getLme('anamnese')} required />
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <FL label="Anamnese / História clínica *" fieldKey="anamnese" aiFields={aiFields} changedFields={changedFields} value={getLme('anamnese')} required />
+            <AnamneseImproveDialog
+              maxLength={LME_TEXT_LIMITS.anamnese}
+              context={disease ?? undefined}
+              currentText={getLme('anamnese')}
+              onApply={t => { markChanged('anamnese'); onLmeDataChange({ ...lmeData, anamnese: t }) }}
+            />
+          </div>
           <TextareaCounted
             className="min-h-28"
             maxLength={LME_TEXT_LIMITS.anamnese}

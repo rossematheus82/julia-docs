@@ -20,8 +20,19 @@ export interface AIExtractParams<T> {
   anonymize?: boolean
 }
 
+export interface AITextImproveParams {
+  /** Texto escrito pelo médico a ser melhorado. */
+  text: string
+  /** Limite rígido de caracteres do campo de destino. */
+  maxLength: number
+  /** Contexto opcional (ex.: doença) para guiar o tom clínico. */
+  context?: string
+}
+
 export interface AIProvider {
   extractFields<T>(params: AIExtractParams<T>): Promise<AIExtractionResult<T>>
+  /** Reescreve o texto com clareza clínica respeitando o limite de caracteres. */
+  improveText?(params: AITextImproveParams): Promise<string>
 }
 
 function getProvider(): AIProvider {

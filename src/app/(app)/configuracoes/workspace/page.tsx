@@ -38,11 +38,26 @@ export default async function WorkspaceSettingsPage() {
     .eq('workspace_id', activeWs.id)
     .order('joined_at', { ascending: true })
 
+  // Resolve o nome de cada membro pelo perfil de médico do workspace (owner_user_id).
+  const { data: doctors } = await supabase
+    .from('doctors')
+    .select('owner_user_id, full_name, crm')
+    .eq('workspace_id', activeWs.id)
+  const doctorByUser = new Map(
+    (doctors ?? []).filter(d => d.owner_user_id).map(d => [d.owner_user_id as string, d]),
+  )
+
+  const membersWithNames = (members ?? []).map(m => ({
+    ...m,
+    name: doctorByUser.get(m.user_id)?.full_name ?? null,
+    crm: doctorByUser.get(m.user_id)?.crm ?? null,
+  }))
+
   return (
     <WorkspaceSettingsClient
       activeWorkspace={activeWs}
       myWorkspaces={myWorkspaces}
-      members={members ?? []}
+      members={membersWithNames}
       currentUserId={user.id}
     />
   )

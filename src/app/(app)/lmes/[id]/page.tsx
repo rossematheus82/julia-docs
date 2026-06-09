@@ -11,6 +11,7 @@ import { differenceInDays, parseISO as parseISO2 } from 'date-fns'
 import { ArrowLeft, FileText, Download, User, Stethoscope, Building2, Calendar, PencilLine, Info } from 'lucide-react'
 import { LmePdfButtons } from './lme-pdf-buttons'
 import { DeleteLmeButton } from './delete-lme-button'
+import { lmeCode } from '@/lib/lme-code'
 
 const STATUS_COLORS: Record<string, string> = {
   rascunho: 'bg-gray-100 text-gray-700',
@@ -89,8 +90,11 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
                 {STATUS_LABELS[lme.status]}
               </Badge>
             </div>
-            <p className="text-gray-500 text-sm">
-              {REQUEST_TYPE_LABELS[lme.request_type]} · Criada em {format(parseISO(lme.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+            <p className="text-gray-500 text-sm flex items-center gap-2 flex-wrap">
+              <span className="font-mono font-medium text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded text-xs">
+                {lmeCode({ id: lme.id, disease: lme.disease, createdAt: lme.created_at })}
+              </span>
+              <span>{REQUEST_TYPE_LABELS[lme.request_type]} · Criada em {format(parseISO(lme.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span>
             </p>
           </div>
         </div>

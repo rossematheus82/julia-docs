@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { AIProvider, AIExtractionResult, AIExtractParams } from './index'
+import type { AIProvider, AIExtractionResult, AIExtractParams, AITextImproveParams } from './index'
 import {
   buildExtractionPrompt,
   getLmeFieldDescriptions,
@@ -67,5 +67,36 @@ export class ClaudeProvider implements AIProvider {
       confidence: (parsed.confidence ?? {}) as Partial<Record<keyof T, 'high' | 'medium' | 'low'>>,
       warnings: (parsed.warnings as string[]) ?? [],
     }
+  }
+
+  async improveText({ text, maxLength, context }: AITextImproveParams): Promise<string> {
+    const ctx = context ? ` O texto descreve um caso de ${context.toUpperCase()}.` : ''
+    const system =
+      'Você é um assistente médico que revisa textos clínicos de LMEs do CEAF/SES-MG. ' +
+      'Melhore clareza, gramática, ortografia e objetividade em português do Brasil, mantendo TODOS os fatos clínicos. ' +
+      'NÃO invente dados, diagnósticos, exames ou medicamentos que não estejam no texto. ' +
+      'Use linguagem técnica, impessoal e concisa. ' +
+      `O texto final DEVE ter no máximo ${maxLength} caracteres. ` +
+      'Responda APENAS com o texto revisado, sem comentários, aspas ou marcações.'
+
+    const response = await this.client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system,
+      messages: [{ role: 'user', content: `Revise e melhore o texto abaixo (limite de ${maxLength} caracteres).${ctx}\n\n"""\n${text}\n"""` }],
+    })
+
+    const content = response.content[0]
+    if (content.type !== 'text') throw new Error('Resposta inesperada da IA')
+
+    let out = content.text.trim().replace(/^["']|["']$/g, '').trim()
+    // Salvaguarda: nunca exceder o limite do campo (corta na última palavra).
+    if (out.length > maxLength) {
+      out = out.slice(0, maxLength)
+      const lastSpace = out.lastIndexOf(' ')
+      if (lastSpace > maxLength * 0.6) out = out.slice(0, lastSpace)
+      out = out.trim()
+    }
+    return out
   }
 }

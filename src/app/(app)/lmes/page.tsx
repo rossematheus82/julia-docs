@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, FileText } from 'lucide-react'
 import { LmesSearch } from '@/components/lmes-search'
+import { lmeCode } from '@/lib/lme-code'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -107,7 +108,12 @@ export default async function LmesPage({
                     <FileText className="h-4 w-4 text-green-600" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{patient?.full_name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-gray-900 truncate">{patient?.full_name}</p>
+                      <span className="text-[10px] font-mono font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
+                        {lmeCode({ id: lme.id, disease: lme.disease, createdAt: lme.created_at })}
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-500">
                       {DISEASE_LABELS[lme.disease]} · {REQUEST_TYPE_LABELS[lme.request_type]}
                       {doctor?.full_name ? ` · Dr. ${doctor.full_name}` : ''}
