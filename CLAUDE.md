@@ -6,6 +6,10 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 
 **Stack:** Next.js 14 (App Router) · TypeScript · Supabase (auth + DB) · pdf-lib · shadcn/ui · Tailwind · pnpm
 
+## ⚠️ Convenção — sempre atualizar as Novidades
+
+**Toda mudança relevante para o usuário** (nova funcionalidade, melhoria visível ou correção de bug perceptível) **DEVE** ganhar uma entrada no changelog em `src/lib/changelog.ts`, exibido na página `/novidades`. Adicione o item **no topo** da lista (mais recente primeiro), agrupando por data, com o `tipo` correto (`'novo'` | `'melhoria'` | `'correcao'`) e texto curto e claro em português. Não precisa registrar mudanças internas/invisíveis (refactors, ajustes de build).
+
 ## Status / Deploy (2026-05-30)
 
 - **Repo:** [github.com/rossematheus82/julia-docs](https://github.com/rossematheus82/julia-docs)
