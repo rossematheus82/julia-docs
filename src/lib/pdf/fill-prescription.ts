@@ -1,4 +1,5 @@
 import { PDFDocument, PDFFont, StandardFonts, rgb } from 'pdf-lib'
+import { sanitizeWinAnsi } from './sanitize'
 
 export interface PrescricaoData {
   estabelecimento_nome: string
@@ -70,7 +71,7 @@ function textLine(
   size: number,
   color = BLACK,
 ) {
-  page.drawText(text, { x, y, size, font, color })
+  page.drawText(sanitizeWinAnsi(text), { x, y, size, font, color })
 }
 
 /**
@@ -79,7 +80,7 @@ function textLine(
  */
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const out: string[] = []
-  for (const rawLine of text.split('\n')) {
+  for (const rawLine of sanitizeWinAnsi(text).split('\n')) {
     const words = rawLine.split(/\s+/).filter(Boolean)
     if (words.length === 0) { out.push(''); continue }
     let line = ''

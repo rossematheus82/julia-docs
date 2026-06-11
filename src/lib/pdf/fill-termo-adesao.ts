@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { sanitizeWinAnsi } from './sanitize'
 
 export interface TermoAdesaoData {
   paciente_nome: string
@@ -20,7 +21,14 @@ function dataHoje(): string {
   return `${dia}/${mes}/${ano}`
 }
 
-export async function fillTermoAdesao(data: TermoAdesaoData): Promise<Uint8Array> {
+export async function fillTermoAdesao(dataRaw: TermoAdesaoData): Promise<Uint8Array> {
+  // Higieniza campos dinâmicos para a fonte WinAnsi (evita "cannot encode").
+  const data: TermoAdesaoData = {
+    ...dataRaw,
+    paciente_nome: sanitizeWinAnsi(dataRaw.paciente_nome),
+    paciente_nome_social: dataRaw.paciente_nome_social ? sanitizeWinAnsi(dataRaw.paciente_nome_social) : dataRaw.paciente_nome_social,
+    medicamentos: dataRaw.medicamentos.map(m => ({ nome: sanitizeWinAnsi(m.nome), apresentacao: sanitizeWinAnsi(m.apresentacao) })),
+  }
   const doc  = await PDFDocument.create()
   const bold = await doc.embedFont(StandardFonts.HelveticaBold)
   const reg  = await doc.embedFont(StandardFonts.Helvetica)

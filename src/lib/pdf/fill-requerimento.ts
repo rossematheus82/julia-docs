@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { sanitizeWinAnsi } from './sanitize'
 
 export interface RequerimentoData {
   unidade_solicitante: string
@@ -27,7 +28,17 @@ function drawBlankLine(
   page.drawLine({ start: { x, y: y + 2 }, end: { x: x + width, y: y + 2 }, thickness: 0.4, color: GRAY })
 }
 
-export async function fillRequerimento(data: RequerimentoData): Promise<Uint8Array> {
+export async function fillRequerimento(dataRaw: RequerimentoData): Promise<Uint8Array> {
+  // Higieniza campos dinâmicos para a fonte WinAnsi (evita "cannot encode").
+  const data: RequerimentoData = {
+    ...dataRaw,
+    unidade_solicitante: sanitizeWinAnsi(dataRaw.unidade_solicitante),
+    paciente_nome: sanitizeWinAnsi(dataRaw.paciente_nome),
+    paciente_nome_social: dataRaw.paciente_nome_social ? sanitizeWinAnsi(dataRaw.paciente_nome_social) : dataRaw.paciente_nome_social,
+    paciente_cpf: dataRaw.paciente_cpf ? sanitizeWinAnsi(dataRaw.paciente_cpf) : dataRaw.paciente_cpf,
+    telefones: dataRaw.telefones ? sanitizeWinAnsi(dataRaw.telefones) : dataRaw.telefones,
+    medicamentos: dataRaw.medicamentos.map(m => ({ nome: sanitizeWinAnsi(m.nome), apresentacao: sanitizeWinAnsi(m.apresentacao) })),
+  }
   const doc  = await PDFDocument.create()
   const bold = await doc.embedFont(StandardFonts.HelveticaBold)
   const reg  = await doc.embedFont(StandardFonts.Helvetica)

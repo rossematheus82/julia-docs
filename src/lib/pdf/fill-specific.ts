@@ -6,6 +6,7 @@ import { buildDpocMappings } from './mappings/dpoc'
 import { buildDpiFpMappings } from './mappings/dpi-fp'
 import { buildHapMappings } from './mappings/hap'
 import { buildLmeMappings } from './mappings/lme'
+import { sanitizeWinAnsi } from './sanitize'
 import type { AsmaFormData } from '@/lib/schemas/asma'
 import type { DpocFormData } from '@/lib/schemas/dpoc'
 import type { DpiFpFormData } from '@/lib/schemas/dpi-fp'
@@ -243,7 +244,8 @@ export async function prepareWrappedText(doc: PDFDocument, wrappedText?: Record<
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const padX = 2, padTop = 2.5
   const items: WrappedPrep['items'] = []
-  for (const [name, value] of entries) {
+  for (const [name, rawValue] of entries) {
+    const value = sanitizeWinAnsi(rawValue)
     const pl = findFieldPlacement(doc, name)
     if (!pl) continue
     const maxWidth = (pl.x2 - pl.x1) - padX * 2
@@ -293,7 +295,7 @@ export async function applyMappingsToDoc(doc: PDFDocument, mappings: Mappings): 
     try {
       const field = form.getTextField(fieldName)
       field.setFontSize(10)
-      field.setText(value)
+      field.setText(sanitizeWinAnsi(value))
     } catch { /* campo não encontrado — ignorar */ }
   }
 

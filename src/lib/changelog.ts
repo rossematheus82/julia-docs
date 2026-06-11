@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-06-08',
     itens: [
+      { tipo: 'correcao', texto: 'Geração de PDF não falha mais quando o texto tem caracteres especiais (ex.: a seta “→” vinda do “Melhorar com IA”) — são convertidos automaticamente.' },
       { tipo: 'novo', texto: 'Página “Sobre” no menu e um botão flutuante de Sugestões / Reportar erro — seu feedback chega direto ao responsável.' },
       { tipo: 'correcao', texto: 'Receituário: a posologia agora quebra linha e cabe na página — antes estourava quando o texto era longo (ex.: titulação da pirfenidona).' },
       { tipo: 'novo', texto: 'Ao escolher o medicamento, a posologia e a quantidade já vêm sugeridas (pirfenidona com titulação na 1ª LME, nintedanibe, e os demais por doença).' },
