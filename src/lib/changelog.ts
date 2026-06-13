@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-06-13',
+    itens: [
+      { tipo: 'melhoria', texto: 'O CID-10 não vem mais pré-selecionado na nova LME — é preciso escolher o CID, evitando emitir com o código errado por esquecimento.' },
+    ],
+  },
+  {
     data: '2026-06-08',
     itens: [
       { tipo: 'correcao', texto: 'Geração de PDF não falha mais quando o texto tem caracteres especiais (ex.: a seta “→” vinda do “Melhorar com IA”) — são convertidos automaticamente.' },

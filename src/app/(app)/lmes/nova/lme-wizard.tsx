@@ -14,7 +14,6 @@ import { Step4DoctorFacility } from './steps/step4-doctor-facility'
 import { Step5Prontuario } from './steps/step5-prontuario'
 import { Step6Review } from './steps/step6-review'
 import type { Disease, RequestType, Json } from '@/lib/supabase/types'
-import { getCidsByDoenca } from '@/lib/cid10'
 
 export interface PatientItem { id: string; full_name: string; birth_date?: string | null; cpf?: string | null; cns?: string | null; is_incapable?: boolean | null; responsible_name?: string | null; weight_kg?: number | null; height_cm?: number | null }
 export interface DoctorItem { id: string; full_name: string; crm: string; crm_uf: string; specialty?: string | null }
@@ -77,7 +76,7 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
 
   function canAdvance(): boolean {
     if (step === 0) return !!data.disease
-    if (step === 1) return !!data.request_type
+    if (step === 1) return !!data.request_type && !!data.cid10
     if (step === 2) return !!data.patient_id
     if (step === 3) return !!data.doctor_id && !!data.facility_id
     return true
@@ -85,10 +84,8 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
 
   function advance() {
     if (!canAdvance()) return
-    if (step === 0 && data.disease) {
-      const cids = getCidsByDoenca(data.disease)
-      if (!data.cid10 && cids.length > 0) update({ cid10: cids[0].codigo })
-    }
+    // O CID NÃO é pré-selecionado de propósito — o médico escolhe explicitamente
+    // (evita emitir com o CID errado por esquecer de trocar o padrão).
     setStep(s => Math.min(s + 1, STEPS.length - 1))
   }
 
