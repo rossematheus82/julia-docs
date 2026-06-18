@@ -6,6 +6,9 @@ import type { LmeCommonData } from '@/lib/schemas/lme-common'
 import { dataHoje, calcularIdade, formatarCPF, formatarTelefone } from '@/lib/utils/date'
 import { CIDS_PRINCIPAIS } from '@/lib/cid10'
 import { getActiveWorkspace } from '@/lib/active-workspace'
+import { readJsonBody, UUID_RE, safeErrorMessage } from '@/lib/api/security'
+import { auditLog } from '@/lib/security/audit'
+import { logError } from '@/lib/security/logger'
 
 type Snap = Record<string, unknown>
 
@@ -24,11 +27,19 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const body = await request.json()
-  const { lmeId, type } = body
+  const parsed = await readJsonBody<{ lmeId?: unknown; type?: unknown }>(request, 16 * 1024)
+  if ('response' in parsed) return parsed.response
+  const { lmeId, type } = parsed.data
 
   if (!lmeId || !type) {
     return NextResponse.json({ error: 'Parâmetros obrigatórios: lmeId, type' }, { status: 400 })
+  }
+
+  if (typeof lmeId !== 'string' || !UUID_RE.test(lmeId)) {
+    return NextResponse.json({ error: 'lmeId invalido' }, { status: 400 })
+  }
+  if (type !== 'lme' && type !== 'all') {
+    return NextResponse.json({ error: 'Tipo nao suportado' }, { status: 400 })
   }
 
   const active = await getActiveWorkspace(supabase, user.id)
@@ -180,13 +191,20 @@ export async function POST(request: NextRequest) {
       }, true) // apenasLme
 
       const diseaseLabel = ({ asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP' } as Record<string, string>)[lme.disease] ?? lme.disease
-      const nomeSanitized = patientNome.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '')
       const [dd, mm, aa] = fillDate.split('/')
+      await auditLog(supabase, {
+        workspaceId: memberData.workspace_id,
+        userId: user.id,
+        action: 'pdf_generate',
+        resourceType: 'lme',
+        resourceId: lmeId,
+        metadata: { type },
+      })
       return new NextResponse(Buffer.from(lmePdf), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="LME_${diseaseLabel}_${nomeSanitized}_${dd}-${mm}-${aa}.pdf"`,
+          'Content-Disposition': `attachment; filename="LME_${diseaseLabel}_${lmeId}_${dd}-${mm}-${aa}.pdf"`,
         },
       })
     }
@@ -301,28 +319,35 @@ export async function POST(request: NextRequest) {
           status: 'emitida',
           next_renewal_date: renewal.toISOString().split('T')[0],
         }).eq('id', lmeId).eq('workspace_id', memberData.workspace_id)
-        if (updateErr) console.error('[pdf/generate] status update failed:', updateErr)
+        if (updateErr) logError('[pdf/generate] status update failed', updateErr, { lmeId, workspaceId: memberData.workspace_id })
       }
 
       const diseaseLabel = ({ asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP' } as Record<string, string>)[lme.disease] ?? lme.disease
-      const nomeSanitized = patientNome.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '')
       const [dd, mm, aa] = fillDate.split('/')
       const dateName = `${dd}-${mm}-${aa}`
+      await auditLog(supabase, {
+        workspaceId: memberData.workspace_id,
+        userId: user.id,
+        action: 'pdf_generate',
+        resourceType: 'lme',
+        resourceId: lmeId,
+        metadata: { type },
+      })
 
       return new NextResponse(Buffer.from(processo), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="Processo_${diseaseLabel}_${nomeSanitized}_${dateName}.pdf"`,
+          'Content-Disposition': `attachment; filename="Processo_${diseaseLabel}_${lmeId}_${dateName}.pdf"`,
         },
       })
     }
 
     return NextResponse.json({ error: `Tipo não suportado: ${type}` }, { status: 400 })
   } catch (err: unknown) {
-    console.error('PDF generation error:', err)
+    logError('[pdf/generate]', err, { lmeId, workspaceId: memberData.workspace_id })
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Erro ao gerar PDF' },
+      { error: safeErrorMessage(err, 'Erro ao gerar PDF') },
       { status: 500 }
     )
   }

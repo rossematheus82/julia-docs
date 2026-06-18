@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { readJsonBody, UUID_RE } from '@/lib/api/security'
+import { auditLog } from '@/lib/security/audit'
+import { logError } from '@/lib/security/logger'
 
 /**
  * Remove um membro do ambulatório (owner/admin). NÃO apaga pacientes, LMEs nem o
@@ -11,8 +14,14 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const { memberId } = await req.json()
+  const parsed = await readJsonBody<{ memberId?: unknown }>(req, 8 * 1024)
+  if ('response' in parsed) return parsed.response
+  const { memberId } = parsed.data
   if (!memberId) return NextResponse.json({ error: 'memberId obrigatório' }, { status: 400 })
+
+  if (typeof memberId !== 'string' || !UUID_RE.test(memberId)) {
+    return NextResponse.json({ error: 'memberId invalido' }, { status: 400 })
+  }
 
   // Membro alvo
   const { data: target } = await supabase
@@ -42,9 +51,18 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase.from('workspace_members').delete().eq('id', target.id)
   if (error) {
-    console.error('[workspaces/members/remove]', error)
+    logError('[workspaces/members/remove]', error, { memberId: target.id, workspaceId: target.workspace_id })
     return NextResponse.json({ error: 'Erro ao remover membro' }, { status: 500 })
   }
+
+  await auditLog(supabase, {
+    workspaceId: target.workspace_id,
+    userId: user.id,
+    action: 'workspace_member_remove',
+    resourceType: 'workspace_member',
+    resourceId: target.id,
+    metadata: { removed_user_id: target.user_id },
+  })
 
   return NextResponse.json({ ok: true })
 }

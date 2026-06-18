@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Groq from 'groq-sdk'
 import { PatientExtractionSchema } from '@/lib/schemas/patient-extraction'
+import { readJsonBody, safeErrorMessage } from '@/lib/api/security'
+import { getActiveWorkspace } from '@/lib/active-workspace'
+import { auditLog } from '@/lib/security/audit'
+import { logError } from '@/lib/security/logger'
 
 const SYSTEM_PROMPT = `Você é um assistente de extração de dados médicos. Extraia as informações do paciente do texto fornecido, que pode vir do sistema Tasy ou outro prontuário eletrônico.
 
@@ -31,14 +35,25 @@ REGRAS IMPORTANTES:
 - Peso: extraia só o número.
 - is_incapable padrão é false.`
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const { text } = await req.json() as { text: string }
+    const active = await getActiveWorkspace(supabase, user.id)
+
+    const parsed = await readJsonBody<{ text?: unknown }>(req, 128 * 1024)
+    if ('response' in parsed) return parsed.response
+    const { text } = parsed.data as { text?: string }
     if (!text?.trim()) return NextResponse.json({ error: 'Texto obrigatório' }, { status: 400 })
+
+    if (typeof text !== 'string' || !text.trim()) {
+      return NextResponse.json({ error: 'Texto obrigatorio' }, { status: 400 })
+    }
+    if (text.length > 80_000) {
+      return NextResponse.json({ error: 'Texto muito grande' }, { status: 413 })
+    }
 
     const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'GROQ_API_KEY não configurado' }, { status: 500 })
@@ -64,14 +79,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Resposta da IA inválida' }, { status: 500 })
     }
 
-    const parsed = PatientExtractionSchema.safeParse(raw)
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Dados extraídos inválidos', details: parsed.error.issues }, { status: 422 })
+    const validatedPatient = PatientExtractionSchema.safeParse(raw)
+    if (!validatedPatient.success) {
+      return NextResponse.json({ error: 'Dados extraídos inválidos', details: validatedPatient.error.issues }, { status: 422 })
     }
 
-    return NextResponse.json({ data: parsed.data })
+    await auditLog(supabase, {
+      workspaceId: active?.workspaceId ?? null,
+      userId: user.id,
+      action: 'ai_extract',
+      resourceType: 'patient',
+      resourceId: null,
+      metadata: { source: 'patient_extraction' },
+    })
+
+    return NextResponse.json({ data: validatedPatient.data })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Erro interno'
+    logError('[ai/extract-patient]', err)
+    const msg = safeErrorMessage(err, 'Erro interno')
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

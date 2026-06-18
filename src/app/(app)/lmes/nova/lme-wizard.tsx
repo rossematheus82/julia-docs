@@ -139,13 +139,12 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
       toast.success('LME criada com sucesso!')
       router.push(`/lmes/${lme.id}`)
     } catch (err: unknown) {
-      console.error('[lmes/criar] erro bruto:', err)
       // Erros do Supabase (PostgrestError) trazem message/details/hint/code — vamos exibir tudo
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const e = err as any
       const partes = [e?.message, e?.details, e?.hint].filter(Boolean)
       const code = e?.code ? ` (code: ${e.code})` : ''
-      const msg = partes.length > 0 ? partes.join(' — ') + code : 'Erro ao criar LME (veja o console pro detalhe)'
+      const msg = partes.length > 0 ? partes.join(' — ') + code : 'Erro ao criar LME'
       toast.error(msg, { duration: 10000 })
     } finally {
       setSaving(false)

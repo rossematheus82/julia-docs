@@ -2,7 +2,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Disease = 'asma' | 'dpoc' | 'dpi-fp' | 'hap'
 export type RequestType = 'inicial' | 'renovacao' | 'reavaliacao'
-export type LmeStatus = 'rascunho' | 'emitida'
+export type LmeStatus = 'rascunho' | 'enviada' | 'em_analise' | 'deferida' | 'devolvida' | 'indeferida' | 'emitida'
 export type WorkspaceRole = 'owner' | 'admin' | 'member'
 
 export interface Database {
@@ -161,6 +161,14 @@ export interface Database {
       }
       generate_invite_code: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      join_workspace_by_invite: {
+        Args: { invite: string }
+        Returns: string
+      }
+      create_workspace_with_owner: {
+        Args: { workspace_name: string; invite: string }
         Returns: string
       }
     }

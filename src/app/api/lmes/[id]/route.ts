@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
+import { auditLog } from '@/lib/security/audit'
+import { logError } from '@/lib/security/logger'
 
 export async function DELETE(
   _req: NextRequest,
@@ -54,9 +56,17 @@ export async function DELETE(
     .eq('workspace_id', memberData.workspace_id)
 
   if (error) {
-    console.error('[lmes/delete]', error)
+    logError('[lmes/delete]', error, { lmeId: id, workspaceId: memberData.workspace_id })
     return NextResponse.json({ error: 'Erro ao excluir LME' }, { status: 500 })
   }
+
+  await auditLog(supabase, {
+    workspaceId: memberData.workspace_id,
+    userId: user.id,
+    action: 'lme_delete',
+    resourceType: 'lme',
+    resourceId: id,
+  })
 
   return NextResponse.json({ ok: true })
 }

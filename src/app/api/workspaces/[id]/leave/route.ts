@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { ACTIVE_WORKSPACE_COOKIE } from '@/lib/active-workspace'
+import { auditLog } from '@/lib/security/audit'
+import { logError } from '@/lib/security/logger'
 
 export async function POST(
   _req: NextRequest,
@@ -27,18 +29,26 @@ export async function POST(
     return NextResponse.json({ error: 'Proprietário não pode sair do próprio ambulatório.' }, { status: 400 })
   }
 
+  await auditLog(supabase, {
+    workspaceId,
+    userId: user.id,
+    action: 'workspace_leave',
+    resourceType: 'workspace',
+    resourceId: workspaceId,
+  })
+
   // Remove a membership
   const { error } = await supabase
     .from('workspace_members')
     .delete()
     .eq('id', membership.id)
   if (error) {
-    console.error('[workspaces/leave]', error)
+    logError('[workspaces/leave]', error, { workspaceId, membershipId: membership.id })
     return NextResponse.json({ error: 'Erro ao sair do ambulatório' }, { status: 500 })
   }
 
   // Se era o ambulatório ativo, limpa o cookie (middleware vai escolher outro)
   const res = NextResponse.json({ ok: true })
-  res.cookies.set(ACTIVE_WORKSPACE_COOKIE, '', { path: '/', maxAge: 0 })
+  res.cookies.set(ACTIVE_WORKSPACE_COOKIE, '', { path: '/', httpOnly: true, maxAge: 0 })
   return res
 }

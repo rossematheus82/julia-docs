@@ -37,39 +37,24 @@ export default function OnboardingPage() {
     if (!user) { router.push('/login'); return }
 
     const code = generateCode()
-    const { data: ws, error: wsErr } = await supabase
-      .from('workspaces')
-      .insert({ name: workspaceName.trim(), invite_code: code, created_by: user.id })
-      .select()
-      .single()
+    const { data: workspaceId, error: createErr } = await supabase
+      .rpc('create_workspace_with_owner', { workspace_name: workspaceName.trim(), invite: code })
 
-    if (wsErr || !ws) {
-      toast.error('Erro ao criar ambulatório: ' + wsErr?.message)
+    if (createErr || !workspaceId) {
+      toast.error('Erro ao criar ambulatorio: ' + (createErr?.message ?? 'tente novamente'))
       setLoading(false)
       return
     }
 
-    const { error: memberErr } = await supabase
-      .from('workspace_members')
-      .insert({ workspace_id: ws.id, user_id: user.id, role: 'owner' })
-
-    if (memberErr) {
-      toast.error('Erro ao configurar acesso: ' + memberErr.message)
-      setLoading(false)
-      return
-    }
-
-    // Marca esse workspace como ativo para o usuário
     await fetch('/api/workspaces/switch', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workspaceId: ws.id }),
+      body: JSON.stringify({ workspaceId }),
     })
 
-    toast.success(`Ambulatório "${workspaceName}" criado! Código de convite: ${code}`)
+    toast.success(`Ambulatorio "${workspaceName}" criado! Codigo de convite: ${code}`)
     router.push('/perfil-medico/novo')
     router.refresh()
   }
-
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault()
     const code = inviteCode.trim().toUpperCase()
@@ -79,45 +64,24 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
 
-    const { data: ws, error: wsErr } = await supabase
-      .from('workspaces')
-      .select('id, name')
-      .eq('invite_code', code)
-      .single()
+    const { data: workspaceId, error: joinErr } = await supabase
+      .rpc('join_workspace_by_invite', { invite: code })
 
-    if (wsErr || !ws) {
-      toast.error('Código de convite inválido ou não encontrado.')
+    if (joinErr || !workspaceId) {
+      toast.error('Codigo de convite invalido ou nao encontrado.')
       setLoading(false)
       return
     }
 
-    const { error: memberErr } = await supabase
-      .from('workspace_members')
-      .insert({ workspace_id: ws.id, user_id: user.id, role: 'member' })
-
-    if (memberErr) {
-      if (memberErr.code === '23505') {
-        toast.info('Você já é membro deste ambulatório.')
-      } else {
-        toast.error('Erro ao entrar: ' + memberErr.message)
-        setLoading(false)
-        return
-      }
-    } else {
-      toast.success(`Bem-vindo ao ambulatório "${ws.name}"!`)
-    }
-
-    // Marca como workspace ativo
     await fetch('/api/workspaces/switch', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workspaceId: ws.id }),
+      body: JSON.stringify({ workspaceId }),
     })
 
-    // Vai pra perfil-medico/novo se ainda não tiver perfil neste workspace; middleware redireciona se preciso
+    toast.success('Ambulatorio selecionado.')
     router.push('/perfil-medico/novo')
     router.refresh()
   }
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-6">
