@@ -56,6 +56,7 @@ export default function NovoPacientePage() {
   const [confidence, setConfidence] = useState<ConfidenceMap>({})
   const [workspaceId, setWorkspaceId] = useState<string | null>(null)
   const [duplicatePatient, setDuplicatePatient] = useState<DuplicatePatient | null>(null)
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
 
   const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<PatientFormInput>({
     resolver: zodResolver(PatientSchema),
@@ -145,13 +146,17 @@ export default function NovoPacientePage() {
 
     if (cpfDigits(cpf).length < 11 && normalizedName(name).length < 3) {
       setDuplicatePatient(null)
+      setDuplicateModalOpen(false)
       return
     }
 
     let ignore = false
     const timeout = setTimeout(async () => {
       const existing = await findDuplicatePatient(name, cpf)
-      if (!ignore) setDuplicatePatient(existing)
+      if (!ignore) {
+        setDuplicatePatient(existing)
+        setDuplicateModalOpen(Boolean(existing))
+      }
     }, 450)
 
     return () => {
@@ -208,6 +213,7 @@ export default function NovoPacientePage() {
 
       const existing = await findDuplicatePatient(d.full_name ?? '', d.cpf ?? '')
       setDuplicatePatient(existing)
+      setDuplicateModalOpen(Boolean(existing))
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao extrair dados')
     } finally {
@@ -227,8 +233,9 @@ export default function NovoPacientePage() {
       setWorkspaceId(memberData.workspace_id)
 
       const existing = await findDuplicatePatient(data.full_name, data.cpf)
-      if (existing) {
+      if (existing?.match === 'cpf') {
         setDuplicatePatient(existing)
+        setDuplicateModalOpen(true)
         toast.error('Esta paciente já está cadastrada.')
         return
       }
@@ -304,21 +311,6 @@ export default function NovoPacientePage() {
           Preencher com IA
         </Button>
       </div>
-
-      {duplicatePatient && (
-        <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-300 rounded-lg text-sm">
-          <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-yellow-800">Esta paciente já está cadastrada: {duplicatePatient.full_name}</p>
-            <p className="text-yellow-700 mt-0.5">Deseja iniciar uma LME para o cadastro existente?</p>
-          </div>
-          <Link href={`/lmes/nova?paciente=${duplicatePatient.id}`}>
-            <Button size="sm" variant="outline" className="gap-1 border-yellow-300 text-yellow-700 hover:bg-yellow-100">
-              <ExternalLink className="h-3 w-3" /> Iniciar LME
-            </Button>
-          </Link>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Identificação */}
@@ -472,12 +464,63 @@ export default function NovoPacientePage() {
           <Link href="/pacientes">
             <Button type="button" variant="outline">Cancelar</Button>
           </Link>
-          <Button type="submit" disabled={loading || Boolean(duplicatePatient)} className="gap-2">
+          <Button type="submit" disabled={loading || duplicatePatient?.match === 'cpf'} className="gap-2">
             <Save className="h-4 w-4" />
             {loading ? 'Salvando...' : 'Cadastrar paciente'}
           </Button>
         </div>
       </form>
+
+      <Dialog open={duplicateModalOpen && Boolean(duplicatePatient)} onOpenChange={setDuplicateModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              {duplicatePatient?.match === 'cpf' ? 'Paciente já cadastrada' : 'Nome já encontrado'}
+            </DialogTitle>
+          </DialogHeader>
+          {duplicatePatient?.match === 'cpf' ? (
+            <div className="space-y-3 text-sm text-gray-600">
+              <p>
+                Esta paciente já está cadastrada: <strong className="text-gray-900">{duplicatePatient.full_name}</strong>.
+              </p>
+              <p>Deseja iniciar uma LME para o cadastro existente?</p>
+            </div>
+          ) : (
+            <div className="space-y-3 text-sm text-gray-600">
+              <p>
+                Já existe uma paciente com este nome: <strong className="text-gray-900">{duplicatePatient?.full_name}</strong>.
+              </p>
+              <p>Confira CPF e data de nascimento antes de continuar. Se for outra pessoa, você pode manter este cadastro.</p>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            {duplicatePatient?.match === 'cpf' ? (
+              <>
+                <Button type="button" variant="outline" onClick={() => setDuplicateModalOpen(false)}>
+                  Corrigir dados
+                </Button>
+                <Link href={`/lmes/nova?paciente=${duplicatePatient.id}`}>
+                  <Button type="button" className="gap-2">
+                    <ExternalLink className="h-4 w-4" /> Iniciar LME
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href={duplicatePatient ? `/lmes/nova?paciente=${duplicatePatient.id}` : '/lmes/nova'}>
+                  <Button type="button" variant="outline" className="gap-2">
+                    <ExternalLink className="h-4 w-4" /> Usar existente
+                  </Button>
+                </Link>
+                <Button type="button" onClick={() => setDuplicateModalOpen(false)}>
+                  Continuar cadastro
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal IA */}
       <Dialog open={showAiModal} onOpenChange={setShowAiModal}>

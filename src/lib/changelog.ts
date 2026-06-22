@@ -22,7 +22,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     data: '2026-06-22',
     itens: [
       { tipo: 'correcao', texto: 'DPOC: medicamento DIPROPIONATO DE BECLOMETASONA + BROMETO DE GLICOPIRRÔNIO + FUMARATO DE FORMOTEROL corrigido na ordem oficial e com apresentação de 120 doses.' },
-      { tipo: 'melhoria', texto: 'Cadastro de pacientes agora avisa quando nome ou CPF já existem e oferece iniciar uma LME para o cadastro existente, evitando duplicidade.' },
+      { tipo: 'melhoria', texto: 'Cadastro de pacientes agora avisa em pop-up quando nome ou CPF já existem; CPF repetido bloqueia duplicidade e nome igual só pede conferência dos dados.' },
     ],
   },
   {
