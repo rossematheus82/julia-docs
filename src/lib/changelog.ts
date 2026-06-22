@@ -19,6 +19,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-06-22',
+    itens: [
+      { tipo: 'correcao', texto: 'DPOC: medicamento DIPROPIONATO DE BECLOMETASONA + BROMETO DE GLICOPIRRÔNIO + FUMARATO DE FORMOTEROL corrigido na ordem oficial e com apresentação de 120 doses.' },
+      { tipo: 'melhoria', texto: 'Cadastro de pacientes agora avisa quando nome ou CPF já existem e oferece iniciar uma LME para o cadastro existente, evitando duplicidade.' },
+    ],
+  },
+  {
     data: '2026-06-13',
     itens: [
       { tipo: 'melhoria', texto: 'O CID-10 não vem mais pré-selecionado na nova LME — é preciso escolher o CID, evitando emitir com o código errado por esquecimento.' },

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import { DateInput } from '@/components/ui/date-input'
 
 type ConfidenceMap = Partial<Record<keyof PatientExtractionData, 'high' | 'low'>>
+type DuplicatePatient = { id: string; full_name: string; cpf: string | null; match: 'cpf' | 'name' }
 
 function ConfidenceDot({ level }: { level: 'high' | 'low' }) {
   return (
@@ -32,6 +33,19 @@ function ConfidenceDot({ level }: { level: 'high' | 'low' }) {
 
 const AI_SET_OPTS = { shouldDirty: true, shouldTouch: true, shouldValidate: false } as const
 
+function cpfDigits(value?: string | null) {
+  return (value ?? '').replace(/\D/g, '')
+}
+
+function formatCpfDigits(digits: string) {
+  if (digits.length !== 11) return digits
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+function normalizedName(value?: string | null) {
+  return (value ?? '').trim().replace(/\s+/g, ' ')
+}
+
 export default function NovoPacientePage() {
   const router = useRouter()
   const supabase = createClient()
@@ -40,7 +54,8 @@ export default function NovoPacientePage() {
   const [aiText, setAiText] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [confidence, setConfidence] = useState<ConfidenceMap>({})
-  const [duplicateCpf, setDuplicateCpf] = useState<{ id: string; full_name: string } | null>(null)
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null)
+  const [duplicatePatient, setDuplicatePatient] = useState<DuplicatePatient | null>(null)
 
   const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<PatientFormInput>({
     resolver: zodResolver(PatientSchema),
@@ -66,6 +81,85 @@ export default function NovoPacientePage() {
   // without an explicit value prop, setValue updates are swallowed on next re-render)
   const v = watch()
   const isIncapable = v.is_incapable ?? false
+
+  async function getWorkspaceId() {
+    if (workspaceId) return workspaceId
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: memberData } = await supabase
+      .from('workspace_members')
+      .select('workspace_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+
+    const id = memberData?.workspace_id ?? null
+    setWorkspaceId(id)
+    return id
+  }
+
+  async function findDuplicatePatient(fullName: string, cpf: string): Promise<DuplicatePatient | null> {
+    const activeWorkspaceId = await getWorkspaceId()
+    if (!activeWorkspaceId) return null
+
+    const digits = cpfDigits(cpf)
+    if (digits.length === 11) {
+      const cpfVariants = Array.from(new Set([digits, formatCpfDigits(digits), cpf].filter(Boolean)))
+      const { data: existingByCpf } = await supabase
+        .from('patients')
+        .select('id, full_name, cpf')
+        .eq('workspace_id', activeWorkspaceId)
+        .in('cpf', cpfVariants)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingByCpf) return { ...existingByCpf, match: 'cpf' }
+    }
+
+    const name = normalizedName(fullName)
+    if (name.length >= 3) {
+      const { data: existingByName } = await supabase
+        .from('patients')
+        .select('id, full_name, cpf')
+        .eq('workspace_id', activeWorkspaceId)
+        .ilike('full_name', name)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingByName) return { ...existingByName, match: 'name' }
+    }
+
+    return null
+  }
+
+  useEffect(() => {
+    getWorkspaceId()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const name = v.full_name ?? ''
+    const cpf = v.cpf ?? ''
+
+    if (cpfDigits(cpf).length < 11 && normalizedName(name).length < 3) {
+      setDuplicatePatient(null)
+      return
+    }
+
+    let ignore = false
+    const timeout = setTimeout(async () => {
+      const existing = await findDuplicatePatient(name, cpf)
+      if (!ignore) setDuplicatePatient(existing)
+    }, 450)
+
+    return () => {
+      ignore = true
+      clearTimeout(timeout)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v.full_name, v.cpf, workspaceId])
 
   async function runAiExtraction() {
     if (!aiText.trim()) { toast.error('Cole o texto antes de extrair'); return }
@@ -112,18 +206,8 @@ export default function NovoPacientePage() {
       setShowAiModal(false)
       toast.success('Campos preenchidos! Revise antes de salvar.')
 
-      if (d.cpf) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data: memberData } = await supabase
-            .from('workspace_members').select('workspace_id').eq('user_id', user.id).limit(1).maybeSingle()
-          if (memberData) {
-            const { data: existing } = await supabase
-              .from('patients').select('id, full_name').eq('cpf', d.cpf).eq('workspace_id', memberData.workspace_id).maybeSingle()
-            if (existing) setDuplicateCpf(existing)
-          }
-        }
-      }
+      const existing = await findDuplicatePatient(d.full_name ?? '', d.cpf ?? '')
+      setDuplicatePatient(existing)
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao extrair dados')
     } finally {
@@ -140,6 +224,14 @@ export default function NovoPacientePage() {
       const { data: memberData } = await supabase
         .from('workspace_members').select('workspace_id').eq('user_id', user.id).limit(1).maybeSingle()
       if (!memberData) { router.push('/onboarding'); return }
+      setWorkspaceId(memberData.workspace_id)
+
+      const existing = await findDuplicatePatient(data.full_name, data.cpf)
+      if (existing) {
+        setDuplicatePatient(existing)
+        toast.error('Esta paciente já está cadastrada.')
+        return
+      }
 
       const { data: patient, error } = await supabase.from('patients').insert({
         workspace_id: memberData.workspace_id,
@@ -169,7 +261,12 @@ export default function NovoPacientePage() {
       toast.success('Paciente cadastrado com sucesso!')
       router.push(`/pacientes/${patient.id}`)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao cadastrar paciente')
+      const message = err instanceof Error ? err.message : 'Erro ao cadastrar paciente'
+      if (/duplicate key|duplicate_patient_cpf|unique/i.test(message)) {
+        toast.error('Esta paciente já está cadastrada.')
+      } else {
+        toast.error(message)
+      }
     } finally {
       setLoading(false)
     }
@@ -208,16 +305,16 @@ export default function NovoPacientePage() {
         </Button>
       </div>
 
-      {duplicateCpf && (
+      {duplicatePatient && (
         <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-300 rounded-lg text-sm">
           <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
-            <p className="font-medium text-yellow-800">Já existe um paciente com este CPF: {duplicateCpf.full_name}</p>
-            <p className="text-yellow-700 mt-0.5">Deseja editar o cadastro existente em vez de criar um novo?</p>
+            <p className="font-medium text-yellow-800">Esta paciente já está cadastrada: {duplicatePatient.full_name}</p>
+            <p className="text-yellow-700 mt-0.5">Deseja iniciar uma LME para o cadastro existente?</p>
           </div>
-          <Link href={`/pacientes/${duplicateCpf.id}/editar`}>
+          <Link href={`/lmes/nova?paciente=${duplicatePatient.id}`}>
             <Button size="sm" variant="outline" className="gap-1 border-yellow-300 text-yellow-700 hover:bg-yellow-100">
-              <ExternalLink className="h-3 w-3" /> Editar existente
+              <ExternalLink className="h-3 w-3" /> Iniciar LME
             </Button>
           </Link>
         </div>
@@ -375,7 +472,7 @@ export default function NovoPacientePage() {
           <Link href="/pacientes">
             <Button type="button" variant="outline">Cancelar</Button>
           </Link>
-          <Button type="submit" disabled={loading} className="gap-2">
+          <Button type="submit" disabled={loading || Boolean(duplicatePatient)} className="gap-2">
             <Save className="h-4 w-4" />
             {loading ? 'Salvando...' : 'Cadastrar paciente'}
           </Button>

@@ -87,7 +87,12 @@ export default function EditarPacientePage() {
       toast.success('Paciente atualizado!')
       router.push(`/pacientes/${id}`)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao atualizar')
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar'
+      if (/duplicate key|duplicate_patient_cpf|unique/i.test(message)) {
+        toast.error('Esta paciente já está cadastrada.')
+      } else {
+        toast.error(message)
+      }
     } finally {
       setLoading(false)
     }

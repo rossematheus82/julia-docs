@@ -23,7 +23,7 @@ export const MEDICAMENTOS: Medicamento[] = [
   // DPOC
   { id: 'dpoc-bud200', nome: 'Budesonida', apresentacao: '200 mcg cápsula inalante', idadeMinima: 0, doenca: 'dpoc' },
   { id: 'dpoc-bud400', nome: 'Budesonida', apresentacao: '400 mcg cápsula inalante', idadeMinima: 0, doenca: 'dpoc' },
-  { id: 'dpoc-becfor-gli', nome: 'Beclometasona + Formoterol + Glicopirrônio', apresentacao: '(100+6+12,5 mcg)/dose aerossol', idadeMinima: 18, doenca: 'dpoc' },
+  { id: 'dpoc-becfor-gli', nome: 'DIPROPIONATO DE BECLOMETASONA + BROMETO DE GLICOPIRRÔNIO + FUMARATO DE FORMOTEROL', apresentacao: '(100MCG + 12,5MCG + 6MCG) 120 DOSES', idadeMinima: 18, doenca: 'dpoc' },
   { id: 'dpoc-fen100', nome: 'Fenoterol', apresentacao: '100 mcg aerossol', idadeMinima: 0, doenca: 'dpoc' },
   { id: 'dpoc-for12', nome: 'Formoterol', apresentacao: '12 mcg cápsula inalante', idadeMinima: 0, doenca: 'dpoc' },
   { id: 'dpoc-for6bud200cap', nome: 'Formoterol 6 mcg + Budesonida 200 mcg', apresentacao: 'cápsula inalante', idadeMinima: 0, doenca: 'dpoc' },
