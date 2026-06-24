@@ -185,27 +185,35 @@ export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> 
     const numLabel = `${i + 1}.`
     const medLine = `${med.nome} ${med.apresentacao}`.trim()
     const qtdLine = `Qtd.: ${med.quantidade}`
+    const medTextX = margin + 16
+    const medLines = wrapText(medLine, bold, 11, right - medTextX)
 
     // Pré-calcula a quebra da posologia (indentação pendente sob "Posologia: ").
     const posoLabel = 'Posologia: '
-    const posoContentX = margin + 16 + reg.widthOfTextAtSize(posoLabel, 10)
+    const posoContentX = medTextX + reg.widthOfTextAtSize(posoLabel, 10)
     const posoLines = med.posologia
       ? wrapText(med.posologia, reg, 10, right - posoContentX)
       : []
 
     // Garante que o bloco inteiro do medicamento caiba na página.
-    const blockHeight = 14 + 12 + (med.posologia ? Math.max(posoLines.length, 1) * 12 : 0) + 6
+    const blockHeight =
+      Math.max(medLines.length, 1) * 14 +
+      12 +
+      (med.posologia ? Math.max(posoLines.length, 1) * 12 : 0) +
+      6
     ensureSpace(blockHeight)
 
     textLine(page, numLabel, margin, y, bold, 11)
-    textLine(page, medLine, margin + 16, y, bold, 11)
-    y -= 14
+    for (const line of medLines.length ? medLines : ['']) {
+      textLine(page, line, medTextX, y, bold, 11)
+      y -= 14
+    }
 
-    textLine(page, qtdLine, margin + 16, y, reg, 10)
+    textLine(page, qtdLine, medTextX, y, reg, 10)
     y -= 12
 
     if (med.posologia) {
-      textLine(page, posoLabel, margin + 16, y, reg, 10)
+      textLine(page, posoLabel, medTextX, y, reg, 10)
       const lines = posoLines.length ? posoLines : ['']
       lines.forEach(ln => {
         textLine(page, ln, posoContentX, y, reg, 10)

@@ -205,6 +205,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="LME_${diseaseLabel}_${lmeId}_${dd}-${mm}-${aa}.pdf"`,
+          'Cache-Control': 'no-store, max-age=0',
         },
       })
     }
@@ -339,6 +340,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="Processo_${diseaseLabel}_${lmeId}_${dateName}.pdf"`,
+          'Cache-Control': 'no-store, max-age=0',
         },
       })
     }

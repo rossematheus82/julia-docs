@@ -22,6 +22,7 @@ interface Props {
 async function downloadPdf(lmeId: string, type: string, filename: string) {
   const res = await fetch('/api/pdf/generate', {
     method: 'POST',
+    cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lmeId, type }),
   })
