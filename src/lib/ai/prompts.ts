@@ -1,4 +1,5 @@
 import type { Disease, RequestType } from '../supabase/types'
+import { LME_TEXT_LIMITS } from '../pdf/text-limits'
 
 const DISEASE_NAMES: Record<Disease, string> = {
   'asma': 'Asma Brônquica',
@@ -58,7 +59,7 @@ export function getLmeFieldDescriptions(): string {
 - mae_nome: Nome completo da mãe do paciente
 - peso_kg: Peso em kg (número)
 - altura_cm: Altura em cm (número)
-- anamnese: Resumo clínico / anamnese do paciente
+- anamnese: Resumo clínico / anamnese do paciente, com no máximo ${LME_TEXT_LIMITS.anamnese} caracteres
 - tratamento_previo: true se já fez tratamento, false se não
 - tratamento_previo_descricao: Descrição do tratamento prévio (se houver)
 - paciente_incapaz: true se incapaz, false caso contrário

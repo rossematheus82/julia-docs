@@ -12,6 +12,8 @@ import { readJsonBody, safeErrorMessage } from '@/lib/api/security'
 import type { Disease, RequestType } from '@/lib/supabase/types'
 import { auditLog } from '@/lib/security/audit'
 import { logError } from '@/lib/security/logger'
+import { LME_TEXT_LIMITS } from '@/lib/pdf/text-limits'
+import { capToLimit } from '@/lib/ai/improve'
 
 const DISEASE_SCHEMAS: Record<string, z.ZodSchema> = {
   asma: AsmaFormSchema,
@@ -81,6 +83,15 @@ export async function POST(request: NextRequest) {
         anonymize: shouldAnonymize,
       }),
     ])
+
+    // A extração também respeita o limite físico da caixa da LME, mesmo se o
+    // provedor devolver uma anamnese maior que a solicitada no prompt.
+    if (typeof lmeResult.data.anamnese === 'string') {
+      lmeResult.data.anamnese = capToLimit(
+        lmeResult.data.anamnese,
+        LME_TEXT_LIMITS.anamnese,
+      )
+    }
 
     await auditLog(supabase, {
       workspaceId: memberData?.workspace_id ?? null,

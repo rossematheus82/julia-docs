@@ -250,11 +250,13 @@ export async function prepareWrappedText(doc: PDFDocument, wrappedText?: Record<
     if (!pl) continue
     const maxWidth = (pl.x2 - pl.x1) - padX * 2
     const boxHeight = pl.y2 - pl.y1
-    // Auto-ajuste: reduz a fonte (10→7) até o texto caber inteiro na altura da caixa
+    // Auto-ajuste: reduz a fonte (10→7) até o texto caber inteiro na altura da caixa.
+    // O espaçamento de 1.08 mantém a leitura e permite até 7 linhas na caixa de
+    // anamnese da LME, sem ultrapassar o retângulo oficial.
     let fontSize = 10, lineHeight = fontSize * 1.15
     let lines = wrapToWidth(value, font, fontSize, maxWidth)
-    for (const size of [10, 9, 8, 7]) {
-      const lh = size * 1.15
+    for (const size of [10, 9.5, 9, 8.5, 8, 7.5, 7]) {
+      const lh = size * 1.08
       const maxLines = Math.max(1, Math.floor((boxHeight - 1) / lh))
       const wrapped = wrapToWidth(value, font, size, maxWidth)
       fontSize = size; lineHeight = lh; lines = wrapped.slice(0, maxLines)

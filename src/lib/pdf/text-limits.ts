@@ -31,7 +31,9 @@ export const SPEC_TEXT_LIMITS: Record<string, Record<string, number>> = {
 }
 
 export const LME_TEXT_LIMITS: Record<string, number> = {
-  anamnese: 405,
+  // A caixa oficial mede ~526x57 pt. O renderer reduz gradualmente a fonte
+  // até 7 pt e compacta o espaçamento para comportar anamneses extensas.
+  anamnese: 1000,
   diagnostico: 85,
   tratamento_previo_descricao: 80,
 }
