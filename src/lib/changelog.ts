@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-06-24',
     itens: [
+      { tipo: 'melhoria', texto: 'Na criação de uma nova LME, o item 12 (tratamento prévio ou atual) não vem mais marcado como “Não”: agora é obrigatório confirmar SIM ou NÃO antes de continuar.' },
       { tipo: 'melhoria', texto: 'O campo de anamnese da LME agora aceita até 1.000 caracteres; o texto é ajustado automaticamente dentro da caixa oficial do PDF, e a IA também respeita o novo limite.' },
       { tipo: 'novo', texto: 'DPOC: adicionadas as apresentações em pó inalante de formoterol 6 mcg + budesonida 200 mcg e formoterol 12 mcg + budesonida 400 mcg, ambas com 60 doses.' },
       { tipo: 'melhoria', texto: 'DPOC: a combinação de beclometasona + glicopirrônio + formoterol agora informa a apresentação completa: solução aerossol com 120 doses.' },

@@ -59,6 +59,10 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
   }
 
   async function saveAndGeneratePdf() {
+    if (typeof currentLmeData.tratamento_previo !== 'boolean') {
+      toast.error('Informe se o paciente realizou ou está em tratamento da doença.')
+      return
+    }
     setGeneratingPdf(true)
     try {
       const { error } = await supabase

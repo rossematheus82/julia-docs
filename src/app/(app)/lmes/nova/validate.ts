@@ -30,6 +30,9 @@ export function validateLme(data: WizardData): ValidationIssue[] {
   if (!anamnese) {
     issues.push({ campo: 'Anamnese', mensagem: 'Preencha a anamnese / história clínica', step: 4 })
   }
+  if (typeof lme.tratamento_previo !== 'boolean') {
+    issues.push({ campo: 'Tratamento prévio', mensagem: 'Informe se o paciente realizou ou está em tratamento da doença', step: 4 })
+  }
 
   type Med = { nome?: string; apresentacao?: string; posologia?: string; quantidades?: Record<string, string> }
   const meds: Med[] = Array.isArray(lme.medicamentos) ? (lme.medicamentos as Med[]) : []

@@ -1045,7 +1045,8 @@ export function LmeFormEditor({
   }, [])
 
   const getLme = (key: string) => (lmeData[key] as string) ?? ''
-  const getBoolLme = (key: string) => Boolean(lmeData[key])
+  const getOptionalBoolLme = (key: string): boolean | undefined =>
+    typeof lmeData[key] === 'boolean' ? lmeData[key] : undefined
   const setLme = (key: string, value: unknown) => {
     markChanged(key)
     onLmeDataChange({ ...lmeData, [key]: value })
@@ -1194,21 +1195,28 @@ export function LmeFormEditor({
           </div>
         </div>
 
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-800">12. Paciente realizou tratamento prévio ou está em tratamento da doença?</p>
+        <div className={`p-3 rounded-lg border ${
+          getOptionalBoolLme('tratamento_previo') == null
+            ? 'bg-amber-50 border-amber-200'
+            : 'bg-gray-50 border-transparent'
+        }`}>
+          <p className="text-sm font-medium text-gray-800">12. Paciente realizou tratamento prévio ou está em tratamento da doença? *</p>
           <div className="flex gap-6 mt-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input type="radio" name="tratamento_previo" checked={!getBoolLme('tratamento_previo')} onChange={() => setLme('tratamento_previo', false)} className="accent-blue-600" />
+              <input type="radio" name="tratamento_previo" checked={getOptionalBoolLme('tratamento_previo') === false} onChange={() => setLme('tratamento_previo', false)} className="accent-blue-600" />
               <span className="text-sm text-gray-700">NÃO</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input type="radio" name="tratamento_previo" checked={getBoolLme('tratamento_previo')} onChange={() => setLme('tratamento_previo', true)} className="accent-blue-600" />
+              <input type="radio" name="tratamento_previo" checked={getOptionalBoolLme('tratamento_previo') === true} onChange={() => setLme('tratamento_previo', true)} className="accent-blue-600" />
               <span className="text-sm text-gray-700">SIM. Relatar:</span>
             </label>
           </div>
+          {getOptionalBoolLme('tratamento_previo') == null && (
+            <p className="text-xs text-amber-700 mt-2">Selecione SIM ou NÃO para continuar.</p>
+          )}
         </div>
 
-        {getBoolLme('tratamento_previo') && (
+        {getOptionalBoolLme('tratamento_previo') === true && (
           <div>
             <FL label="Descrição do tratamento prévio" fieldKey="tratamento_previo_descricao" aiFields={aiFields} changedFields={changedFields} value={getLme('tratamento_previo_descricao')} />
             <TextareaCounted className="min-h-16" maxLength={LME_TEXT_LIMITS.tratamento_previo_descricao} placeholder="Medicamentos, doses, duração do tratamento prévio..." value={getLme('tratamento_previo_descricao')} onChange={v => setLme('tratamento_previo_descricao', v)} />

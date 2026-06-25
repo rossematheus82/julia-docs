@@ -79,6 +79,7 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
     if (step === 1) return !!data.request_type && !!data.cid10
     if (step === 2) return !!data.patient_id
     if (step === 3) return !!data.doctor_id && !!data.facility_id
+    if (step === 4) return typeof data.lme_data.tratamento_previo === 'boolean'
     return true
   }
 

@@ -50,8 +50,13 @@ export function Step5Prontuario({ data, update, patients }: Props) {
       setResult(json)
       // O CID é pré-selecionado pelo médico (data.cid10) e o diagnóstico deriva dele —
       // a IA nunca deve influenciar esses campos, então descartamos se vierem na extração.
-      const { cid10: _cid, diagnostico: _diag, ...lmeFromAi } = json.lme?.data ?? {}
-      void _cid; void _diag
+      const {
+        cid10: _cid,
+        diagnostico: _diag,
+        tratamento_previo: _tratamentoPrevio,
+        ...lmeFromAi
+      } = json.lme?.data ?? {}
+      void _cid; void _diag; void _tratamentoPrevio
       // Faz merge — não sobrescreve o que o médico já preencheu manualmente
       update({
         lme_data: { ...lmeFromAi, ...data.lme_data },
