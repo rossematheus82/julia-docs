@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react'
+import { LogoutButton } from './logout-button'
 
 export default function AcessoSuspensoPage() {
   return (
@@ -9,6 +10,7 @@ export default function AcessoSuspensoPage() {
         <p className="mt-2 text-sm text-gray-500">
           Seu acesso ao Julia Docs foi suspenso. Entre em contato com o administrador da plataforma para avaliar a reativacao da sua conta.
         </p>
+        <LogoutButton />
       </div>
     </div>
   )
