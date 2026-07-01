@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { WorkspaceSettingsClient } from './workspace-settings-client'
+import { isPlatformAdminEmail } from '@/lib/platform-admin'
 
 export default async function WorkspaceSettingsPage() {
   const supabase = await createClient()
@@ -59,6 +60,7 @@ export default async function WorkspaceSettingsPage() {
       myWorkspaces={myWorkspaces}
       members={membersWithNames}
       currentUserId={user.id}
+      canCreateWorkspace={isPlatformAdminEmail(user.email)}
     />
   )
 }

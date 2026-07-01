@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { Building2, Users } from 'lucide-react'
+import { Building2, Lock, Users } from 'lucide-react'
+import { isPlatformAdminEmail } from '@/lib/platform-admin'
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -25,8 +26,18 @@ export default function OnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
+  const [tab, setTab] = useState('join')
+  const [canCreateWorkspace, setCanCreateWorkspace] = useState(false)
   const [workspaceName, setWorkspaceName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const allowed = isPlatformAdminEmail(data.user?.email)
+      setCanCreateWorkspace(allowed)
+      if (allowed) setTab('create')
+    })
+  }, [supabase.auth])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -35,6 +46,11 @@ export default function OnboardingPage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
+    if (!isPlatformAdminEmail(user.email)) {
+      toast.error('Apenas administradores da plataforma podem criar ambulatórios.')
+      setLoading(false)
+      return
+    }
 
     const code = generateCode()
     const { data: workspaceId, error: createErr } = await supabase
@@ -90,16 +106,19 @@ export default function OnboardingPage() {
           <p className="text-gray-500">Configure seu ambulatório para começar a usar a plataforma</p>
         </div>
 
-        <Tabs defaultValue="create">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList className={`grid w-full ${canCreateWorkspace ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {canCreateWorkspace && (
             <TabsTrigger value="create" className="gap-2">
               <Building2 className="h-4 w-4" /> Criar ambulatório
             </TabsTrigger>
+            )}
             <TabsTrigger value="join" className="gap-2">
               <Users className="h-4 w-4" /> Entrar em um existente
             </TabsTrigger>
           </TabsList>
 
+          {canCreateWorkspace && (
           <TabsContent value="create">
             <Card>
               <CardHeader>
@@ -126,6 +145,7 @@ export default function OnboardingPage() {
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
           <TabsContent value="join">
             <Card>
@@ -151,6 +171,12 @@ export default function OnboardingPage() {
                     {loading ? 'Entrando...' : 'Entrar no ambulatório'}
                   </Button>
                 </form>
+                {!canCreateWorkspace && (
+                  <div className="mt-4 flex items-start gap-2 rounded-lg bg-gray-50 border border-gray-200 p-3 text-xs text-gray-500">
+                    <Lock className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <p>Novos ambulatorios so podem ser criados por administradores da plataforma.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

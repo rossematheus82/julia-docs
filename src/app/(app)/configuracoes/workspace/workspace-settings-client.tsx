@@ -26,13 +26,14 @@ interface Props {
   myWorkspaces: Workspace[]
   members: Member[]
   currentUserId: string
+  canCreateWorkspace: boolean
 }
 
 const ROLE_LABELS: Record<string, string> = {
   owner: 'Proprietário', admin: 'Administrador', member: 'Membro',
 }
 
-export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members, currentUserId }: Props) {
+export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members, currentUserId, canCreateWorkspace }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [name, setName] = useState(activeWorkspace.name)
@@ -145,7 +146,7 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
             </span>
             <Link href="/onboarding">
               <Button variant="outline" size="sm" className="gap-1.5">
-                <Plus className="h-3.5 w-3.5" /> Criar / entrar em outro
+                <Plus className="h-3.5 w-3.5" /> {canCreateWorkspace ? 'Criar / entrar em outro' : 'Entrar em outro'}
               </Button>
             </Link>
           </CardTitle>

@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
+  const [signupInviteCode, setSignupInviteCode] = useState('')
   const [forgotEmail, setForgotEmail] = useState('')
 
   function set(field: 'email' | 'password', value: string) {
@@ -41,15 +42,30 @@ export default function LoginPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
-      ...form,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+    const res = await fetch('/api/auth/signup-with-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+        inviteCode: signupInviteCode,
+      }),
     })
-    if (error) {
-      toast.error(error.message)
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      toast.error(body.error ?? 'Erro ao criar conta')
       setLoading(false)
       return
     }
+
+    const { error: loginError } = await supabase.auth.signInWithPassword(form)
+    if (!loginError) {
+      toast.success(`Conta criada e vinculada ao ambulatório ${body.workspaceName}.`)
+      router.push('/dashboard')
+      router.refresh()
+      return
+    }
+
     toast.success('Conta criada! Verifique seu email para confirmar o cadastro.')
     setLoading(false)
   }
@@ -210,11 +226,23 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+                <div className="space-y-1">
+                  <Label htmlFor="invite-signup">Código de convite do ambulatório</Label>
+                  <Input
+                    id="invite-signup"
+                    type="text"
+                    required
+                    value={signupInviteCode}
+                    onChange={e => setSignupInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: JULI-TEST"
+                    className="uppercase tracking-widest font-mono"
+                  />
+                </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Criando conta...' : 'Criar conta'}
                 </Button>
                 <p className="text-xs text-gray-500 text-center">
-                  Você configurará seu ambulatório no próximo passo
+                  O acesso ao dashboard depende de um convite valido do ambulatorio
                 </p>
               </form>
             )}

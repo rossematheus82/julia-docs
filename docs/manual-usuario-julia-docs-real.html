@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Manual de uso - Julia Docs</title>
+  <style>
+    @page { size: A4 portrait; margin: 8mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111827; background: #f3f4f6; }
+    .page { min-height: 281mm; page-break-after: always; background: #fff; padding: 8mm; border: 1px solid #e5e7eb; }
+    .cover { display: flex; flex-direction: column; justify-content: center; padding: 18mm; }
+    h1 { margin: 0 0 8px; color: #172554; font-size: 30px; }
+    h2 { margin: 0 0 6px; color: #172554; font-size: 21px; }
+    h3 { margin: 0 0 6px; font-size: 15px; }
+    p { margin: 0 0 7px; line-height: 1.38; font-size: 13px; }
+    ul, ol { margin: 6px 0 0 18px; padding: 0; line-height: 1.38; font-size: 13px; }
+    li { margin-bottom: 4px; }
+    .muted { color: #6b7280; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .logo { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; background: #2563eb; color: white; font-size: 28px; font-weight: 800; }
+    .grid { display: block; }
+    .shot { width: 100%; max-height: 188mm; object-fit: contain; object-position: top center; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 8px 20px rgba(15, 23, 42, .10); margin-top: 7mm; }
+    .note { background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 8px; padding: 9px 11px; color: #1e3a8a; font-size: 12px; margin-top: 8px; }
+    .warn { background: #fffbeb; border-left-color: #f59e0b; color: #92400e; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+    .table th, .table td { border: 1px solid #e5e7eb; padding: 6px; text-align: left; vertical-align: top; }
+    .table th { background: #f9fafb; color: #374151; }
+    .footer { margin-top: 6px; color: #9ca3af; font-size: 10px; text-align: right; }
+  </style>
+</head>
+<body>
+  <section class="page cover">
+    <div class="brand">
+      <div class="logo">J</div>
+      <div>
+        <div style="font-size:24px;color:#172554;"><strong>J&uacute;lia</strong>Docs</div>
+        <div class="muted">Automa&ccedil;&atilde;o de LMEs - CEAF/SES-MG</div>
+      </div>
+    </div>
+    <h1>Manual pr&aacute;tico de uso da plataforma</h1>
+    <p class="muted" style="font-size:17px;max-width:760px;">Roteiro operacional com prints reais do ambiente de teste: cadastro, entrada no ambulat&oacute;rio do J&uacute;lia, pacientes, LME, gera&ccedil;&atilde;o de processo, corre&ccedil;&atilde;o e repeti&ccedil;&atilde;o de LME de colega.</p>
+    <div class="note">Todos os dados dos prints s&atilde;o fict&iacute;cios e foram criados apenas para treinamento.</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>1. Criar conta e entrar</h2>
+        <p>O usu&aacute;rio acessa a tela inicial, cria a conta quando for primeiro acesso e depois entra com e-mail e senha.</p>
+        <ol>
+          <li>Clique em <strong>Criar conta</strong> para o primeiro acesso.</li>
+          <li>Informe e-mail e senha.</li>
+          <li>Depois, volte para <strong>Entrar</strong> e acesse normalmente.</li>
+          <li>Use <strong>Esqueceu a senha?</strong> quando precisar recuperar o acesso.</li>
+        </ol>
+        <div class="note">Por enquanto, usu&aacute;rios comuns n&atilde;o criam ambulat&oacute;rios. Eles entram no ambulat&oacute;rio do J&uacute;lia usando convite.</div>
+      </div>
+      <img class="shot" src="manual-assets/02-criar-conta.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>2. Entrar no ambulat&oacute;rio</h2>
+        <p>Depois de criar a conta, o usu&aacute;rio deve entrar no ambulat&oacute;rio existente usando o c&oacute;digo informado pela administra&ccedil;&atilde;o.</p>
+        <ol>
+          <li>Abra a tela de entrada no ambulat&oacute;rio.</li>
+          <li>Digite o c&oacute;digo de convite.</li>
+          <li>Clique em <strong>Entrar no ambulat&oacute;rio</strong>.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/03-entrar-ambulatorio.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>3. Dashboard</h2>
+        <p>O Dashboard &eacute; a tela de acompanhamento do ambulat&oacute;rio.</p>
+        <ul>
+          <li>Mostra total de pacientes e LMEs.</li>
+          <li>Destaca renova&ccedil;&otilde;es pr&oacute;ximas.</li>
+          <li>O bot&atilde;o <strong>Nova LME</strong> inicia um novo processo.</li>
+          <li>O menu lateral leva para Pacientes, LMEs e Configura&ccedil;&otilde;es.</li>
+        </ul>
+      </div>
+      <img class="shot" src="manual-assets/04-dashboard.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>4. Cadastrar paciente</h2>
+        <p>Antes de emitir uma LME, cadastre ou localize o paciente.</p>
+        <ol>
+          <li>Entre em <strong>Pacientes</strong>.</li>
+          <li>Clique em <strong>Novo paciente</strong>.</li>
+          <li>Preencha identifica&ccedil;&atilde;o, CPF, CNS, data de nascimento, dados cl&iacute;nicos, contato e endere&ccedil;o.</li>
+          <li>Revise peso, altura e respons&aacute;vel legal quando houver.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/06-novo-paciente.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>5. Preencher paciente com IA</h2>
+        <p>A IA pode acelerar o cadastro a partir de texto copiado do prontu&aacute;rio.</p>
+        <ol>
+          <li>Clique em <strong>Preencher com IA</strong>.</li>
+          <li>Cole o texto do prontu&aacute;rio.</li>
+          <li>Clique em <strong>Extrair dados</strong>.</li>
+          <li>Confira todos os campos antes de salvar.</li>
+        </ol>
+        <div class="note">A IA ajuda no preenchimento, mas a responsabilidade de revisar os dados continua sendo do usu&aacute;rio.</div>
+      </div>
+      <img class="shot" src="manual-assets/07-paciente-ia.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>6. Criar uma nova LME</h2>
+        <p>O assistente guia o usu&aacute;rio em etapas.</p>
+        <ol>
+          <li>Clique em <strong>Nova LME</strong>.</li>
+          <li>Escolha a doen&ccedil;a/protocolo.</li>
+          <li>Avance para tipo de documento e CID-10.</li>
+          <li>Selecione paciente, m&eacute;dico e estabelecimento.</li>
+          <li>Preencha dados do prontu&aacute;rio e revise.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/08-nova-lme-doenca.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>7. Processo completo vs LME + Receita</h2>
+        <p>Essa escolha define quais documentos ser&atilde;o preenchidos.</p>
+        <table class="table">
+          <tr><th>Op&ccedil;&atilde;o</th><th>Quando usar</th></tr>
+          <tr><td><strong>Processo Completo</strong></td><td>Primeira solicita&ccedil;&atilde;o ou mudan&ccedil;a de medicamento/situa&ccedil;&atilde;o cl&iacute;nica. Gera o conjunto completo.</td></tr>
+          <tr><td><strong>LME + Receita</strong></td><td>Renova&ccedil;&atilde;o de tratamento j&aacute; aprovado. Mais r&aacute;pido, focado no essencial.</td></tr>
+        </table>
+      </div>
+      <img class="shot" src="manual-assets/09-tipo-processo.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>8. Gerar processo</h2>
+        <p>Depois de criada, a LME abre uma tela de detalhe.</p>
+        <ol>
+          <li>Confira paciente, m&eacute;dico, estabelecimento e CID-10.</li>
+          <li>Clique em <strong>Gerar processo completo</strong>.</li>
+          <li>Use <strong>Downloads individuais</strong> quando precisar baixar apenas um documento.</li>
+          <li>Abra o PDF e revise antes de protocolar.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/10-gerar-processo.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>9. Editar LME com problema</h2>
+        <p>Quando uma LME pr&oacute;pria voltar com erro, o criador pode corrigir os campos.</p>
+        <ol>
+          <li>Abra a LME.</li>
+          <li>Clique em <strong>Preencher / Editar campos</strong>.</li>
+          <li>Corrija CID-10, anamnese, medicamentos ou campos espec&iacute;ficos.</li>
+          <li>Clique em <strong>Salvar e gerar PDF</strong>.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/12-editar-lme.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>10. LME feita por outro colega</h2>
+        <p>Uma LME emitida por outro m&eacute;dico n&atilde;o deve ser editada diretamente em seu nome.</p>
+        <ol>
+          <li>Voc&ecirc; pode baixar o processo original.</li>
+          <li>Para emitir em seu nome, clique em <strong>Renovar / repetir em meu nome</strong>.</li>
+          <li>A plataforma copia os dados da LME anterior para uma nova LME vinculada ao seu perfil.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/13-lme-colega.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <div class="grid">
+      <div>
+        <h2>11. Repetir em meu nome</h2>
+        <p>Ao repetir uma LME de colega, escolha o escopo da nova emiss&atilde;o.</p>
+        <ol>
+          <li><strong>Apenas a LME:</strong> reaproveita o formul&aacute;rio espec&iacute;fico anterior e permite ajustar LME/medicamentos.</li>
+          <li><strong>LME + formul&aacute;rio espec&iacute;fico:</strong> use quando exames, crit&eacute;rios ou situa&ccedil;&atilde;o cl&iacute;nica mudaram.</li>
+          <li>Revise os campos copiados e crie a renova&ccedil;&atilde;o em seu nome.</li>
+        </ol>
+      </div>
+      <img class="shot" src="manual-assets/14-repetir-em-meu-nome.png" />
+    </div>
+    <div class="footer">Manual Julia Docs</div>
+  </section>
+
+  <section class="page">
+    <h2>12. Boas pr&aacute;ticas para ensinar</h2>
+    <ul>
+      <li>Buscar paciente antes de cadastrar para evitar duplicidade.</li>
+      <li>Conferir CPF, CNS, nascimento, peso, altura e respons&aacute;vel legal.</li>
+      <li>Conferir perfil m&eacute;dico, CRM/UF e estabelecimento antes de gerar PDF.</li>
+      <li>Usar Processo Completo para primeira solicita&ccedil;&atilde;o ou mudan&ccedil;a cl&iacute;nica; usar LME + Receita para renova&ccedil;&otilde;es simples.</li>
+      <li>Quando a LME for de colega, repetir em seu nome em vez de editar o documento original.</li>
+      <li>Sair da plataforma ao usar computador compartilhado.</li>
+    </ul>
+  </section>
+</body>
+</html>

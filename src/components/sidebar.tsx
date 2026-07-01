@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { isPlatformAdminEmail } from '@/lib/platform-admin'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator,
@@ -44,6 +45,7 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
   const router = useRouter()
   const supabase = createClient()
   const hasMultiple = workspaces.length > 1
+  const canCreateWorkspace = isPlatformAdminEmail(userEmail)
   const [open, setOpen] = useState(false)
 
   // Fecha o drawer ao navegar (no mobile)
@@ -152,7 +154,7 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/onboarding?modo=adicionar')}>
               <Plus className="h-3.5 w-3.5 mr-2" />
-              <span className="text-sm">Criar ou entrar em outro</span>
+              <span className="text-sm">{canCreateWorkspace ? 'Criar ou entrar em outro' : 'Entrar em outro'}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
