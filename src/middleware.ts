@@ -60,7 +60,8 @@ export async function middleware(request: NextRequest) {
   const isPerfilNovo = path.startsWith('/perfil-medico/novo')
   const isAdminRoute = path.startsWith('/controle-interno-julia-docs-7f3c9a')
   const isApiRoute = path.startsWith('/api')
-  const isPublic = isAuthRoute || isApiRoute || path === '/'
+  const isSuspendedAccessRoute = path.startsWith('/acesso-suspenso')
+  const isPublic = isAuthRoute || isApiRoute || isSuspendedAccessRoute || path === '/'
 
   if (isApiRoute && UNSAFE_METHODS.has(request.method) && !isAllowedOrigin(request)) {
     return withSecurityHeaders(NextResponse.json({ error: 'Origem nao permitida' }, { status: 403 }))
