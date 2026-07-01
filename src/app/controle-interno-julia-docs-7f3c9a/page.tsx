@@ -3,7 +3,12 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { ShieldCheck, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { isPlatformAdminEmail } from '@/lib/platform-admin'
-import { AdminUsersClient, type AdminUserRow } from './admin-users-client'
+import {
+  AdminUsersClient,
+  type AdminPatientRow,
+  type AdminUserRow,
+  type AdminWorkspaceRow,
+} from './admin-users-client'
 
 function createAdminClient() {
   return createSupabaseClient(
@@ -38,10 +43,18 @@ export default async function AdminPage() {
     { data: platformRows },
     { data: memberships },
     { data: doctors },
+    { data: workspaces },
+    { data: patients },
   ] = await Promise.all([
     admin.from('platform_users').select('user_id, email, role, status').in('user_id', userIds),
     admin.from('workspace_members').select('user_id, workspace_id').in('user_id', userIds),
     admin.from('doctors').select('owner_user_id').in('owner_user_id', userIds),
+    admin.from('workspaces').select('id, name, invite_code, created_at').order('name'),
+    admin
+      .from('patients')
+      .select('id, workspace_id, full_name, cpf, cns, birth_date, phone, created_at, updated_at')
+      .order('full_name')
+      .limit(1000),
   ])
 
   const platformByUser = new Map((platformRows ?? []).map(row => [row.user_id as string, row]))
@@ -75,6 +88,26 @@ export default async function AdminPage() {
     })
     .sort((a, b) => a.email.localeCompare(b.email))
 
+  const workspaceRows: AdminWorkspaceRow[] = (workspaces ?? []).map(workspace => ({
+    id: workspace.id,
+    name: workspace.name,
+    inviteCode: workspace.invite_code,
+    createdAt: workspace.created_at,
+  }))
+  const workspaceNameById = new Map(workspaceRows.map(workspace => [workspace.id, workspace.name]))
+  const patientRows: AdminPatientRow[] = (patients ?? []).map(patient => ({
+    id: patient.id,
+    workspaceId: patient.workspace_id,
+    workspaceName: workspaceNameById.get(patient.workspace_id) ?? 'Ambulatorio removido',
+    fullName: patient.full_name,
+    cpf: patient.cpf,
+    cns: patient.cns,
+    birthDate: patient.birth_date,
+    phone: patient.phone,
+    createdAt: patient.created_at,
+    updatedAt: patient.updated_at,
+  }))
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="mx-auto max-w-6xl space-y-6 p-6">
@@ -96,7 +129,12 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <AdminUsersClient users={rows} currentUserId={user.id} />
+        <AdminUsersClient
+          users={rows}
+          currentUserId={user.id}
+          workspaces={workspaceRows}
+          patients={patientRows}
+        />
       </main>
     </div>
   )
