@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Users, FileText, Plus, Settings,
-  LogOut, Building2, ChevronRight, Sparkles, ChevronsUpDown, Check, Stethoscope, Menu, X, Heart, ShieldCheck,
+  LogOut, Building2, ChevronRight, Sparkles, ChevronsUpDown, Check, Stethoscope, Menu, X, Heart,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -46,9 +46,6 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
   const supabase = createClient()
   const hasMultiple = workspaces.length > 1
   const canCreateWorkspace = isPlatformAdminEmail(userEmail)
-  const visibleSettingsItems = canCreateWorkspace
-    ? [...settingsItems, { href: '/controle-interno-julia-docs-7f3c9a', icon: ShieldCheck, label: 'Admin' }]
-    : settingsItems
   const [open, setOpen] = useState(false)
 
   // Fecha o drawer ao navegar (no mobile)
@@ -186,7 +183,7 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
           <p className="px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Configurações</p>
         </div>
 
-        {visibleSettingsItems.map(item => (
+        {settingsItems.map(item => (
           <Link key={item.href} href={item.href}>
             <span className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
