@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = path.startsWith('/controle-interno-julia-docs-7f3c9a')
   const isApiRoute = path.startsWith('/api')
   const isSuspendedAccessRoute = path.startsWith('/acesso-suspenso')
-  const isPublic = isAuthRoute || isApiRoute || isSuspendedAccessRoute || path === '/'
+  const isPublic = isAuthRoute || isApiRoute || path === '/'
 
   if (isApiRoute && UNSAFE_METHODS.has(request.method) && !isAllowedOrigin(request)) {
     return withSecurityHeaders(NextResponse.json({ error: 'Origem nao permitida' }, { status: 403 }))
@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.redirect(url))
   }
 
-  if (user && !isPublic) {
+  if (user && (!isPublic || isSuspendedAccessRoute)) {
     const { data: platformUser } = await supabase
       .from('platform_users')
       .select('status')
@@ -87,8 +87,15 @@ export async function middleware(request: NextRequest) {
       .maybeSingle()
 
     if (platformUser?.status === 'banned') {
+      if (isSuspendedAccessRoute) return withSecurityHeaders(supabaseResponse)
       const url = request.nextUrl.clone()
       url.pathname = '/acesso-suspenso'
+      return withSecurityHeaders(NextResponse.redirect(url))
+    }
+
+    if (isSuspendedAccessRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
       return withSecurityHeaders(NextResponse.redirect(url))
     }
   }
