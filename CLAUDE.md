@@ -17,6 +17,8 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 - **Migrations aplicadas no Supabase:**
   - `0002_doctor_profile.sql` — perfil de médico atrelado ao usuário (`doctors.owner_user_id`, `doctors.cpf`, índice único por workspace, RLS `own_doctor_*`)
   - `0003_lme_status_emitida.sql` — inclui `'emitida'` na check constraint de `lmes.status`
+  - `0007_platform_admin_workspace_creation.sql` — restringe criação de ambulatórios a administradores da plataforma e cria RPC `create_workspace_as_admin`.
+  - `0008_platform_users_admin_dashboard.sql` — adiciona `platform_users`, papéis/status globais (`basic`, `platform_admin`, `active`, `banned`) e suporte ao painel administrativo.
 - **Ajustes recentes (2026-05-28 a 30):**
   - DPOC: "em uso de medicamento" virou SIM/NÃO explícito (radio, tri-estado — não força NÃO quando não respondido); caixas "Especificar" de poluentes ambientais/ocupacionais agora aparecem inline sob o item marcado.
   - Cadastro de paciente: campos obrigatórios reforçados (ver seção própria); **CNS voltou a ser opcional** (basta CPF) após ajuste 2026-05-29.
@@ -25,6 +27,13 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
   - **Responsivo mobile:** sidebar vira drawer com hambúrguer abaixo de `md` (768px), barra superior fixa no mobile (`pt-14`), grids de 2/3 colunas dos formulários empilham (`grid-cols-1 sm:grid-cols-2`), tabela de exames HAP rola horizontalmente. Layout passou de flex+`w-64` para sidebar `fixed` + `md:pl-64` no `<main>`.
   - **Dashboard em horário de Brasília:** Vercel roda em UTC — cabeçalho e queries de renovação/mês usam `Intl.DateTimeFormat('America/Sao_Paulo')`. Outras páginas que exibem datas (detalhes de LME, timeline) ainda usam o fuso do servidor — corrigir se aparecer reclamação.
   - **HAP — "Detalhar" do risco (seção 9):** `Text15` (caixa livre logo abaixo da linha tracejada) era duplicata equivocada de `outras_observacoes`; agora recebe `risco_detalhe` (cap 700 chars). `outras_observacoes` segue apenas em `Text34` (p3).
+- **Ajustes recentes (2026-06-30):**
+  - **Primeiro acesso com convite:** cadastro em `/login` exige código de convite de um ambulatório existente. O usuário entra direto no ambulatório pelo convite, sem precisar criar ou selecionar ambulatório no primeiro acesso.
+  - **Criação de ambulatório restrita:** usuários básicos não veem nem conseguem criar ambulatório. Apenas contas administradoras da plataforma podem criar novos ambulatórios.
+  - **Painel administrativo básico:** rota direta e não divulgada em `/controle-interno-julia-docs-7f3c9a`, protegida por permissão de admin. Lista usuários, permite banir/reativar contas não administradoras e mostra pacientes com filtro por ambulatório e busca por nome/CPF/CNS/telefone.
+  - **Admin sem atalho na sidebar:** o link do painel administrativo foi removido da dashboard/sidebar. A rota segue acessível apenas por URL direta para contas autorizadas.
+  - **Acesso suspenso:** usuário com `platform_users.status='banned'` é redirecionado para `/acesso-suspenso`. A página só abre para sessão autenticada suspensa; deslogados vão para `/login` e usuários ativos voltam ao `/dashboard`. A tela possui botão **Sair da conta**.
+  - **Manual mobile:** manual de uso atualizado em `docs/manual-usuario-julia-docs-mobile.pdf`, com prints reais e orientação voltada a usuários comuns do ambulatório Júlia.
 
 ## Modelo de usuários e workspaces
 
@@ -32,6 +41,18 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
 - **Médico = 1 por usuário por workspace**, identificado por `doctors.owner_user_id` (índice único `doctors_owner_per_workspace_unique`). LME só pode ser emitida com o perfil de médico do usuário logado.
 - **Pacientes / estabelecimentos** são compartilhados dentro do workspace (não por médico).
 - **Trocador de workspace** na sidebar; hub em `/configuracoes/workspace` (renomear, sair, listar membros, código de convite).
+- **Convite obrigatório no cadastro:** novos usuários devem informar um código de convite válido no cadastro. A API `/api/auth/signup-with-invite` cria a conta e vincula o usuário ao ambulatório convidante.
+- **Criação de ambulatório:** usuários básicos apenas entram em ambulatórios existentes via convite. Criação fica restrita a administradores globais via `isPlatformAdminEmail()`/`is_platform_admin()`.
+- **Administradores globais iniciais:** `drmatheusrosse@gmail.com` e `rossematheus@gmail.com` são tratados como admins da plataforma, com permissão para criar ambulatórios e acessar o painel administrativo.
+- **Status global do usuário:** `platform_users.status='banned'` suspende o acesso à plataforma. O middleware bloqueia rotas autenticadas e direciona para `/acesso-suspenso`.
+
+## Administração da plataforma
+
+- **Rota do painel:** `/controle-interno-julia-docs-7f3c9a`. Não há link visível na sidebar; acessar por URL direta.
+- **Proteção:** a página usa Supabase server client para identificar o usuário atual e service role apenas no server para consultar dados administrativos. Quem não é admin recebe `notFound()`.
+- **Usuários:** o painel lista contas do Auth, papel global, status, quantidade de ambulatórios, perfil médico preenchido, data de criação e último login.
+- **Banimento/reativação:** API `/api/controle-interno-julia-docs-7f3c9a/users/status` altera `platform_users.status`. Não permite banir a própria conta nem e-mails admin hardcoded.
+- **Pacientes por ambulatório:** o painel lista até 1000 pacientes, com filtro por ambulatório e busca textual por nome, CPF, CNS, telefone ou nome do ambulatório.
 
 ## Permissões por LME (criador vs. demais)
 
