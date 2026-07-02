@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import type { LmeStatus } from '@/lib/supabase/types'
+import { adicionarDiasIsoBrasilia } from '@/lib/utils/date'
 
 interface Props {
   lmeId: string
@@ -24,9 +25,7 @@ export function LmeStatusActions({ lmeId, currentStatus, statuses }: Props) {
     setLoading(true)
     const updateData: { status: LmeStatus; next_renewal_date?: string } = { status: newStatus as LmeStatus }
     if (newStatus === 'deferida') {
-      const renewalDate = new Date()
-      renewalDate.setDate(renewalDate.getDate() + 180)
-      updateData.next_renewal_date = renewalDate.toISOString().split('T')[0]
+      updateData.next_renewal_date = adicionarDiasIsoBrasilia(180)
     }
     const { error } = await supabase.from('lmes').update(updateData).eq('id', lmeId)
     setLoading(false)

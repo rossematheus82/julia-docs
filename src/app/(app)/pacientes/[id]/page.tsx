@@ -2,14 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import Link from 'next/link'
-import { format, differenceInYears, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Plus, FileText, Edit, Phone, Mail, MapPin, User } from 'lucide-react'
 import { DeletePatientButton } from './delete-patient-button'
 import { TimelineActions } from './timeline-actions'
 import { lmeCode } from '@/lib/lme-code'
+import { calcularIdade, formatarData } from '@/lib/utils/date'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -53,7 +52,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
     .neq('status', 'rascunho') // ignora LMEs em rascunho (legado)
     .order('created_at', { ascending: false }) as { data: LmeRow[] | null }
 
-  const age = patient.birth_date ? differenceInYears(new Date(), parseISO(patient.birth_date)) : null
+  const age = calcularIdade(patient.birth_date)
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -99,7 +98,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
               {patient.birth_date && (
                 <div className="flex justify-between">
                   <span className="text-gray-500">Nascimento</span>
-                  <span className="font-medium">{format(parseISO(patient.birth_date), 'dd/MM/yyyy')}</span>
+                  <span className="font-medium">{formatarData(patient.birth_date)}</span>
                 </div>
               )}
               {patient.sex && (
@@ -230,7 +229,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
                           <div className="p-3 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-xs text-gray-500 font-medium tabular-nums">
-                                {format(parseISO(lme.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                                {formatarData(lme.created_at)}
                               </span>
                               <span className="text-[10px] font-mono font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                                 {lmeCode({ id: lme.id, disease: lme.disease, createdAt: lme.created_at })}
@@ -252,7 +251,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
                             )}
                             {isMostRecent && lme.next_renewal_date && (
                               <p className="text-xs text-orange-600 mt-1">
-                                Renovar até {format(parseISO(lme.next_renewal_date), 'dd/MM/yyyy')}
+                                Renovar até {formatarData(lme.next_renewal_date)}
                               </p>
                             )}
                             <TimelineActions lmeId={lme.id} disease={lme.disease} showRenew />

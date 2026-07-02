@@ -2,11 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { differenceInYears, parseISO } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, User, FileText } from 'lucide-react'
 import { PacientesSearch } from '@/components/pacientes-search'
+import { calcularIdade } from '@/lib/utils/date'
 
 export default async function PacientesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient()
@@ -55,7 +55,7 @@ export default async function PacientesPage({ searchParams }: { searchParams: Pr
           </div>
         )}
         {patients?.map(p => {
-          const age = p.birth_date ? differenceInYears(new Date(), parseISO(p.birth_date)) : null
+          const age = calcularIdade(p.birth_date)
           return (
             <Link key={p.id} href={`/pacientes/${p.id}`}>
               <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer">

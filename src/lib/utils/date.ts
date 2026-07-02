@@ -1,49 +1,95 @@
-const TZ = 'America/Sao_Paulo'
+export const TZ_BRASILIA = 'America/Sao_Paulo'
 
-/** Formata Date ou string ISO para exibição: DD/MM/AAAA */
+function hojePartesBrasilia() {
+  const iso = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ_BRASILIA,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+  const [ano, mes, dia] = iso.split('-')
+  return { iso, ano, mes, dia }
+}
+
+function utcDateFromIsoDate(iso: string) {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  return new Date(Date.UTC(ano, mes - 1, dia))
+}
+
+/** Formata Date ou string ISO para exibicao: DD/MM/AAAA */
 export function formatarData(data: Date | string | null | undefined): string {
   if (!data) return ''
   if (typeof data === 'string') {
-    // ISO date string YYYY-MM-DD — parse directly to avoid UTC midnight shift
-    const m = data.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    // Data pura YYYY-MM-DD: nao converte para Date para evitar troca de dia por timezone.
+    const m = data.match(/^(\d{4})-(\d{2})-(\d{2})$/)
     if (m) return `${m[3]}/${m[2]}/${m[1]}`
   }
-  const d = typeof data === 'string' ? new Date(data) : data
-  if (isNaN(d.getTime())) return ''
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  return `${dia}/${mes}/${d.getFullYear()}`
-}
 
-/** Data atual formatada: DD/MM/AAAA — usa getDate/getMonth/getFullYear para evitar problemas de timezone */
-export function dataHoje(): string {
-  const d = new Date()
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  const ano = d.getFullYear()
-  return `${dia}/${mes}/${ano}`
-}
-
-/** Data + hora: DD/MM/AAAA HH:mm */
-export function formatarDataHora(data: Date | string | null | undefined): string {
-  if (!data) return ''
   const d = typeof data === 'string' ? new Date(data) : data
-  if (isNaN(d.getTime())) return ''
-  return d.toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', timeZone: TZ,
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: TZ_BRASILIA,
   })
 }
 
-/** Para o PDF — formato por extenso: "18 de maio de 2026" */
+/** Data atual em Brasilia: DD/MM/AAAA */
+export function dataHoje(): string {
+  const { dia, mes, ano } = hojePartesBrasilia()
+  return `${dia}/${mes}/${ano}`
+}
+
+/** Data atual em Brasilia: YYYY-MM-DD */
+export function hojeIsoBrasilia(): string {
+  return hojePartesBrasilia().iso
+}
+
+/** Soma dias a partir do calendario de Brasilia e retorna YYYY-MM-DD. */
+export function adicionarDiasIsoBrasilia(dias: number): string {
+  const base = utcDateFromIsoDate(hojeIsoBrasilia())
+  base.setUTCDate(base.getUTCDate() + dias)
+  return base.toISOString().slice(0, 10)
+}
+
+/** Diferenca em dias de calendario entre hoje em Brasilia e uma data YYYY-MM-DD. */
+export function diasAteDataIso(dataIso: string | null | undefined): number | null {
+  if (!dataIso || !/^\d{4}-\d{2}-\d{2}$/.test(dataIso)) return null
+  const alvo = utcDateFromIsoDate(dataIso)
+  const hoje = utcDateFromIsoDate(hojeIsoBrasilia())
+  return Math.round((alvo.getTime() - hoje.getTime()) / 86_400_000)
+}
+
+/** Data + hora em Brasilia: DD/MM/AAAA HH:mm */
+export function formatarDataHora(data: Date | string | null | undefined): string {
+  if (!data) return ''
+  const d = typeof data === 'string' ? new Date(data) : data
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: TZ_BRASILIA,
+  })
+}
+
+/** Para o PDF: formato por extenso, exemplo "18 de maio de 2026". */
 export function formatarDataExtenso(data: Date | string | null | undefined): string {
   if (!data) return ''
   const d = typeof data === 'string' ? new Date(data) : data
-  if (isNaN(d.getTime())) return ''
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: TZ })
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    timeZone: TZ_BRASILIA,
+  })
 }
 
-/** Converte DD/MM/AAAA para string ISO YYYY-MM-DD (para salvar no banco) */
+/** Converte DD/MM/AAAA para string ISO YYYY-MM-DD para salvar no banco. */
 export function parsarDataBr(dataStr: string): string | null {
   if (!dataStr) return null
   const parts = dataStr.split('/')
@@ -51,11 +97,11 @@ export function parsarDataBr(dataStr: string): string | null {
   const [dia, mes, ano] = parts
   if (!dia || !mes || !ano) return null
   const d = new Date(Number(ano), Number(mes) - 1, Number(dia))
-  if (isNaN(d.getTime())) return null
+  if (Number.isNaN(d.getTime())) return null
   return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
 }
 
-/** Converte YYYY-MM-DD para DD/MM/AAAA */
+/** Converte YYYY-MM-DD para DD/MM/AAAA. */
 export function isoParaBr(iso: string | null | undefined): string {
   if (!iso) return ''
   const [ano, mes, dia] = iso.split('-')
@@ -63,19 +109,20 @@ export function isoParaBr(iso: string | null | undefined): string {
   return `${dia}/${mes}/${ano}`
 }
 
-/** Calcula idade em anos completos a partir de YYYY-MM-DD ou ISO string */
+/** Calcula idade em anos completos a partir de YYYY-MM-DD. */
 export function calcularIdade(birthDate: string | null | undefined): number | null {
   if (!birthDate) return null
-  const hoje = new Date()
-  const nasc = new Date(birthDate)
-  if (isNaN(nasc.getTime())) return null
-  let age = hoje.getFullYear() - nasc.getFullYear()
-  const m = hoje.getMonth() - nasc.getMonth()
-  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) age--
+  const [anoNasc, mesNasc, diaNasc] = birthDate.split('-').map(Number)
+  if (!anoNasc || !mesNasc || !diaNasc) return null
+
+  const { ano, mes, dia } = hojePartesBrasilia()
+  let age = Number(ano) - anoNasc
+  const monthDiff = Number(mes) - mesNasc
+  if (monthDiff < 0 || (monthDiff === 0 && Number(dia) < diaNasc)) age--
   return age
 }
 
-/** Formata CPF com máscara: 000.000.000-00 */
+/** Formata CPF com mascara: 000.000.000-00 */
 export function formatarCPF(cpf: string | null | undefined): string {
   if (!cpf) return ''
   const digits = cpf.replace(/\D/g, '')
@@ -83,7 +130,7 @@ export function formatarCPF(cpf: string | null | undefined): string {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
 }
 
-/** Formata telefone com máscara: (00) 00000-0000 */
+/** Formata telefone com mascara: (00) 00000-0000 */
 export function formatarTelefone(tel: string | null | undefined): string {
   if (!tel) return ''
   const digits = tel.replace(/\D/g, '')

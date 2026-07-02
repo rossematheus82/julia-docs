@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { type SupportedDisease } from '@/lib/pdf/fill-specific'
 import { gerarProcessoCompleto } from '@/lib/pdf/merge-processo'
 import type { LmeCommonData } from '@/lib/schemas/lme-common'
-import { dataHoje, calcularIdade, formatarCPF, formatarTelefone } from '@/lib/utils/date'
+import { adicionarDiasIsoBrasilia, dataHoje, calcularIdade, formatarCPF, formatarTelefone } from '@/lib/utils/date'
 import { CIDS_PRINCIPAIS } from '@/lib/cid10'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { readJsonBody, UUID_RE, safeErrorMessage } from '@/lib/api/security'
@@ -313,12 +313,9 @@ export async function POST(request: NextRequest) {
       // Auto-set status=emitida e next_renewal_date apenas se for o criador da LME.
       // Outros médicos só baixam o documento original — não alteram o estado da LME alheia.
       if (lme.created_by_user_id === user.id) {
-        const hoje = new Date()
-        const renewal = new Date(hoje)
-        renewal.setDate(hoje.getDate() + 180)
         const { error: updateErr } = await supabase.from('lmes').update({
           status: 'emitida',
-          next_renewal_date: renewal.toISOString().split('T')[0],
+          next_renewal_date: adicionarDiasIsoBrasilia(180),
         }).eq('id', lmeId).eq('workspace_id', memberData.workspace_id)
         if (updateErr) logError('[pdf/generate] status update failed', updateErr, { lmeId, workspaceId: memberData.workspace_id })
       }

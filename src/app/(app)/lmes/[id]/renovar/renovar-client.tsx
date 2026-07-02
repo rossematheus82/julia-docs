@@ -9,13 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, RefreshCw, Calendar, User, Stethoscope, Building2, FileText, FilePlus2 } from 'lucide-react'
 import Link from 'next/link'
-import { format, parseISO, addDays } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
 import type { Lme, Disease, RequestType, Json } from '@/lib/supabase/types'
 import { LmeFormEditor } from '@/components/lme/lme-form-editor'
 import { getCidsByDoenca } from '@/lib/cid10'
 import { cn } from '@/lib/utils'
+import { adicionarDiasIsoBrasilia, formatarData } from '@/lib/utils/date'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -55,7 +54,7 @@ export function RenovarClient({
   const [loading, setLoading] = useState(false)
 
   const patient = (lme.patient_snapshot ?? {}) as { full_name?: string; cpf?: string }
-  const nextRenewal = addDays(new Date(), 180)
+  const nextRenewal = adicionarDiasIsoBrasilia(180)
 
   // Quando "renovar só LME", trate como request_type='renovacao' (esconde formulário específico).
   // Quando "renovar processo completo", trate como 'inicial' (mostra formulário específico).
@@ -194,9 +193,9 @@ export function RenovarClient({
           <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Calendar className="h-4 w-4" /> Próx. renovação</CardTitle></CardHeader>
           <CardContent>
             <p className="font-medium text-sm text-orange-600">
-              {format(nextRenewal, 'dd/MM/yyyy', { locale: ptBR })}
+              {formatarData(nextRenewal)}
             </p>
-            <p className="text-xs text-gray-500">LME original: {format(parseISO(lme.created_at), 'dd/MM/yyyy')}</p>
+            <p className="text-xs text-gray-500">LME original: {formatarData(lme.created_at)}</p>
           </CardContent>
         </Card>
       </div>

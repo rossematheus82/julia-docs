@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Bell, FileText, Users, Clock, RefreshCw } from 'lucide-react'
-import { differenceInDays, parseISO } from 'date-fns'
+import { diasAteDataIso } from '@/lib/utils/date'
 
 // Vercel roda em UTC — datas/queries são calculadas em horário de Brasília (America/Sao_Paulo).
 const TZ = 'America/Sao_Paulo'
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {(renewalAlerts as unknown as RenewalLme[])?.map(lme => {
-              const days = differenceInDays(parseISO(lme.next_renewal_date!), todayMidnightUTC)
+              const days = diasAteDataIso(lme.next_renewal_date) ?? 0
               const patient = lme.patient
               const doctor = lme.doctor
               return (

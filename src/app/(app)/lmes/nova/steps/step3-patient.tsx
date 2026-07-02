@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Plus, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { differenceInYears, parseISO } from 'date-fns'
+import { calcularIdade } from '@/lib/utils/date'
 
 interface Props {
   data: WizardData
@@ -63,7 +63,7 @@ export function Step3Patient({ data, update, patients }: Props) {
       <div className="space-y-1 max-h-72 overflow-y-auto">
         {filtered.map(p => {
           const selected = data.patient_id === p.id
-          const age = p.birth_date ? differenceInYears(new Date(), parseISO(p.birth_date)) : null
+          const age = calcularIdade(p.birth_date)
           return (
             <button
               key={p.id}

@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { sanitizeWinAnsi } from './sanitize'
+import { dataHoje } from '@/lib/utils/date'
 
 export interface TermoAdesaoData {
   paciente_nome: string
@@ -12,14 +13,6 @@ const BLACK = rgb(0, 0, 0)
 const GRAY  = rgb(0.4, 0.4, 0.4)
 const DARK  = rgb(0.15, 0.15, 0.15)
 const LIGHT = rgb(0.94, 0.94, 0.94)
-
-function dataHoje(): string {
-  const d = new Date()
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  const ano = d.getFullYear()
-  return `${dia}/${mes}/${ano}`
-}
 
 export async function fillTermoAdesao(dataRaw: TermoAdesaoData): Promise<Uint8Array> {
   // Higieniza campos dinâmicos para a fonte WinAnsi (evita "cannot encode").

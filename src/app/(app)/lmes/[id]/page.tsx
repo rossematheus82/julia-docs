@@ -2,16 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import Link from 'next/link'
-import { format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { differenceInDays, parseISO as parseISO2 } from 'date-fns'
 import { ArrowLeft, FileText, Download, User, Stethoscope, Building2, Calendar, PencilLine, Info } from 'lucide-react'
 import { LmePdfButtons } from './lme-pdf-buttons'
 import { DeleteLmeButton } from './delete-lme-button'
 import { lmeCode } from '@/lib/lme-code'
+import { diasAteDataIso, formatarData, formatarDataHora } from '@/lib/utils/date'
 
 const STATUS_COLORS: Record<string, string> = {
   rascunho: 'bg-gray-100 text-gray-700',
@@ -67,9 +65,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
     ? undefined
     : HAP_SITUACOES_KEYS.every(k => situacoesData[k] != null)
 
-  const renewalDays = lme.next_renewal_date
-    ? differenceInDays(parseISO2(lme.next_renewal_date), new Date())
-    : null
+  const renewalDays = diasAteDataIso(lme.next_renewal_date)
   const renewalDot = renewalDays == null ? null
     : renewalDays < 30 ? '🔴' : renewalDays < 60 ? '🟡' : '🟢'
 
@@ -94,7 +90,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
               <span className="font-mono font-medium text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded text-xs">
                 {lmeCode({ id: lme.id, disease: lme.disease, createdAt: lme.created_at })}
               </span>
-              <span>{REQUEST_TYPE_LABELS[lme.request_type]} · Criada em {format(parseISO(lme.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span>
+              <span>{REQUEST_TYPE_LABELS[lme.request_type]} · Criada em {formatarDataHora(lme.created_at)}</span>
             </p>
           </div>
         </div>
@@ -154,7 +150,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
               {patient?.birth_date && (
                 <div className="flex justify-between">
                   <span className="text-gray-500">Nascimento</span>
-                  <span className="font-medium">{format(parseISO(patient.birth_date), 'dd/MM/yyyy')}</span>
+                  <span className="font-medium">{formatarData(patient.birth_date)}</span>
                 </div>
               )}
             </CardContent>
@@ -238,7 +234,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
                 <div className="flex justify-between">
                   <span className="text-gray-500">Data de renovação</span>
                   <span className="font-medium text-orange-600">
-                    {format(parseISO(lme.next_renewal_date), 'dd/MM/yyyy')}
+                    {formatarData(lme.next_renewal_date)}
                   </span>
                 </div>
               )}
@@ -272,7 +268,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
                 <>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500">Renovar em</span>
-                    <span className="font-medium">{format(parseISO(lme.next_renewal_date), 'dd/MM/yyyy')}</span>
+                    <span className="font-medium">{formatarData(lme.next_renewal_date)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500">Prazo</span>
@@ -317,11 +313,11 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
             <CardContent className="space-y-2 text-xs text-gray-500">
               <div className="flex justify-between">
                 <span>Criada</span>
-                <span>{format(parseISO(lme.created_at), 'dd/MM/yyyy HH:mm')}</span>
+                <span>{formatarDataHora(lme.created_at)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Atualizada</span>
-                <span>{format(parseISO(lme.updated_at), 'dd/MM/yyyy HH:mm')}</span>
+                <span>{formatarDataHora(lme.updated_at)}</span>
               </div>
             </CardContent>
           </Card>

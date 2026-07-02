@@ -14,6 +14,7 @@ import type { Disease, RequestType } from '@/lib/supabase/types'
 import { MEDICAMENTOS, getMedicamentosByDoenca, getSugestaoPosologia } from '@/lib/medicamentos'
 import { CIDS_PRINCIPAIS } from '@/lib/cid10'
 import { AnamneseImproveDialog } from '@/components/lme/anamnese-improve-dialog'
+import { calcularIdade } from '@/lib/utils/date'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -52,12 +53,7 @@ function quantidadesFromTupla(t: [string, string, string, string, string, string
 }
 
 function calcIdadeAnos(birthDate: string): number {
-  const hoje = new Date()
-  const nasc = new Date(birthDate)
-  let age = hoje.getFullYear() - nasc.getFullYear()
-  const m = hoje.getMonth() - nasc.getMonth()
-  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) age--
-  return age
+  return calcularIdade(birthDate) ?? 0
 }
 
 // ─── Field label with dot indicator ──────────────────────────────────────────

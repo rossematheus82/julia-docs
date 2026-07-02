@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Ban, CheckCircle2, Loader2, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatarData, formatarDataHora } from '@/lib/utils/date'
 
 export interface AdminUserRow {
   id: string
@@ -262,5 +263,5 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients }:
 
 function formatDate(value: string | null) {
   if (!value) return '-'
-  return new Date(value).toLocaleDateString('pt-BR')
+  return value.includes('T') ? formatarDataHora(value) : formatarData(value)
 }

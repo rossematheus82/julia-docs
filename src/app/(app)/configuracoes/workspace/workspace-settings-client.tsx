@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Settings, Copy, RefreshCw, Users, Check, Crown, Building2, Plus, LogOut, ArrowRightLeft, UserMinus } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatarData } from '@/lib/utils/date'
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -169,7 +170,7 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
                       {isActive && <Badge className="text-xs bg-blue-100 text-blue-700 border-0">Ativo</Badge>}
                       <Badge variant="outline" className="text-xs">{ROLE_LABELS[w.role] ?? w.role}</Badge>
                     </div>
-                    <p className="text-xs text-gray-400">Entrou em {new Date(w.joined_at).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-xs text-gray-400">Entrou em {formatarData(w.joined_at)}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -276,7 +277,7 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
                       {member.crm && <span className="text-xs font-normal text-gray-400 ml-1.5">CRM {member.crm}</span>}
                     </p>
                     <p className="text-xs text-gray-400">
-                      Entrou em {new Date(member.joined_at).toLocaleDateString('pt-BR')}
+                      Entrou em {formatarData(member.joined_at)}
                     </p>
                   </div>
                 </div>

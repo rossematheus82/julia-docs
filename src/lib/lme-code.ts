@@ -1,6 +1,8 @@
+import { formatarData } from '@/lib/utils/date'
+
 /**
- * Código legível e estável para identificar uma LME, derivado dos próprios
- * dados (não precisa de coluna no banco). Formato: DOENÇA-DDMMAA-XXXX
+ * Codigo legivel e estavel para identificar uma LME, derivado dos proprios
+ * dados. Formato: DOENCA-DDMMAA-XXXX. A data usa calendario de Brasilia.
  * Ex.: DPC-220526-7909
  */
 const DISEASE_ABBR: Record<string, string> = {
@@ -15,13 +17,8 @@ export function lmeCode(opts: { id: string; disease?: string | null; createdAt?:
 
   let dataParte = ''
   if (opts.createdAt) {
-    const dt = new Date(opts.createdAt)
-    if (!Number.isNaN(dt.getTime())) {
-      const dd = String(dt.getDate()).padStart(2, '0')
-      const mm = String(dt.getMonth() + 1).padStart(2, '0')
-      const aa = String(dt.getFullYear()).slice(-2)
-      dataParte = `${dd}${mm}${aa}`
-    }
+    const [dd, mm, yyyy] = formatarData(opts.createdAt).split('/')
+    if (dd && mm && yyyy) dataParte = `${dd}${mm}${yyyy.slice(-2)}`
   }
 
   const idParte = opts.id.replace(/-/g, '').slice(0, 4).toUpperCase()

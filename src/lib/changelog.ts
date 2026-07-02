@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-07-01',
+    itens: [
+      { tipo: 'correcao', texto: 'Datas, horários, idades e prazos de renovação agora usam o horário de Brasília de forma consistente nas telas e PDFs.' },
+    ],
+  },
+  {
     data: '2026-06-24',
     itens: [
       { tipo: 'melhoria', texto: 'Na criação de uma nova LME, o item 12 (tratamento prévio ou atual) não vem mais marcado como “Não”: agora é obrigatório confirmar SIM ou NÃO antes de continuar.' },

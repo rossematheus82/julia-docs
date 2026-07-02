@@ -2,8 +2,8 @@
 
 import type { WizardData, PatientItem, DoctorItem, FacilityItem } from '../lme-wizard'
 import { CheckCircle, Sparkles, User, Stethoscope, Building2, FileText, AlertCircle } from 'lucide-react'
-import { differenceInYears, parseISO } from 'date-fns'
 import { validateLme } from '../validate'
+import { calcularIdade } from '@/lib/utils/date'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -27,7 +27,7 @@ export function Step6Review({ data, patients, doctors, facilities }: Props) {
   const doctor = doctors.find(d => d.id === data.doctor_id)
   const facility = facilities.find(f => f.id === data.facility_id)
 
-  const age = patient?.birth_date ? differenceInYears(new Date(), parseISO(patient.birth_date)) : null
+  const age = calcularIdade(patient?.birth_date)
 
   const lmeFieldCount = Object.keys(data.lme_data).length
   const specificFieldCount = Object.keys(data.specific_form_data).length

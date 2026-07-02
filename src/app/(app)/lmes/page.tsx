@@ -3,12 +3,12 @@ import { getActiveWorkspace } from '@/lib/active-workspace'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { LmeStatus, Disease } from '@/lib/supabase/types'
-import { differenceInDays, parseISO } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, FileText } from 'lucide-react'
 import { LmesSearch } from '@/components/lmes-search'
 import { lmeCode } from '@/lib/lme-code'
+import { diasAteDataIso } from '@/lib/utils/date'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -21,7 +21,8 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
 
 function RenewalBadge({ dateStr }: { dateStr: string | null }) {
   if (!dateStr) return null
-  const days = differenceInDays(parseISO(dateStr), new Date())
+  const days = diasAteDataIso(dateStr)
+  if (days == null) return null
   const color = days < 30 ? 'bg-red-100 text-red-700' : days < 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
   const dot = days < 30 ? '🔴' : days < 60 ? '🟡' : '🟢'
   return (

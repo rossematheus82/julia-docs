@@ -1,5 +1,6 @@
 import { PDFDocument, PDFFont, StandardFonts, rgb } from 'pdf-lib'
 import { sanitizeWinAnsi } from './sanitize'
+import { calcularIdade, dataHoje } from '@/lib/utils/date'
 
 export interface PrescricaoData {
   estabelecimento_nome: string
@@ -26,24 +27,6 @@ export interface PrescricaoData {
 const BLACK = rgb(0, 0, 0)
 const GRAY  = rgb(0.4, 0.4, 0.4)
 const LIGHT = rgb(0.92, 0.92, 0.92)
-
-function calcIdade(birthDate: string): number | null {
-  if (!birthDate) return null
-  const hoje = new Date()
-  const nasc = new Date(birthDate)
-  let age = hoje.getFullYear() - nasc.getFullYear()
-  const m = hoje.getMonth() - nasc.getMonth()
-  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) age--
-  return age
-}
-
-function dataHoje(): string {
-  const d = new Date()
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  const ano = d.getFullYear()
-  return `${dia}/${mes}/${ano}`
-}
 
 function dataExtenso(data?: string): string {
   const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
@@ -152,7 +135,7 @@ export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> 
   y -= 16
 
   // ── Dados do paciente ─────────────────────────────────────────────────────
-  const idade = data.paciente_birth_date ? calcIdade(data.paciente_birth_date) : null
+  const idade = data.paciente_birth_date ? calcularIdade(data.paciente_birth_date) : null
   const nascStr = isoToBr(data.paciente_birth_date)
 
   textLine(page, 'Paciente:', margin, y, bold, 10)
