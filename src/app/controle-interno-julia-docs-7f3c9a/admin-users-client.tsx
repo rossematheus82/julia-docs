@@ -552,6 +552,7 @@ function formatAction(action: string) {
     workspace_switch: 'Troca de ambulatorio',
     workspace_leave: 'Saida de ambulatorio',
     workspace_member_remove: 'Membro removido',
+    workspace_member_role_update: 'Permissao de membro alterada',
     feedback_send: 'Feedback enviado',
   }
   return labels[action] ?? action

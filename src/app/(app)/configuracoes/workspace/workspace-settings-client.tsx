@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Settings, Copy, RefreshCw, Users, Check, Crown, Building2, Plus, LogOut, ArrowRightLeft, UserMinus } from 'lucide-react'
+import { Settings, Copy, RefreshCw, Users, Check, Crown, Building2, Plus, LogOut, ArrowRightLeft, UserMinus, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData } from '@/lib/utils/date'
 
@@ -45,8 +45,10 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
   const [switching, setSwitching] = useState<string | null>(null)
   const [leaving, setLeaving] = useState<string | null>(null)
   const [removing, setRemoving] = useState<string | null>(null)
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null)
 
   const isOwner = activeWorkspace.role === 'owner'
+  const canManageMembers = activeWorkspace.role === 'owner' || activeWorkspace.role === 'admin'
 
   async function removeMember(member: Member) {
     const label = member.name ?? `Membro ${member.id.slice(0, 8)}`
@@ -63,6 +65,29 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
       return
     }
     toast.success(`${label} removido.`)
+    router.refresh()
+  }
+
+  async function updateMemberRole(member: Member, role: 'admin' | 'member') {
+    const label = member.name ?? `Membro ${member.id.slice(0, 8)}`
+    const action = role === 'admin' ? 'tornar administrador' : 'remover permissao de administrador de'
+    if (!confirm(`Deseja ${action} ${label}?`)) return
+
+    setUpdatingRole(member.id)
+    const res = await fetch('/api/workspaces/members/role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberId: member.id, role }),
+    })
+    const body = await res.json().catch(() => ({}))
+    setUpdatingRole(null)
+
+    if (!res.ok) {
+      toast.error(body.error ?? 'Erro ao alterar permissao')
+      return
+    }
+
+    toast.success(role === 'admin' ? `${label} agora e admin do ambulatorio.` : `${label} voltou para membro comum.`)
     router.refresh()
   }
 
@@ -260,13 +285,19 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
             const baseName = member.name ?? (isSelf ? 'Você' : `Membro ${member.id.slice(0, 8)}`)
             const displayName = member.name && isSelf ? `${member.name} (você)` : baseName
             const initial = member.name ? member.name.trim().charAt(0).toUpperCase() : 'M'
-            const canRemove = isOwner && member.role !== 'owner' && !isSelf
+            const canRemove = canManageMembers && !isSelf && (
+              (isOwner && member.role !== 'owner') ||
+              (activeWorkspace.role === 'admin' && member.role === 'member')
+            )
+            const canChangeRole = isOwner && member.role !== 'owner' && !isSelf
             return (
               <div key={member.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                     {member.role === 'owner' ? (
                       <Crown className="h-3.5 w-3.5 text-blue-600" />
+                    ) : member.role === 'admin' ? (
+                      <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
                     ) : (
                       <span className="text-xs font-medium text-blue-600">{initial}</span>
                     )}
@@ -285,6 +316,20 @@ export function WorkspaceSettingsClient({ activeWorkspace, myWorkspaces, members
                   <Badge variant="outline" className="text-xs">
                     {ROLE_LABELS[member.role] ?? member.role}
                   </Badge>
+                  {canChangeRole && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5"
+                      onClick={() => updateMemberRole(member, member.role === 'admin' ? 'member' : 'admin')}
+                      disabled={updatingRole === member.id}
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      {updatingRole === member.id
+                        ? 'Salvando...'
+                        : member.role === 'admin' ? 'Tornar membro' : 'Tornar admin'}
+                    </Button>
+                  )}
                   {canRemove && (
                     <Button
                       variant="outline"

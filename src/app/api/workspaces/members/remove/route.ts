@@ -49,6 +49,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão para remover membros.' }, { status: 403 })
   }
 
+  if (requester.role === 'admin' && target.role !== 'member') {
+    return NextResponse.json({ error: 'Administradores so podem remover membros comuns.' }, { status: 403 })
+  }
+
   const { error } = await supabase.from('workspace_members').delete().eq('id', target.id)
   if (error) {
     logError('[workspaces/members/remove]', error, { memberId: target.id, workspaceId: target.workspace_id })

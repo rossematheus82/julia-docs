@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-07-04',
     itens: [
+      { tipo: 'melhoria', texto: 'Proprietarios de ambulatorio agora podem tornar residentes administradores do ambulatorio e rebaixar novamente quando necessario.' },
       { tipo: 'melhoria', texto: 'Excluir paciente agora remove o cadastro dos fluxos normais, mas preserva o registro no banco para histórico e auditoria.' },
       { tipo: 'melhoria', texto: 'Novo cadastro agora exige confirmação de ciência sobre privacidade e uso de dados antes de criar a conta.' },
       { tipo: 'melhoria', texto: 'Sessões autenticadas agora são encerradas automaticamente após período de inatividade, com aviso antes do logout.' },

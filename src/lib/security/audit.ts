@@ -12,6 +12,7 @@ type AuditAction =
   | 'workspace_switch'
   | 'workspace_leave'
   | 'workspace_member_remove'
+  | 'workspace_member_role_update'
   | 'feedback_send'
 
 interface AuditEvent {
