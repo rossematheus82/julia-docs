@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, User, FileText } from 'lucide-react'
 import { PacientesSearch } from '@/components/pacientes-search'
-import { calcularIdade } from '@/lib/utils/date'
+import { calcularIdade, formatarData } from '@/lib/utils/date'
+import { documentoPacienteMascarado } from '@/lib/utils/privacy'
 
 export default async function PacientesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient()
@@ -22,7 +23,7 @@ export default async function PacientesPage({ searchParams }: { searchParams: Pr
 
   let query = supabase
     .from('patients')
-    .select('id, full_name, social_name, birth_date, cpf, phone, sex, created_at')
+    .select('id, full_name, social_name, birth_date, cpf, cns, phone, sex, created_at')
     .eq('workspace_id', memberData.workspace_id)
     .order('full_name', { ascending: true })
 
@@ -56,6 +57,7 @@ export default async function PacientesPage({ searchParams }: { searchParams: Pr
         )}
         {patients?.map(p => {
           const age = calcularIdade(p.birth_date)
+          const documentLabel = documentoPacienteMascarado(p)
           return (
             <Link key={p.id} href={`/pacientes/${p.id}`}>
               <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer">
@@ -68,8 +70,9 @@ export default async function PacientesPage({ searchParams }: { searchParams: Pr
                   <div>
                     <p className="font-medium text-gray-900">{p.full_name}</p>
                     <p className="text-sm text-gray-500">
-                      {age !== null ? `${age} anos` : ''}{age !== null && p.cpf ? ' · ' : ''}
-                      {p.cpf ? `CPF: ${p.cpf}` : ''}
+                      {p.birth_date ? `Nascimento: ${formatarData(p.birth_date)}` : ''}
+                      {age !== null ? ` · ${age} anos` : ''}
+                      {documentLabel ? ` · ${documentLabel}` : ''}
                       {p.phone ? ` · ${p.phone}` : ''}
                     </p>
                   </div>

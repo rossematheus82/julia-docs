@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Plus, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { calcularIdade } from '@/lib/utils/date'
+import { calcularIdade, formatarData } from '@/lib/utils/date'
+import { documentoPacienteMascarado } from '@/lib/utils/privacy'
 
 interface Props {
   data: WizardData
@@ -64,6 +65,7 @@ export function Step3Patient({ data, update, patients }: Props) {
         {filtered.map(p => {
           const selected = data.patient_id === p.id
           const age = calcularIdade(p.birth_date)
+          const documentLabel = documentoPacienteMascarado(p)
           return (
             <button
               key={p.id}
@@ -85,9 +87,9 @@ export function Step3Patient({ data, update, patients }: Props) {
                   {p.full_name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {age !== null ? `${age} anos` : ''}
-                  {age !== null && p.cpf ? ' · ' : ''}
-                  {p.cpf ? `CPF ${p.cpf}` : ''}
+                  {p.birth_date ? `Nascimento: ${formatarData(p.birth_date)}` : ''}
+                  {age !== null ? ` · ${age} anos` : ''}
+                  {documentLabel ? ` · ${documentLabel}` : ''}
                 </p>
               </div>
             </button>

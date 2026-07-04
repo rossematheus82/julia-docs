@@ -15,6 +15,7 @@ import {
 import { Ban, CheckCircle2, Loader2, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
+import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
 
 export interface AdminUserRow {
   id: string
@@ -238,8 +239,8 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients }:
                       {patient.workspaceName}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{patient.cpf ?? '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{patient.cns ?? '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{patient.cpf ? mascararCpf(patient.cpf) : '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{patient.cns ? mascararCns(patient.cns) : '-'}</td>
                   <td className="px-4 py-3 text-gray-600">{formatDate(patient.birthDate)}</td>
                   <td className="px-4 py-3 text-gray-600">{patient.phone ?? '-'}</td>
                   <td className="px-4 py-3 text-gray-600">{formatDate(patient.updatedAt)}</td>

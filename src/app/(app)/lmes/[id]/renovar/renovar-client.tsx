@@ -15,6 +15,7 @@ import { LmeFormEditor } from '@/components/lme/lme-form-editor'
 import { getCidsByDoenca } from '@/lib/cid10'
 import { cn } from '@/lib/utils'
 import { adicionarDiasIsoBrasilia, formatarData } from '@/lib/utils/date'
+import { documentoPacienteMascarado } from '@/lib/utils/privacy'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -53,7 +54,8 @@ export function RenovarClient({
   )
   const [loading, setLoading] = useState(false)
 
-  const patient = (lme.patient_snapshot ?? {}) as { full_name?: string; cpf?: string }
+  const patient = (lme.patient_snapshot ?? {}) as { full_name?: string; cpf?: string; cns?: string }
+  const documentLabel = documentoPacienteMascarado(patient)
   const nextRenewal = adicionarDiasIsoBrasilia(180)
 
   // Quando "renovar só LME", trate como request_type='renovacao' (esconde formulário específico).
@@ -177,7 +179,7 @@ export function RenovarClient({
           <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><User className="h-4 w-4" /> Paciente</CardTitle></CardHeader>
           <CardContent>
             <p className="font-medium text-sm">{patient?.full_name}</p>
-            {patient?.cpf && <p className="text-xs text-gray-500">CPF: {patient.cpf}</p>}
+            {documentLabel && <p className="text-xs text-gray-500">{documentLabel}</p>}
           </CardContent>
         </Card>
 
