@@ -80,18 +80,22 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
 
-    const { data: workspaceId, error: joinErr } = await supabase
-      .rpc('join_workspace_by_invite', { invite: code })
+    const res = await fetch('/api/workspaces/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inviteCode: code }),
+    })
+    const body = await res.json().catch(() => ({}))
 
-    if (joinErr || !workspaceId) {
-      toast.error('Codigo de convite invalido ou nao encontrado.')
+    if (!res.ok || !body.workspaceId) {
+      toast.error(body.error ?? 'Codigo de convite invalido ou nao encontrado.')
       setLoading(false)
       return
     }
 
     await fetch('/api/workspaces/switch', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workspaceId }),
+      body: JSON.stringify({ workspaceId: body.workspaceId }),
     })
 
     toast.success('Ambulatorio selecionado.')

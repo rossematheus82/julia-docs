@@ -325,6 +325,20 @@ export async function POST(request: NextRequest) {
           next_renewal_date: adicionarDiasIsoBrasilia(180),
         }).eq('id', lmeId).eq('workspace_id', memberData.workspace_id)
         if (updateErr) logError('[pdf/generate] status update failed', updateErr, { lmeId, workspaceId: memberData.workspace_id })
+        if (!updateErr && lme.status !== 'emitida') {
+          await auditLog(supabase, {
+            workspaceId: memberData.workspace_id,
+            userId: user.id,
+            action: 'lme_status_update',
+            resourceType: 'lme',
+            resourceId: lmeId,
+            metadata: {
+              previous_status: lme.status,
+              new_status: 'emitida',
+              source: 'pdf_generate',
+            },
+          })
+        }
       }
 
       const diseaseLabel = ({ asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP' } as Record<string, string>)[lme.disease] ?? lme.disease

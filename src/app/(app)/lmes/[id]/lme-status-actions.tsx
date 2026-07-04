@@ -1,12 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import type { LmeStatus } from '@/lib/supabase/types'
-import { adicionarDiasIsoBrasilia } from '@/lib/utils/date'
 
 interface Props {
   lmeId: string
@@ -15,7 +12,6 @@ interface Props {
 }
 
 export function LmeStatusActions({ lmeId, currentStatus, statuses }: Props) {
-  const supabase = createClient()
   const router = useRouter()
   const [status, setStatus] = useState(currentStatus)
   const [loading, setLoading] = useState(false)
@@ -23,13 +19,17 @@ export function LmeStatusActions({ lmeId, currentStatus, statuses }: Props) {
   async function changeStatus(newStatus: string | null) {
     if (!newStatus || newStatus === status) return
     setLoading(true)
-    const updateData: { status: LmeStatus; next_renewal_date?: string } = { status: newStatus as LmeStatus }
-    if (newStatus === 'deferida') {
-      updateData.next_renewal_date = adicionarDiasIsoBrasilia(180)
-    }
-    const { error } = await supabase.from('lmes').update(updateData).eq('id', lmeId)
+    const res = await fetch(`/api/lmes/${lmeId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
     setLoading(false)
-    if (error) { toast.error('Erro ao atualizar status'); return }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      toast.error(body.error ?? 'Erro ao atualizar status')
+      return
+    }
     setStatus(newStatus as string)
     toast.success('Status atualizado!')
     router.refresh()

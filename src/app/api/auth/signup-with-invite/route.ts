@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { auditLog } from '@/lib/security/audit'
 
 function supabaseAdmin() {
   return createClient(
@@ -79,6 +80,18 @@ export async function POST(request: NextRequest) {
     await admin.auth.admin.deleteUser(signup.user.id).catch(() => undefined)
     return NextResponse.json({ error: 'Erro ao vincular usuario ao ambulatorio.' }, { status: 500 })
   }
+
+  await auditLog(admin, {
+    workspaceId: workspace.id,
+    userId: signup.user.id,
+    action: 'workspace_join',
+    resourceType: 'workspace',
+    resourceId: workspace.id,
+    metadata: {
+      source: 'signup_with_invite',
+      email,
+    },
+  })
 
   return NextResponse.json({
     ok: true,
