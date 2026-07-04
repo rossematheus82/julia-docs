@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-07-04',
+    itens: [
+      { tipo: 'correcao', texto: 'Exclusão de pacientes ficou mais restrita: usuário comum só remove paciente que cadastrou, enquanto administradores do ambulatório mantêm controle do ambulatório.' },
+    ],
+  },
+  {
     data: '2026-07-01',
     itens: [
       { tipo: 'correcao', texto: 'Datas, horários, idades e prazos de renovação agora usam o horário de Brasília de forma consistente nas telas e PDFs.' },

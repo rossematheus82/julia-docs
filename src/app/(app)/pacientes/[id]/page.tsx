@@ -9,6 +9,7 @@ import { DeletePatientButton } from './delete-patient-button'
 import { TimelineActions } from './timeline-actions'
 import { lmeCode } from '@/lib/lme-code'
 import { calcularIdade, formatarData } from '@/lib/utils/date'
+import { isPlatformAdminEmail } from '@/lib/platform-admin'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -53,6 +54,11 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
     .order('created_at', { ascending: false }) as { data: LmeRow[] | null }
 
   const age = calcularIdade(patient.birth_date)
+  const canDeletePatient =
+    patient.created_by_user_id === user.id ||
+    active.role === 'owner' ||
+    active.role === 'admin' ||
+    isPlatformAdminEmail(user.email)
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -69,7 +75,9 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
           </div>
         </div>
         <div className="flex gap-2">
-          <DeletePatientButton patientId={id} patientName={patient.full_name} lmeCount={lmes?.length ?? 0} />
+          {canDeletePatient && (
+            <DeletePatientButton patientId={id} patientName={patient.full_name} lmeCount={lmes?.length ?? 0} />
+          )}
           <Link href={`/pacientes/${id}/editar`}>
             <Button variant="outline" className="gap-2"><Edit className="h-4 w-4" /> Editar</Button>
           </Link>

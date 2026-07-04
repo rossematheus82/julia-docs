@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { auditLog } from '@/lib/security/audit'
 import { logError } from '@/lib/security/logger'
+import { isPlatformAdminEmail } from '@/lib/platform-admin'
 
 export async function DELETE(
   _req: NextRequest,
@@ -20,12 +21,25 @@ export async function DELETE(
 
   const { data: patient } = await supabase
     .from('patients')
-    .select('id')
+    .select('id, created_by_user_id')
     .eq('id', id)
     .eq('workspace_id', memberData.workspace_id)
     .single()
 
   if (!patient) return NextResponse.json({ error: 'Paciente não encontrado' }, { status: 404 })
+
+  const canDelete =
+    patient.created_by_user_id === user.id ||
+    active.role === 'owner' ||
+    active.role === 'admin' ||
+    isPlatformAdminEmail(user.email)
+
+  if (!canDelete) {
+    return NextResponse.json(
+      { error: 'Apenas quem cadastrou o paciente ou um administrador do ambulatório pode excluí-lo.' },
+      { status: 403 },
+    )
+  }
 
   // Bloqueia exclusão se houver LMEs vinculadas (preserva histórico / evita violar FK)
   const { count } = await supabase
