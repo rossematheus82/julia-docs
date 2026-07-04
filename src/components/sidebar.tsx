@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Users, FileText, Plus, Settings,
-  LogOut, Building2, ChevronRight, Sparkles, ChevronsUpDown, Check, Stethoscope, Menu, X, Heart,
+  LogOut, Building2, ChevronRight, Sparkles, ChevronsUpDown, Check, Stethoscope, Menu, X, Heart, ShieldCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,7 @@ const settingsItems = [
   { href: '/configuracoes/estabelecimentos', icon: Building2, label: 'Estabelecimentos' },
   { href: '/configuracoes/workspace', icon: Settings, label: 'Ambulatório' },
   { href: '/novidades', icon: Sparkles, label: 'Novidades' },
+  { href: '/privacidade', icon: ShieldCheck, label: 'Privacidade' },
   { href: '/sobre', icon: Heart, label: 'Sobre' },
 ]
 

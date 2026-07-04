@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Ban, CheckCircle2, Loader2, Search, Stethoscope, UsersRound } from 'lucide-react'
+import { Activity, Ban, CheckCircle2, Loader2, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
 import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
@@ -48,14 +48,25 @@ export interface AdminPatientRow {
   updatedAt: string | null
 }
 
+export interface AdminAuditRow {
+  id: number
+  workspaceName: string
+  userEmail: string
+  action: string
+  resourceType: string | null
+  resourceId: string | null
+  createdAt: string | null
+}
+
 interface Props {
   users: AdminUserRow[]
   currentUserId: string
   workspaces: AdminWorkspaceRow[]
   patients: AdminPatientRow[]
+  auditLogs: AdminAuditRow[]
 }
 
-export function AdminUsersClient({ users, currentUserId, workspaces, patients }: Props) {
+export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [workspaceFilter, setWorkspaceFilter] = useState('all')
@@ -258,6 +269,60 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients }:
           </table>
         </div>
       </section>
+
+      <section className="rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700 text-white">
+              <Activity className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Auditoria recente</h2>
+              <p className="text-sm text-gray-500">{auditLogs.length} evento(s) mais recente(s)</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[920px] text-sm">
+            <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Data</th>
+                <th className="px-4 py-3 font-medium">Usuario</th>
+                <th className="px-4 py-3 font-medium">Ambulatorio</th>
+                <th className="px-4 py-3 font-medium">Acao</th>
+                <th className="px-4 py-3 font-medium">Recurso</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {auditLogs.map(log => (
+                <tr key={log.id} className="hover:bg-gray-50/70">
+                  <td className="px-4 py-3 text-gray-600">{formatDate(log.createdAt)}</td>
+                  <td className="px-4 py-3">
+                    <div className="max-w-[260px] truncate text-gray-900" title={log.userEmail}>{log.userEmail}</div>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{log.workspaceName}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant="outline">{formatAction(log.action)}</Badge>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    <div>{formatResourceType(log.resourceType)}</div>
+                    {log.resourceId && <div className="font-mono text-[11px] text-gray-400">{log.resourceId}</div>}
+                  </td>
+                </tr>
+              ))}
+
+              {auditLogs.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
+                    Nenhum evento de auditoria encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   )
 }
@@ -265,4 +330,40 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients }:
 function formatDate(value: string | null) {
   if (!value) return '-'
   return value.includes('T') ? formatarDataHora(value) : formatarData(value)
+}
+
+function formatAction(action: string) {
+  const labels: Record<string, string> = {
+    ai_extract: 'IA extracao',
+    ai_improve: 'IA melhoria',
+    patient_delete: 'Paciente excluido',
+    patients_insert: 'Paciente criado',
+    patients_update: 'Paciente editado',
+    patients_delete: 'Paciente excluido',
+    lme_delete: 'LME excluida',
+    lmes_insert: 'LME criada',
+    lmes_update: 'LME editada',
+    lmes_delete: 'LME excluida',
+    pdf_generate: 'PDF gerado',
+    workspace_switch: 'Troca de ambulatorio',
+    workspace_leave: 'Saida de ambulatorio',
+    workspace_member_remove: 'Membro removido',
+    feedback_send: 'Feedback enviado',
+  }
+  return labels[action] ?? action
+}
+
+function formatResourceType(value: string | null) {
+  const labels: Record<string, string> = {
+    patient: 'Paciente',
+    patients: 'Paciente',
+    lme: 'LME',
+    lmes: 'LME',
+    doctors: 'Medico',
+    health_facilities: 'Estabelecimento',
+    workspace_members: 'Membro',
+    workspaces: 'Ambulatorio',
+  }
+  if (!value) return '-'
+  return labels[value] ?? value
 }

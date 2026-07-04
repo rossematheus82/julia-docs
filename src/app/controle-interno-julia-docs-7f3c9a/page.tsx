@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isPlatformAdminEmail } from '@/lib/platform-admin'
 import {
   AdminUsersClient,
+  type AdminAuditRow,
   type AdminPatientRow,
   type AdminUserRow,
   type AdminWorkspaceRow,
@@ -45,6 +46,7 @@ export default async function AdminPage() {
     { data: doctors },
     { data: workspaces },
     { data: patients },
+    { data: auditLogs },
   ] = await Promise.all([
     admin.from('platform_users').select('user_id, email, role, status').in('user_id', userIds),
     admin.from('workspace_members').select('user_id, workspace_id').in('user_id', userIds),
@@ -55,6 +57,11 @@ export default async function AdminPage() {
       .select('id, workspace_id, full_name, cpf, cns, birth_date, phone, created_at, updated_at')
       .order('full_name')
       .limit(1000),
+    admin
+      .from('audit_logs')
+      .select('id, workspace_id, user_id, action, resource_type, resource_id, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
   ])
 
   const platformByUser = new Map((platformRows ?? []).map(row => [row.user_id as string, row]))
@@ -107,6 +114,16 @@ export default async function AdminPage() {
     createdAt: patient.created_at,
     updatedAt: patient.updated_at,
   }))
+  const emailByUserId = new Map(rows.map(row => [row.id, row.email]))
+  const auditRows: AdminAuditRow[] = (auditLogs ?? []).map(log => ({
+    id: log.id,
+    workspaceName: log.workspace_id ? workspaceNameById.get(log.workspace_id) ?? 'Ambulatorio removido' : 'Plataforma',
+    userEmail: log.user_id ? emailByUserId.get(log.user_id) ?? log.user_id : 'Sistema',
+    action: log.action,
+    resourceType: log.resource_type,
+    resourceId: log.resource_id,
+    createdAt: log.created_at,
+  }))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,6 +151,7 @@ export default async function AdminPage() {
           currentUserId={user.id}
           workspaces={workspaceRows}
           patients={patientRows}
+          auditLogs={auditRows}
         />
       </main>
     </div>

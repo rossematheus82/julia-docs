@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-07-04',
     itens: [
+      { tipo: 'novo', texto: 'Página de Privacidade adicionada e painel administrativo agora mostra auditoria recente de ações sensíveis da plataforma.' },
       { tipo: 'melhoria', texto: 'CPF e CNS agora aparecem mascarados em listas e telas de seleção, mantendo a busca por documento e a conferência completa apenas nos detalhes e PDFs.' },
       { tipo: 'correcao', texto: 'Exclusão de pacientes ficou mais restrita: usuário comum só remove paciente que cadastrou, enquanto administradores do ambulatório mantêm controle do ambulatório.' },
     ],
