@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Activity, Ban, CheckCircle2, Loader2, Search, Stethoscope, UsersRound } from 'lucide-react'
+import { Activity, Ban, CheckCircle2, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
 import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
@@ -71,6 +71,7 @@ interface Props {
 export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [restoringPatientId, setRestoringPatientId] = useState<string | null>(null)
   const [workspaceFilter, setWorkspaceFilter] = useState('all')
   const [patientStatusFilter, setPatientStatusFilter] = useState('active')
   const [patientSearch, setPatientSearch] = useState('')
@@ -119,6 +120,28 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
     }
 
     toast.success(status === 'banned' ? 'Usuario banido.' : 'Usuario reativado.')
+    router.refresh()
+  }
+
+  async function restorePatient(patient: AdminPatientRow) {
+    if (!patient.deletedAt) return
+    if (!confirm(`Restaurar ${patient.fullName}?`)) return
+
+    setRestoringPatientId(patient.id)
+    const res = await fetch('/api/controle-interno-julia-docs-7f3c9a/patients/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patientId: patient.id }),
+    })
+    const body = await res.json().catch(() => ({}))
+    setRestoringPatientId(null)
+
+    if (!res.ok) {
+      toast.error(body.error ?? 'Erro ao restaurar paciente')
+      return
+    }
+
+    toast.success('Paciente restaurado.')
     router.refresh()
   }
 
@@ -244,7 +267,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[920px] text-sm">
+          <table className="w-full min-w-[1040px] text-sm">
             <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Paciente</th>
@@ -255,39 +278,53 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                 <th className="px-4 py-3 font-medium">Telefone</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Atualizado em</th>
+                <th className="px-4 py-3 text-right font-medium">Acoes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredPatients.map(patient => (
-                <tr key={patient.id} className="hover:bg-gray-50/70">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{patient.fullName}</div>
-                    <div className="font-mono text-[11px] text-gray-400">{patient.id}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <Stethoscope className="h-4 w-4 text-cyan-600" />
-                      {patient.workspaceName}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{patient.cpf ? mascararCpf(patient.cpf) : '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{patient.cns ? mascararCns(patient.cns) : '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{formatDate(patient.birthDate)}</td>
-                  <td className="px-4 py-3 text-gray-600">{patient.phone ?? '-'}</td>
-                  <td className="px-4 py-3">
-                    {patient.deletedAt ? (
-                      <Badge className="bg-amber-100 text-amber-700">Excluido</Badge>
-                    ) : (
-                      <Badge className="bg-green-100 text-green-700">Ativo</Badge>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{formatDate(patient.updatedAt)}</td>
-                </tr>
-              ))}
+              {filteredPatients.map(patient => {
+                const restoring = restoringPatientId === patient.id
+                return (
+                  <tr key={patient.id} className="hover:bg-gray-50/70">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{patient.fullName}</div>
+                      <div className="font-mono text-[11px] text-gray-400">{patient.id}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <Stethoscope className="h-4 w-4 text-cyan-600" />
+                        {patient.workspaceName}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{patient.cpf ? mascararCpf(patient.cpf) : '-'}</td>
+                    <td className="px-4 py-3 text-gray-600">{patient.cns ? mascararCns(patient.cns) : '-'}</td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(patient.birthDate)}</td>
+                    <td className="px-4 py-3 text-gray-600">{patient.phone ?? '-'}</td>
+                    <td className="px-4 py-3">
+                      {patient.deletedAt ? (
+                        <Badge className="bg-amber-100 text-amber-700">Excluido</Badge>
+                      ) : (
+                        <Badge className="bg-green-100 text-green-700">Ativo</Badge>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(patient.updatedAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      {patient.deletedAt ? (
+                        <Button size="sm" variant="outline" className="gap-1.5" disabled={restoring} onClick={() => restorePatient(patient)}>
+                          {restoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                          Restaurar
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
 
               {filteredPatients.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-500">
                     Nenhum paciente encontrado para os filtros selecionados.
                   </td>
                 </tr>
@@ -364,6 +401,7 @@ function formatAction(action: string) {
     ai_extract: 'IA extracao',
     ai_improve: 'IA melhoria',
     patient_delete: 'Paciente excluido',
+    patient_restore: 'Paciente restaurado',
     patients_insert: 'Paciente criado',
     patients_update: 'Paciente editado',
     patients_delete: 'Paciente excluido',
