@@ -6,14 +6,14 @@ export default function SobrePage() {
       <div className="flex items-center gap-3">
         <Heart className="h-6 w-6 text-rose-500" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sobre o Julia Docs</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Sobre o Júlia Docs</h1>
           <p className="text-gray-500 text-sm">Feito por quem usa, para quem usa</p>
         </div>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 text-gray-700 leading-relaxed">
         <p>
-          O Julia Docs nasceu dentro da residência médica, da necessidade real do dia a dia:
+          O Júlia Docs nasceu dentro da residência médica, da necessidade real do dia a dia:
           preencher as LMEs do CEAF/SES-MG de um jeito mais rápido, organizado e menos sujeito a erros.
         </p>
         <p>

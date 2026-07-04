@@ -11,7 +11,7 @@ export default function PrivacidadePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Privacidade e proteção de dados</h1>
-            <p className="text-sm text-gray-500">Como o Julia Docs trata informações de pacientes e usuários</p>
+            <p className="text-sm text-gray-500">Como o Júlia Docs trata informações de pacientes e usuários</p>
           </div>
         </div>
 
@@ -20,7 +20,7 @@ export default function PrivacidadePage() {
             <div>
               <h2 className="text-base font-semibold text-gray-900">Finalidade</h2>
               <p className="mt-1">
-                O Julia Docs organiza dados necessários para cadastro de pacientes, preenchimento de LMEs,
+                O Júlia Docs organiza dados necessários para cadastro de pacientes, preenchimento de LMEs,
                 geração de documentos do CEAF/SES-MG e acompanhamento assistencial dentro do ambulatório.
               </p>
             </div>
@@ -62,7 +62,7 @@ export default function PrivacidadePage() {
               <h2 className="text-base font-semibold text-gray-900">Contato</h2>
               <p className="mt-1">
                 Para solicitar correção, revisão de acesso ou tratar de privacidade, entre em contato com o
-                administrador responsável pelo Julia Docs.
+                administrador responsável pelo Júlia Docs.
               </p>
             </div>
           </div>

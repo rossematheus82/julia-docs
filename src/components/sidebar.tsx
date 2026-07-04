@@ -113,7 +113,7 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
         {/* Header com workspace switcher */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-3">
-            <img src="/logo-icon.svg" alt="Julia Docs" className="h-9 w-9 flex-shrink-0" />
+            <img src="/logo-icon.svg" alt="Júlia Docs" className="h-9 w-9 flex-shrink-0" />
             <span className="text-base leading-none">
               <span className="font-bold text-blue-900">Júlia</span>
               <span className="font-normal text-blue-900">Docs</span>

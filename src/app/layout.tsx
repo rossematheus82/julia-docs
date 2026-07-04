@@ -6,7 +6,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Julia Docs — LMEs CEAF/SES-MG',
+  title: 'Júlia Docs — LMEs CEAF/SES-MG',
   description: 'Plataforma de automação de LMEs para Pneumologia',
 }
 

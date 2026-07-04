@@ -134,7 +134,7 @@ export default async function AdminPage() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Julia Docs</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Admin Júlia Docs</h1>
               <p className="text-sm text-gray-500">Controle basico de usuarios da plataforma</p>
             </div>
           </div>

@@ -8,7 +8,7 @@ export default function AcessoSuspensoPage() {
         <AlertTriangle className="mx-auto h-10 w-10 text-amber-600" />
         <h1 className="mt-4 text-xl font-semibold text-gray-900">Acesso suspenso</h1>
         <p className="mt-2 text-sm text-gray-500">
-          Seu acesso ao Julia Docs foi suspenso. Entre em contato com o administrador da plataforma para avaliar a reativacao da sua conta.
+          Seu acesso ao Júlia Docs foi suspenso. Entre em contato com o administrador da plataforma para avaliar a reativacao da sua conta.
         </p>
         <LogoutButton />
       </div>

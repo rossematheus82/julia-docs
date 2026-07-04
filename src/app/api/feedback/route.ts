@@ -6,7 +6,7 @@ import { auditLog } from '@/lib/security/audit'
 import { logError } from '@/lib/security/logger'
 
 const FEEDBACK_TO = process.env.FEEDBACK_TO ?? 'drmatheusrosse@gmail.com'
-const FEEDBACK_FROM = process.env.FEEDBACK_FROM ?? 'Julia Docs <onboarding@resend.dev>'
+const FEEDBACK_FROM = process.env.FEEDBACK_FROM ?? 'Júlia Docs <onboarding@resend.dev>'
 
 const TIPO_LABELS: Record<string, string> = {
   sugestao: 'Sugestão',
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   const label = TIPO_LABELS[tipo]
   const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
   const html = `
-    <h2>${label} — Julia Docs</h2>
+    <h2>${label} — Júlia Docs</h2>
     <p><strong>De:</strong> ${escapeHtml(user.email ?? '(sem e-mail)')}</p>
     ${contato ? `<p><strong>Contato informado:</strong> ${escapeHtml(contato)}</p>` : ''}
     <p><strong>Quando:</strong> ${quando}</p>
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         from: FEEDBACK_FROM,
         to: [FEEDBACK_TO],
         ...(replyTo ? { reply_to: replyTo } : {}),
-        subject: `[Julia Docs] ${label} de ${user.email ?? 'usuário'}`,
+        subject: `[Júlia Docs] ${label} de ${user.email ?? 'usuário'}`,
         html,
       }),
     })
