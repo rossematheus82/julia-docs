@@ -18,6 +18,13 @@ function diagnosticoDoCid(cid: string): string {
   return CIDS_PRINCIPAIS.find(c => c.codigo === code)?.descricao ?? ''
 }
 
+const PDF_SECURITY_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'X-Content-Type-Options': 'nosniff',
+}
+
 function str(v: unknown): string {
   return v != null ? String(v) : ''
 }
@@ -205,7 +212,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="LME_${diseaseLabel}_${lmeId}_${dd}-${mm}-${aa}.pdf"`,
-          'Cache-Control': 'no-store, max-age=0',
+          ...PDF_SECURITY_HEADERS,
         },
       })
     }
@@ -337,7 +344,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="Processo_${diseaseLabel}_${lmeId}_${dateName}.pdf"`,
-          'Cache-Control': 'no-store, max-age=0',
+          ...PDF_SECURITY_HEADERS,
         },
       })
     }

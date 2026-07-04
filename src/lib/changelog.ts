@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-07-04',
     itens: [
+      { tipo: 'melhoria', texto: 'Downloads de PDFs foram reforcados com cabecalhos para evitar cache e armazenamento intermediario indevido.' },
       { tipo: 'melhoria', texto: 'Painel administrativo agora permite exportar dados administrativos de um paciente em JSON para atender solicitações e auditorias.' },
       { tipo: 'melhoria', texto: 'Proprietarios de ambulatorio agora podem tornar residentes administradores do ambulatorio e rebaixar novamente quando necessario.' },
       { tipo: 'melhoria', texto: 'Excluir paciente agora remove o cadastro dos fluxos normais, mas preserva o registro no banco para histórico e auditoria.' },

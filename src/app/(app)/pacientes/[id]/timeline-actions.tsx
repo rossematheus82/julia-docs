@@ -26,6 +26,7 @@ export function TimelineActions({ lmeId, disease, showRenew }: Props) {
     try {
       const res = await fetch('/api/pdf/generate', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lmeId, type: 'all' }),
       })
