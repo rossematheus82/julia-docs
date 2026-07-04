@@ -52,7 +52,9 @@ export interface AdminPatientRow {
 
 export interface AdminAuditRow {
   id: number
+  workspaceId: string | null
   workspaceName: string
+  userId: string | null
   userEmail: string
   action: string
   resourceType: string | null
@@ -75,6 +77,12 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
   const [workspaceFilter, setWorkspaceFilter] = useState('all')
   const [patientStatusFilter, setPatientStatusFilter] = useState('active')
   const [patientSearch, setPatientSearch] = useState('')
+  const [auditWorkspaceFilter, setAuditWorkspaceFilter] = useState('all')
+  const [auditUserFilter, setAuditUserFilter] = useState('all')
+  const [auditActionFilter, setAuditActionFilter] = useState('all')
+  const [auditStartDate, setAuditStartDate] = useState('')
+  const [auditEndDate, setAuditEndDate] = useState('')
+  const [auditSearch, setAuditSearch] = useState('')
 
   const filteredPatients = useMemo(() => {
     const term = patientSearch.trim().toLowerCase()
@@ -100,6 +108,61 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
       return haystack.includes(term)
     })
   }, [patients, patientSearch, patientStatusFilter, workspaceFilter])
+
+  const auditUsers = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const log of auditLogs) {
+      if (log.userId) byId.set(log.userId, log.userEmail)
+    }
+    return Array.from(byId, ([id, email]) => ({ id, email })).sort((a, b) => a.email.localeCompare(b.email))
+  }, [auditLogs])
+
+  const auditActions = useMemo(() => {
+    return Array.from(new Set(auditLogs.map(log => log.action))).sort()
+  }, [auditLogs])
+
+  const filteredAuditLogs = useMemo(() => {
+    const term = auditSearch.trim().toLowerCase()
+    const start = auditStartDate ? new Date(`${auditStartDate}T00:00:00`).getTime() : null
+    const end = auditEndDate ? new Date(`${auditEndDate}T23:59:59.999`).getTime() : null
+
+    return auditLogs.filter(log => {
+      if (auditWorkspaceFilter === 'platform' && log.workspaceId !== null) return false
+      if (auditWorkspaceFilter !== 'all' && auditWorkspaceFilter !== 'platform' && log.workspaceId !== auditWorkspaceFilter) return false
+      if (auditUserFilter !== 'all' && log.userId !== auditUserFilter) return false
+      if (auditActionFilter !== 'all' && log.action !== auditActionFilter) return false
+
+      if (log.createdAt) {
+        const createdAt = new Date(log.createdAt).getTime()
+        if (start !== null && createdAt < start) return false
+        if (end !== null && createdAt > end) return false
+      } else if (start !== null || end !== null) {
+        return false
+      }
+
+      if (!term) return true
+      const haystack = [
+        log.userEmail,
+        log.workspaceName,
+        log.action,
+        formatAction(log.action),
+        log.resourceType,
+        formatResourceType(log.resourceType),
+        log.resourceId,
+      ].filter(Boolean).join(' ').toLowerCase()
+
+      return haystack.includes(term)
+    })
+  }, [auditActionFilter, auditEndDate, auditLogs, auditSearch, auditStartDate, auditUserFilter, auditWorkspaceFilter])
+
+  function clearAuditFilters() {
+    setAuditWorkspaceFilter('all')
+    setAuditUserFilter('all')
+    setAuditActionFilter('all')
+    setAuditStartDate('')
+    setAuditEndDate('')
+    setAuditSearch('')
+  }
 
   async function setStatus(user: AdminUserRow, status: 'active' | 'banned') {
     const label = status === 'banned' ? 'banir' : 'reativar'
@@ -336,13 +399,89 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
 
       <section className="rounded-lg border border-gray-200 bg-white">
         <div className="border-b border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700 text-white">
-              <Activity className="h-5 w-5" />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700 text-white">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Auditoria recente</h2>
+                <p className="text-sm text-gray-500">
+                  {filteredAuditLogs.length} de {auditLogs.length} evento(s) exibido(s)
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Auditoria recente</h2>
-              <p className="text-sm text-gray-500">{auditLogs.length} evento(s) mais recente(s)</p>
+
+            <div className="grid gap-2 lg:grid-cols-[minmax(180px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_140px_140px_minmax(220px,1fr)_auto]">
+              <Select value={auditWorkspaceFilter} onValueChange={setAuditWorkspaceFilter}>
+                <SelectTrigger aria-label="Filtrar auditoria por ambulatorio">
+                  <SelectValue placeholder="Ambulatorio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os ambulatorios</SelectItem>
+                  <SelectItem value="platform">Plataforma</SelectItem>
+                  {workspaces.map(workspace => (
+                    <SelectItem key={workspace.id} value={workspace.id}>
+                      {workspace.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={auditUserFilter} onValueChange={setAuditUserFilter}>
+                <SelectTrigger aria-label="Filtrar auditoria por usuario">
+                  <SelectValue placeholder="Usuario" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os usuarios</SelectItem>
+                  {auditUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={auditActionFilter} onValueChange={setAuditActionFilter}>
+                <SelectTrigger aria-label="Filtrar auditoria por acao">
+                  <SelectValue placeholder="Acao" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as acoes</SelectItem>
+                  {auditActions.map(action => (
+                    <SelectItem key={action} value={action}>
+                      {formatAction(action)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Input
+                type="date"
+                value={auditStartDate}
+                onChange={event => setAuditStartDate(event.target.value)}
+                aria-label="Data inicial da auditoria"
+              />
+              <Input
+                type="date"
+                value={auditEndDate}
+                onChange={event => setAuditEndDate(event.target.value)}
+                aria-label="Data final da auditoria"
+              />
+
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={auditSearch}
+                  onChange={event => setAuditSearch(event.target.value)}
+                  placeholder="Buscar recurso ou acao"
+                  className="pl-8"
+                />
+              </div>
+
+              <Button variant="outline" onClick={clearAuditFilters}>
+                Limpar
+              </Button>
             </div>
           </div>
         </div>
@@ -359,7 +498,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {auditLogs.map(log => (
+              {filteredAuditLogs.map(log => (
                 <tr key={log.id} className="hover:bg-gray-50/70">
                   <td className="px-4 py-3 text-gray-600">{formatDate(log.createdAt)}</td>
                   <td className="px-4 py-3">
@@ -376,10 +515,10 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                 </tr>
               ))}
 
-              {auditLogs.length === 0 && (
+              {filteredAuditLogs.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
-                    Nenhum evento de auditoria encontrado.
+                    Nenhum evento de auditoria encontrado para os filtros selecionados.
                   </td>
                 </tr>
               )}

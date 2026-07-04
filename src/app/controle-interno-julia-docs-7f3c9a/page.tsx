@@ -61,7 +61,7 @@ export default async function AdminPage() {
       .from('audit_logs')
       .select('id, workspace_id, user_id, action, resource_type, resource_id, created_at')
       .order('created_at', { ascending: false })
-      .limit(100),
+      .limit(500),
   ])
 
   const platformByUser = new Map((platformRows ?? []).map(row => [row.user_id as string, row]))
@@ -119,7 +119,9 @@ export default async function AdminPage() {
   const emailByUserId = new Map(rows.map(row => [row.id, row.email]))
   const auditRows: AdminAuditRow[] = (auditLogs ?? []).map(log => ({
     id: log.id,
+    workspaceId: log.workspace_id,
     workspaceName: log.workspace_id ? workspaceNameById.get(log.workspace_id) ?? 'Ambulatorio removido' : 'Plataforma',
+    userId: log.user_id,
     userEmail: log.user_id ? emailByUserId.get(log.user_id) ?? log.user_id : 'Sistema',
     action: log.action,
     resourceType: log.resource_type,
