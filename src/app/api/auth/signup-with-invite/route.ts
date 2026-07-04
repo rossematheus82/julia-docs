@@ -22,14 +22,19 @@ export async function POST(request: NextRequest) {
     email?: string
     password?: string
     inviteCode?: string
+    acceptedPrivacy?: boolean
   } | null
 
   const email = body?.email?.trim().toLowerCase()
   const password = body?.password ?? ''
   const inviteCode = body?.inviteCode?.trim().toUpperCase()
+  const acceptedPrivacy = body?.acceptedPrivacy === true
 
   if (!email || !password || password.length < 6 || !inviteCode) {
     return NextResponse.json({ error: 'Informe email, senha e codigo de convite.' }, { status: 400 })
+  }
+  if (!acceptedPrivacy) {
+    return NextResponse.json({ error: 'Confirme a ciencia sobre privacidade e uso de dados.' }, { status: 400 })
   }
 
   const admin = supabaseAdmin()

@@ -6,8 +6,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Mail, CheckCircle } from 'lucide-react'
+import Link from 'next/link'
 
 type Tab = 'login' | 'signup' | 'forgot'
 
@@ -20,6 +22,7 @@ export default function LoginPage() {
   const [forgotSent, setForgotSent] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
   const [signupInviteCode, setSignupInviteCode] = useState('')
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [forgotEmail, setForgotEmail] = useState('')
 
   function set(field: 'email' | 'password', value: string) {
@@ -41,6 +44,10 @@ export default function LoginPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (!acceptedPrivacy) {
+      toast.error('Confirme a ciência sobre privacidade e uso de dados para criar a conta.')
+      return
+    }
     setLoading(true)
     const res = await fetch('/api/auth/signup-with-invite', {
       method: 'POST',
@@ -49,6 +56,7 @@ export default function LoginPage() {
         email: form.email,
         password: form.password,
         inviteCode: signupInviteCode,
+        acceptedPrivacy,
       }),
     })
     const body = await res.json().catch(() => ({}))
@@ -238,6 +246,21 @@ export default function LoginPage() {
                     className="uppercase tracking-widest font-mono"
                   />
                 </div>
+                <label className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs leading-5 text-gray-600">
+                  <Checkbox
+                    checked={acceptedPrivacy}
+                    onCheckedChange={value => setAcceptedPrivacy(value === true)}
+                    aria-label="Confirmar ciência de privacidade"
+                    className="mt-0.5"
+                  />
+                  <span>
+                    Confirmo que li e estou ciente do uso de dados pessoais e de saúde conforme a{' '}
+                    <Link href="/privacidade" target="_blank" className="font-medium text-blue-700 hover:underline">
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </span>
+                </label>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Criando conta...' : 'Criar conta'}
                 </Button>

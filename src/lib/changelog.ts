@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-07-04',
     itens: [
+      { tipo: 'melhoria', texto: 'Novo cadastro agora exige confirmação de ciência sobre privacidade e uso de dados antes de criar a conta.' },
       { tipo: 'melhoria', texto: 'Sessões autenticadas agora são encerradas automaticamente após período de inatividade, com aviso antes do logout.' },
       { tipo: 'novo', texto: 'Página de Privacidade adicionada para explicar o uso e a proteção dos dados na plataforma.' },
       { tipo: 'melhoria', texto: 'CPF e CNS agora aparecem mascarados em listas e telas de seleção, mantendo a busca por documento e a conferência completa apenas nos detalhes e PDFs.' },
