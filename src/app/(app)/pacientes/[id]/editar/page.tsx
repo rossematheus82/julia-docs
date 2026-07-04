@@ -35,7 +35,7 @@ export default function EditarPacientePage() {
 
   useEffect(() => {
     async function load() {
-      const { data: patient } = await supabase.from('patients').select('*').eq('id', id).single()
+      const { data: patient } = await supabase.from('patients').select('*').eq('id', id).is('deleted_at', null).single()
       if (!patient) { router.push('/pacientes'); return }
       reset({
         full_name: patient.full_name,

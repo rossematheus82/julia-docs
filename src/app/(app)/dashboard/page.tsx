@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       .select('id, created_at')
       .eq('workspace_id', workspaceId)
       .gte('created_at', monthStartBR),
-    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('workspace_id', workspaceId).is('deleted_at', null),
     supabase.from('lmes').select('*', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
   ])
 

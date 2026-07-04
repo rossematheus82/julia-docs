@@ -25,6 +25,7 @@ export default async function PacientesPage({ searchParams }: { searchParams: Pr
     .from('patients')
     .select('id, full_name, social_name, birth_date, cpf, cns, phone, sex, created_at')
     .eq('workspace_id', memberData.workspace_id)
+    .is('deleted_at', null)
     .order('full_name', { ascending: true })
 
   if (q) {

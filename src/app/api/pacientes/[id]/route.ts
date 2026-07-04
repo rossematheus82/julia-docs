@@ -21,7 +21,7 @@ export async function DELETE(
 
   const { data: patient } = await supabase
     .from('patients')
-    .select('id, created_by_user_id')
+    .select('id, created_by_user_id, deleted_at')
     .eq('id', id)
     .eq('workspace_id', memberData.workspace_id)
     .single()
@@ -41,23 +41,16 @@ export async function DELETE(
     )
   }
 
-  // Bloqueia exclusão se houver LMEs vinculadas (preserva histórico / evita violar FK)
-  const { count } = await supabase
-    .from('lmes')
-    .select('id', { count: 'exact', head: true })
-    .eq('patient_id', id)
-    .eq('workspace_id', memberData.workspace_id)
-
-  if ((count ?? 0) > 0) {
-    return NextResponse.json(
-      { error: `Paciente possui ${count} LME(s) vinculada(s). Exclua-as antes de remover o paciente.` },
-      { status: 400 },
-    )
+  if (patient.deleted_at) {
+    return NextResponse.json({ ok: true })
   }
 
   const { error } = await supabase
     .from('patients')
-    .delete()
+    .update({
+      deleted_at: new Date().toISOString(),
+      deleted_by_user_id: user.id,
+    })
     .eq('id', id)
     .eq('workspace_id', memberData.workspace_id)
 

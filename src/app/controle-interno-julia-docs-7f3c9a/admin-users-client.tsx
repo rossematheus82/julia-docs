@@ -46,6 +46,8 @@ export interface AdminPatientRow {
   phone: string | null
   createdAt: string | null
   updatedAt: string | null
+  deletedAt: string | null
+  deletedByUserId: string | null
 }
 
 export interface AdminAuditRow {
@@ -70,6 +72,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [workspaceFilter, setWorkspaceFilter] = useState('all')
+  const [patientStatusFilter, setPatientStatusFilter] = useState('active')
   const [patientSearch, setPatientSearch] = useState('')
 
   const filteredPatients = useMemo(() => {
@@ -78,6 +81,11 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
     return patients.filter(patient => {
       const matchesWorkspace = workspaceFilter === 'all' || patient.workspaceId === workspaceFilter
       if (!matchesWorkspace) return false
+      const matchesStatus =
+        patientStatusFilter === 'all' ||
+        (patientStatusFilter === 'active' && !patient.deletedAt) ||
+        (patientStatusFilter === 'deleted' && Boolean(patient.deletedAt))
+      if (!matchesStatus) return false
       if (!term) return true
 
       const haystack = [
@@ -90,7 +98,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
 
       return haystack.includes(term)
     })
-  }, [patients, patientSearch, workspaceFilter])
+  }, [patients, patientSearch, patientStatusFilter, workspaceFilter])
 
   async function setStatus(user: AdminUserRow, status: 'active' | 'banned') {
     const label = status === 'banned' ? 'banir' : 'reativar'
@@ -196,7 +204,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
               </div>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-[minmax(220px,280px)_minmax(220px,280px)]">
+            <div className="grid gap-2 sm:grid-cols-[minmax(190px,240px)_minmax(160px,200px)_minmax(220px,280px)]">
               <Select value={workspaceFilter} onValueChange={setWorkspaceFilter}>
                 <SelectTrigger aria-label="Filtrar por ambulatorio">
                   <SelectValue placeholder="Ambulatorio" />
@@ -208,6 +216,17 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                       {workspace.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={patientStatusFilter} onValueChange={setPatientStatusFilter}>
+                <SelectTrigger aria-label="Filtrar por status">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="deleted">Excluidos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -234,6 +253,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                 <th className="px-4 py-3 font-medium">CNS</th>
                 <th className="px-4 py-3 font-medium">Nascimento</th>
                 <th className="px-4 py-3 font-medium">Telefone</th>
+                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Atualizado em</th>
               </tr>
             </thead>
@@ -254,13 +274,20 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                   <td className="px-4 py-3 text-gray-600">{patient.cns ? mascararCns(patient.cns) : '-'}</td>
                   <td className="px-4 py-3 text-gray-600">{formatDate(patient.birthDate)}</td>
                   <td className="px-4 py-3 text-gray-600">{patient.phone ?? '-'}</td>
+                  <td className="px-4 py-3">
+                    {patient.deletedAt ? (
+                      <Badge className="bg-amber-100 text-amber-700">Excluido</Badge>
+                    ) : (
+                      <Badge className="bg-green-100 text-green-700">Ativo</Badge>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{formatDate(patient.updatedAt)}</td>
                 </tr>
               ))}
 
               {filteredPatients.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
                     Nenhum paciente encontrado para os filtros selecionados.
                   </td>
                 </tr>

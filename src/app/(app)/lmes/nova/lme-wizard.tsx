@@ -55,11 +55,14 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
   const supabase = createClient()
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
+  const initialPatientId = defaultPatientId && patients.some(patient => patient.id === defaultPatientId)
+    ? defaultPatientId
+    : null
 
   const [data, setData] = useState<WizardData>({
     disease: null,
     request_type: null,
-    patient_id: defaultPatientId ?? null,
+    patient_id: initialPatientId,
     // Médico do usuário logado é fixo (auto-selecionado) — não dá pra escolher outro
     doctor_id: doctors[0]?.id ?? null,
     facility_id: null,

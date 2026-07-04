@@ -95,10 +95,13 @@ export interface Database {
           internal_notes: string | null
           last_seen_by_user_id: string | null
           last_seen_at: string | null
+          deleted_at: string | null
+          deleted_by_user_id: string | null
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['patients']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: Omit<Database['public']['Tables']['patients']['Row'], 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'deleted_by_user_id'>
+          & Partial<Pick<Database['public']['Tables']['patients']['Row'], 'deleted_at' | 'deleted_by_user_id'>>
         Update: Partial<Omit<Database['public']['Tables']['patients']['Insert'], 'workspace_id' | 'created_by_user_id'>>
         Relationships: []
       }

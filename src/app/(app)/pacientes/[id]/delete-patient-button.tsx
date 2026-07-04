@@ -17,7 +17,6 @@ export function DeletePatientButton({ patientId, patientName, lmeCount }: Props)
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const hasLmes = lmeCount > 0
 
   async function handleDelete() {
     setLoading(true)
@@ -51,22 +50,17 @@ export function DeletePatientButton({ patientId, patientName, lmeCount }: Props)
           <DialogHeader>
             <DialogTitle>Excluir paciente?</DialogTitle>
             <DialogDescription>
-              {hasLmes ? (
-                <><strong>{patientName}</strong> possui {lmeCount} LME{lmeCount > 1 ? 's' : ''} vinculada{lmeCount > 1 ? 's' : ''}. Exclua {lmeCount > 1 ? 'as LMEs' : 'a LME'} antes de remover o paciente, para não perder o histórico.</>
-              ) : (
-                <>Esta ação não pode ser desfeita. <strong>{patientName}</strong> será removido permanentemente.</>
-              )}
+              <strong>{patientName}</strong> será removido da lista de pacientes e da criação de novas LMEs.
+              {lmeCount > 0 && ` As ${lmeCount} LME${lmeCount > 1 ? 's' : ''} vinculada${lmeCount > 1 ? 's' : ''} permanecem preservadas no histórico.`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-              {hasLmes ? 'Entendi' : 'Cancelar'}
+              Cancelar
             </Button>
-            {!hasLmes && (
-              <Button variant="destructive" onClick={handleDelete} disabled={loading}>
-                {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Excluindo...</> : 'Sim, excluir'}
-              </Button>
-            )}
+            <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Excluindo...</> : 'Sim, excluir'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

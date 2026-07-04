@@ -35,7 +35,7 @@ export default async function RenovarLmePage({ params }: { params: Promise<{ id:
       .maybeSingle(),
     supabase.from('health_facilities').select('id, name, cnes, address, city, state')
       .eq('workspace_id', active.workspaceId).eq('is_active', true).order('name'),
-    supabase.from('patients').select('weight_kg, height_cm, birth_date, is_incapable, responsible_name')
+    supabase.from('patients').select('weight_kg, height_cm, birth_date, is_incapable, responsible_name, deleted_at')
       .eq('id', lme.patient_id)
       .single(),
   ])
@@ -64,6 +64,27 @@ export default async function RenovarLmePage({ params }: { params: Promise<{ id:
             <Link href="/perfil-medico/novo">
               <Button>Cadastrar meu perfil de médico</Button>
             </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (patient?.deleted_at) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto space-y-6">
+        <div className="flex items-center gap-3">
+          <Link href={`/lmes/${id}`}>
+            <Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Renovar LME</h1>
+        </div>
+        <Card>
+          <CardHeader><CardTitle className="text-base">Paciente excluido</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-700">
+              Este paciente foi removido da lista ativa. O historico permanece preservado, mas nao e possivel emitir uma nova LME para um paciente excluido.
+            </p>
           </CardContent>
         </Card>
       </div>

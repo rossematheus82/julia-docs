@@ -54,7 +54,7 @@ export default async function AdminPage() {
     admin.from('workspaces').select('id, name, invite_code, created_at').order('name'),
     admin
       .from('patients')
-      .select('id, workspace_id, full_name, cpf, cns, birth_date, phone, created_at, updated_at')
+      .select('id, workspace_id, full_name, cpf, cns, birth_date, phone, created_at, updated_at, deleted_at, deleted_by_user_id')
       .order('full_name')
       .limit(1000),
     admin
@@ -113,6 +113,8 @@ export default async function AdminPage() {
     phone: patient.phone,
     createdAt: patient.created_at,
     updatedAt: patient.updated_at,
+    deletedAt: patient.deleted_at,
+    deletedByUserId: patient.deleted_by_user_id,
   }))
   const emailByUserId = new Map(rows.map(row => [row.id, row.email]))
   const auditRows: AdminAuditRow[] = (auditLogs ?? []).map(log => ({

@@ -36,6 +36,7 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
     .select('*')
     .eq('id', id)
     .eq('workspace_id', memberData.workspace_id)
+    .is('deleted_at', null)
     .single()
 
   if (!patient) notFound()
