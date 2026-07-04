@@ -6,6 +6,7 @@ type AuditAction =
   | 'ai_extract'
   | 'ai_improve'
   | 'patient_delete'
+  | 'patient_export'
   | 'patient_restore'
   | 'lme_delete'
   | 'pdf_generate'

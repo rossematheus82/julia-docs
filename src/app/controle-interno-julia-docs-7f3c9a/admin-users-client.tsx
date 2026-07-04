@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Activity, Ban, CheckCircle2, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
+import { Activity, Ban, CheckCircle2, Download, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
 import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
@@ -74,6 +74,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [restoringPatientId, setRestoringPatientId] = useState<string | null>(null)
+  const [exportingPatientId, setExportingPatientId] = useState<string | null>(null)
   const [workspaceFilter, setWorkspaceFilter] = useState('all')
   const [patientStatusFilter, setPatientStatusFilter] = useState('active')
   const [patientSearch, setPatientSearch] = useState('')
@@ -205,6 +206,39 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
     }
 
     toast.success('Paciente restaurado.')
+    router.refresh()
+  }
+
+  async function exportPatient(patient: AdminPatientRow) {
+    if (!confirm(`Exportar dados administrativos de ${patient.fullName}?`)) return
+
+    setExportingPatientId(patient.id)
+    const res = await fetch('/api/controle-interno-julia-docs-7f3c9a/patients/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patientId: patient.id }),
+    })
+    setExportingPatientId(null)
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      toast.error(body.error ?? 'Erro ao exportar paciente')
+      return
+    }
+
+    const blob = await res.blob()
+    const contentDisposition = res.headers.get('Content-Disposition') ?? ''
+    const match = contentDisposition.match(/filename="([^"]+)"/)
+    const fileName = match?.[1] ?? `paciente-${patient.id}.json`
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    toast.success('Exportacao gerada.')
     router.refresh()
   }
 
@@ -347,6 +381,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
             <tbody className="divide-y divide-gray-100">
               {filteredPatients.map(patient => {
                 const restoring = restoringPatientId === patient.id
+                const exporting = exportingPatientId === patient.id
                 return (
                   <tr key={patient.id} className="hover:bg-gray-50/70">
                     <td className="px-4 py-3">
@@ -372,14 +407,18 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                     </td>
                     <td className="px-4 py-3 text-gray-600">{formatDate(patient.updatedAt)}</td>
                     <td className="px-4 py-3 text-right">
-                      {patient.deletedAt ? (
-                        <Button size="sm" variant="outline" className="gap-1.5" disabled={restoring} onClick={() => restorePatient(patient)}>
-                          {restoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                          Restaurar
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" className="gap-1.5" disabled={exporting} onClick={() => exportPatient(patient)}>
+                          {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                          Exportar
                         </Button>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
+                        {patient.deletedAt && (
+                          <Button size="sm" variant="outline" className="gap-1.5" disabled={restoring} onClick={() => restorePatient(patient)}>
+                            {restoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                            Restaurar
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
@@ -540,6 +579,7 @@ function formatAction(action: string) {
     ai_extract: 'IA extracao',
     ai_improve: 'IA melhoria',
     patient_delete: 'Paciente excluido',
+    patient_export: 'Paciente exportado',
     patient_restore: 'Paciente restaurado',
     patients_insert: 'Paciente criado',
     patients_update: 'Paciente editado',
