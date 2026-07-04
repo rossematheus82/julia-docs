@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { Sidebar } from '@/components/sidebar'
 import { FeedbackWidget } from '@/components/feedback-widget'
+import { SessionTimeout } from '@/components/session-timeout'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -38,6 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
       </main>
       <FeedbackWidget />
+      <SessionTimeout />
     </div>
   )
 }
