@@ -64,8 +64,8 @@ export function LegalAcceptanceGate({ required }: { required: boolean }) {
 
   return (
     <Dialog open>
-      <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-2xl" showCloseButton={false}>
-        <DialogHeader>
+      <DialogContent className="flex max-h-[92vh] flex-col gap-3 overflow-hidden sm:max-w-2xl" showCloseButton={false}>
+        <DialogHeader className="shrink-0">
           <DialogTitle>Atualização de Termos e Privacidade</DialogTitle>
           <DialogDescription>
             Nossa plataforma criou e atualizou termos para se adequar à LGPD e reforçar a proteção dos dados.
@@ -73,7 +73,7 @@ export function LegalAcceptanceGate({ required }: { required: boolean }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <Button
             type="button"
             variant={view === 'termos' ? 'default' : 'outline'}
@@ -92,7 +92,7 @@ export function LegalAcceptanceGate({ required }: { required: boolean }) {
           </Button>
         </div>
 
-        <div className="max-h-[46vh] overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-sm leading-6 text-gray-700">
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-sm leading-6 text-gray-700">
           <div className="mb-4">
             <h3 className="text-base font-semibold text-gray-900">{current.title}</h3>
             <p className="text-xs text-gray-500">Versão {current.version}</p>
@@ -107,7 +107,7 @@ export function LegalAcceptanceGate({ required }: { required: boolean }) {
           </div>
         </div>
 
-        <label className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm leading-5 text-gray-700">
+        <label className="flex shrink-0 items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm leading-5 text-gray-700">
           <Checkbox
             checked={accepted}
             onCheckedChange={value => setAccepted(value === true)}
@@ -119,8 +119,8 @@ export function LegalAcceptanceGate({ required }: { required: boolean }) {
           </span>
         </label>
 
-        <DialogFooter>
-          <Button type="button" onClick={acceptTerms} disabled={saving || !accepted}>
+        <DialogFooter className="shrink-0">
+          <Button type="button" onClick={acceptTerms} disabled={saving || !accepted} className="w-full sm:w-auto">
             {saving ? 'Registrando...' : 'Aceitar e continuar'}
           </Button>
         </DialogFooter>

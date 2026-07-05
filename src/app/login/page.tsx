@@ -122,7 +122,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-blue-900">
               <span className="font-bold">Júlia</span><span className="font-normal">Docs</span>
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">Automação de LMEs — CEAF/SES-MG</p>
+            <p className="text-sm text-gray-500 mt-0.5">Documentos do ambulatório com mais agilidade e segurança</p>
           </div>
         </div>
 
