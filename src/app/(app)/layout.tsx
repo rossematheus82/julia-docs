@@ -4,6 +4,8 @@ import { getActiveWorkspace } from '@/lib/active-workspace'
 import { Sidebar } from '@/components/sidebar'
 import { FeedbackWidget } from '@/components/feedback-widget'
 import { SessionTimeout } from '@/components/session-timeout'
+import { LegalAcceptanceGate } from '@/components/legal-acceptance-gate'
+import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@/lib/legal-content'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -27,6 +29,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const activeWorkspace = workspaces.find(w => w.id === active.workspaceId) ?? workspaces[0]
   if (!activeWorkspace) redirect('/onboarding')
 
+  const { data: latestAcceptance } = await supabase
+    .from('legal_acceptances')
+    .select('terms_version, privacy_version')
+    .eq('user_id', user.id)
+    .order('accepted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const requiresLegalAcceptance =
+    latestAcceptance?.terms_version !== LEGAL_TERMS_VERSION ||
+    latestAcceptance?.privacy_version !== LEGAL_PRIVACY_VERSION
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
@@ -40,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </main>
       <FeedbackWidget />
       <SessionTimeout />
+      <LegalAcceptanceGate required={requiresLegalAcceptance} />
     </div>
   )
 }
