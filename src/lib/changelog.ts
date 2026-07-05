@@ -21,16 +21,13 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-07-04',
     itens: [
-      { tipo: 'melhoria', texto: 'Auditoria agora registra entrada em ambulatorio por convite e alteracoes de status da LME.' },
-      { tipo: 'melhoria', texto: 'Downloads de PDFs foram reforcados com cabecalhos para evitar cache e armazenamento intermediario indevido.' },
-      { tipo: 'melhoria', texto: 'Painel administrativo agora permite exportar dados administrativos de um paciente em JSON para atender solicitações e auditorias.' },
-      { tipo: 'melhoria', texto: 'Proprietarios de ambulatorio agora podem tornar residentes administradores do ambulatorio e rebaixar novamente quando necessario.' },
-      { tipo: 'melhoria', texto: 'Excluir paciente agora remove o cadastro dos fluxos normais, mas preserva o registro no banco para histórico e auditoria.' },
-      { tipo: 'melhoria', texto: 'Novo cadastro agora exige confirmação de ciência sobre privacidade e uso de dados antes de criar a conta.' },
-      { tipo: 'melhoria', texto: 'Sessões autenticadas agora são encerradas automaticamente após período de inatividade, com aviso antes do logout.' },
-      { tipo: 'novo', texto: 'Página de Privacidade adicionada para explicar o uso e a proteção dos dados na plataforma.' },
-      { tipo: 'melhoria', texto: 'CPF e CNS agora aparecem mascarados em listas e telas de seleção, mantendo a busca por documento e a conferência completa apenas nos detalhes e PDFs.' },
-      { tipo: 'correcao', texto: 'Exclusão de pacientes ficou mais restrita: usuário comum só remove paciente que cadastrou, enquanto administradores do ambulatório mantêm controle do ambulatório.' },
+      { tipo: 'melhoria', texto: 'Downloads de PDFs foram reforcados para evitar cache e armazenamento intermediario indevido.' },
+      { tipo: 'melhoria', texto: 'Excluir paciente agora remove o cadastro dos fluxos normais sem apagar o historico de LMEs vinculadas.' },
+      { tipo: 'melhoria', texto: 'Novo cadastro agora exige confirmacao de ciencia sobre privacidade e uso de dados antes de criar a conta.' },
+      { tipo: 'melhoria', texto: 'Sessoes autenticadas agora sao encerradas automaticamente apos periodo de inatividade, com aviso antes do logout.' },
+      { tipo: 'novo', texto: 'Pagina de Privacidade adicionada para explicar o uso e a protecao dos dados na plataforma.' },
+      { tipo: 'melhoria', texto: 'CPF e CNS agora aparecem mascarados em listas e telas de selecao, mantendo a busca por documento e a conferencia completa apenas nos detalhes e PDFs.' },
+      { tipo: 'novo', texto: 'Termos de Uso adicionados para orientar o uso seguro da plataforma.' },
     ],
   },
   {
