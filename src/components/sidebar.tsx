@@ -30,6 +30,7 @@ const settingsItems = [
   { href: '/configuracoes/workspace', icon: Settings, label: 'Ambulatório' },
   { href: '/novidades', icon: Sparkles, label: 'Novidades' },
   { href: '/privacidade', icon: ShieldCheck, label: 'Privacidade' },
+  { href: '/termos', icon: FileText, label: 'Termos de Uso' },
   { href: '/sobre', icon: Heart, label: 'Sobre' },
 ]
 
