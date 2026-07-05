@@ -4,13 +4,22 @@ Estado controlado pelo repositório:
 
 - RLS habilitada nas tabelas sensíveis.
 - Policies isolam dados por `workspace_id`.
-- Convites de workspace usam RPCs seguras.
+- Convites de workspace usam RPC/API segura.
 - Service role key só deve existir em código server-side.
 - `.env*.local` está fora do Git.
 - Payloads de APIs sensíveis têm limite de tamanho.
 - Logs server-side usam redaction para CPF, CNS e CID.
 - Audit log automático registra mudanças em pacientes, LMEs, médicos, estabelecimentos, workspaces e membros.
+- Auditoria explícita registra geração de PDF, exportação de paciente, entrada por convite, troca de ambulatório, remoção de membro, alteração de papel, restauração de paciente e mudança de status da LME.
+- Sessão autenticada tem timeout por inatividade.
+- Cadastro novo exige ciência sobre privacidade e uso de dados.
+- CPF e CNS aparecem mascarados em listas e seleções, com dados completos apenas onde necessário.
+- Exclusão de paciente usa arquivamento lógico (`deleted_at`) e preserva histórico/auditoria.
+- Painel administrativo permite filtrar auditoria, suspender usuários, restaurar pacientes arquivados e exportar dados administrativos do paciente em JSON.
+- Papéis por ambulatório usam `owner`, `admin` e `member`; proprietários podem promover/rebaixar admins do ambulatório.
 - Bucket `lme-pdfs` é privado.
+- PDFs são gerados sob demanda em memória e baixados pelo navegador; o fluxo atual não salva PDF em storage.
+- Respostas de PDF usam `Cache-Control: no-store`, `Pragma: no-cache`, `Expires: 0` e `X-Content-Type-Options: nosniff`.
 - Política de retenção inicial registrada em `data_retention_policies`.
 
 Configurações externas para marcar manualmente:
@@ -19,14 +28,15 @@ Configurações externas para marcar manualmente:
 - GitHub Push Protection ativado.
 - MFA obrigatório nas contas GitHub, Supabase e Vercel.
 - Secrets reais apenas na Vercel/Supabase, nunca no GitHub.
-- Supabase Backup/PITR configurado no painel do projeto.
+- Supabase Backup/PITR configurado no painel do projeto quando o plano permitir; enquanto isso, fazer backup manual antes de migrations sensíveis.
 - Job agendado para `select prune_audit_logs(3650);` conforme política aprovada.
 
 Política inicial de retenção:
 
 - `audit_logs`: 10 anos, sem conteúdo clínico.
 - `patients` e `lmes`: manter enquanto houver relação assistencial ou obrigação legal aplicável.
-- PDFs exportados: preferir geração sob demanda; quando armazenados, bucket privado e retenção de 180 dias.
+- Pacientes arquivados: ocultos dos fluxos normais, preservados para histórico e auditoria.
+- PDFs exportados: preferir geração sob demanda sem storage; quando armazenados no futuro, bucket privado, URLs temporárias e retenção definida.
 
 Regra de log:
 

@@ -38,7 +38,7 @@
       </div>
     </div>
     <h1>Manual pr&aacute;tico de uso da plataforma</h1>
-    <p class="muted" style="font-size:17px;max-width:760px;">Roteiro operacional com prints reais do ambiente de teste: cadastro, entrada no ambulat&oacute;rio do J&uacute;lia, pacientes, LME, gera&ccedil;&atilde;o de processo, corre&ccedil;&atilde;o e repeti&ccedil;&atilde;o de LME de colega.</p>
+    <p class="muted" style="font-size:17px;max-width:760px;">Roteiro operacional com prints reais do ambiente de teste: cadastro com convite, entrada no ambulat&oacute;rio do J&uacute;lia, pacientes, LME, gera&ccedil;&atilde;o de processo, corre&ccedil;&atilde;o, repeti&ccedil;&atilde;o de LME de colega e boas pr&aacute;ticas de privacidade.</p>
     <div class="note">Todos os dados dos prints s&atilde;o fict&iacute;cios e foram criados apenas para treinamento.</div>
   </section>
 
@@ -49,11 +49,12 @@
         <p>O usu&aacute;rio acessa a tela inicial, cria a conta quando for primeiro acesso e depois entra com e-mail e senha.</p>
         <ol>
           <li>Clique em <strong>Criar conta</strong> para o primeiro acesso.</li>
-          <li>Informe e-mail e senha.</li>
+          <li>Informe e-mail, senha e o c&oacute;digo de convite do ambulat&oacute;rio.</li>
+          <li>Confirme a ci&ecirc;ncia sobre privacidade e uso de dados.</li>
           <li>Depois, volte para <strong>Entrar</strong> e acesse normalmente.</li>
           <li>Use <strong>Esqueceu a senha?</strong> quando precisar recuperar o acesso.</li>
         </ol>
-        <div class="note">Por enquanto, usu&aacute;rios comuns n&atilde;o criam ambulat&oacute;rios. Eles entram no ambulat&oacute;rio do J&uacute;lia usando convite.</div>
+        <div class="note">O acesso &eacute; liberado somente com convite do ambulat&oacute;rio. Se a conta estiver suspensa, a plataforma mostra uma tela de aviso e a op&ccedil;&atilde;o de sair da conta.</div>
       </div>
       <img class="shot" src="manual-assets/02-criar-conta.png" />
     </div>
@@ -70,6 +71,7 @@
           <li>Digite o c&oacute;digo de convite.</li>
           <li>Clique em <strong>Entrar no ambulat&oacute;rio</strong>.</li>
         </ol>
+        <div class="note">A entrada por convite fica registrada na auditoria da plataforma.</div>
       </div>
       <img class="shot" src="manual-assets/03-entrar-ambulatorio.png" />
     </div>
@@ -87,6 +89,7 @@
           <li>O bot&atilde;o <strong>Nova LME</strong> inicia um novo processo.</li>
           <li>O menu lateral leva para Pacientes, LMEs e Configura&ccedil;&otilde;es.</li>
         </ul>
+        <div class="note">Por seguran&ccedil;a, a sess&atilde;o expira ap&oacute;s per&iacute;odo de inatividade. Salve o trabalho antes de se afastar do computador.</div>
       </div>
       <img class="shot" src="manual-assets/04-dashboard.png" />
     </div>
@@ -104,6 +107,7 @@
           <li>Preencha identifica&ccedil;&atilde;o, CPF, CNS, data de nascimento, dados cl&iacute;nicos, contato e endere&ccedil;o.</li>
           <li>Revise peso, altura e respons&aacute;vel legal quando houver.</li>
         </ol>
+        <div class="note">Em listas e telas de sele&ccedil;&atilde;o, CPF e CNS aparecem mascarados. A busca por documento continua funcionando.</div>
       </div>
       <img class="shot" src="manual-assets/06-novo-paciente.png" />
     </div>
@@ -173,6 +177,7 @@
           <li>Use <strong>Downloads individuais</strong> quando precisar baixar apenas um documento.</li>
           <li>Abra o PDF e revise antes de protocolar.</li>
         </ol>
+        <div class="note">Os PDFs s&atilde;o gerados para download no computador do usu&aacute;rio. Guarde esses arquivos apenas em local seguro e evite compartilhar por canais n&atilde;o autorizados.</div>
       </div>
       <img class="shot" src="manual-assets/10-gerar-processo.png" />
     </div>
@@ -190,6 +195,7 @@
           <li>Corrija CID-10, anamnese, medicamentos ou campos espec&iacute;ficos.</li>
           <li>Clique em <strong>Salvar e gerar PDF</strong>.</li>
         </ol>
+        <div class="note">Ao gerar o processo, a LME pode passar para status emitida e essa mudan&ccedil;a fica registrada na auditoria.</div>
       </div>
       <img class="shot" src="manual-assets/12-editar-lme.png" />
     </div>
@@ -238,6 +244,20 @@
       <li>Quando a LME for de colega, repetir em seu nome em vez de editar o documento original.</li>
       <li>Sair da plataforma ao usar computador compartilhado.</li>
     </ul>
+  </section>
+
+  <section class="page">
+    <h2>13. Privacidade, permiss&otilde;es e suporte</h2>
+    <p>A plataforma registra a&ccedil;&otilde;es sens&iacute;veis para seguran&ccedil;a e rastreabilidade.</p>
+    <ul>
+      <li><strong>Membro comum:</strong> cadastra pacientes, cria LMEs e trabalha no ambulat&oacute;rio em que recebeu convite.</li>
+      <li><strong>Administrador do ambulat&oacute;rio:</strong> ajuda a gerenciar membros e pode remover membros comuns quando necess&aacute;rio.</li>
+      <li><strong>Propriet&aacute;rio do ambulat&oacute;rio:</strong> pode tornar residentes administradores do ambulat&oacute;rio e rebaixar novamente.</li>
+      <li><strong>Administrador da plataforma:</strong> pode suspender usu&aacute;rios, restaurar pacientes arquivados, consultar auditoria e exportar dados administrativos quando necess&aacute;rio.</li>
+      <li>Paciente exclu&iacute;do sai dos fluxos normais, mas permanece arquivado para hist&oacute;rico e auditoria.</li>
+      <li>Solicita&ccedil;&otilde;es de corre&ccedil;&atilde;o, revis&atilde;o de acesso ou privacidade devem ser encaminhadas ao administrador respons&aacute;vel.</li>
+    </ul>
+    <div class="note">Nunca compartilhe senha. Use apenas dados necess&aacute;rios para o atendimento e revise os documentos antes de protocolar.</div>
   </section>
 </body>
 </html>
