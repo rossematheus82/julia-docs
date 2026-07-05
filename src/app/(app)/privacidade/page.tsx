@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 
 const sections = [
@@ -38,43 +37,35 @@ const sections = [
 
 export default function PrivacidadePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto max-w-3xl space-y-6 p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Privacidade e proteção de dados</h1>
-            <p className="text-sm text-gray-500">Como o Júlia Docs trata informações de pacientes e usuários</p>
-          </div>
+    <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <ShieldCheck className="h-5 w-5" />
         </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Privacidade e proteção de dados</h1>
+          <p className="text-sm text-gray-500">Como o Júlia Docs trata informações de pacientes e usuários</p>
+        </div>
+      </div>
 
-        <section className="rounded-lg border border-gray-200 bg-white p-6 text-sm leading-6 text-gray-700">
-          <div className="space-y-5">
-            {sections.map(section => (
-              <div key={section.title}>
-                <h2 className="text-base font-semibold text-gray-900">{section.title}</h2>
-                <p className="mt-1">{section.body}</p>
-              </div>
-            ))}
-
-            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-blue-900">
-              <h2 className="text-base font-semibold">Contato</h2>
-              <p className="mt-1">
-                Para tratar de privacidade, segurança, correção de dados ou revisão de acesso,
-                use a aba flutuante Sugestões / Erros dentro da plataforma. Não inclua dados de pacientes na mensagem.
-              </p>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 text-sm leading-6 text-gray-700">
+        <div className="space-y-5">
+          {sections.map(section => (
+            <div key={section.title}>
+              <h2 className="text-base font-semibold text-gray-900">{section.title}</h2>
+              <p className="mt-1">{section.body}</p>
             </div>
-          </div>
-        </section>
+          ))}
 
-        <div className="text-center">
-          <Link href="/login" className="text-sm font-medium text-blue-700 hover:underline">
-            Voltar para o acesso
-          </Link>
+          <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-blue-900">
+            <h2 className="text-base font-semibold">Contato</h2>
+            <p className="mt-1">
+              Para tratar de privacidade, segurança, correção de dados ou revisão de acesso,
+              use a aba flutuante Sugestões / Erros dentro da plataforma. Não inclua dados de pacientes na mensagem.
+            </p>
+          </div>
         </div>
-      </main>
+      </section>
     </div>
   )
 }
