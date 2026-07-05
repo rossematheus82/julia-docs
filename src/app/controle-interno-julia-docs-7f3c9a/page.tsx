@@ -6,6 +6,7 @@ import { isPlatformAdminEmail } from '@/lib/platform-admin'
 import {
   AdminUsersClient,
   type AdminAuditRow,
+  type AdminLegalAcceptanceRow,
   type AdminPatientRow,
   type AdminUserRow,
   type AdminWorkspaceRow,
@@ -47,6 +48,7 @@ export default async function AdminPage() {
     { data: workspaces },
     { data: patients },
     { data: auditLogs },
+    { data: legalAcceptances },
   ] = await Promise.all([
     admin.from('platform_users').select('user_id, email, role, status').in('user_id', userIds),
     admin.from('workspace_members').select('user_id, workspace_id').in('user_id', userIds),
@@ -62,6 +64,11 @@ export default async function AdminPage() {
       .select('id, workspace_id, user_id, action, resource_type, resource_id, created_at')
       .order('created_at', { ascending: false })
       .limit(500),
+    admin
+      .from('legal_acceptances')
+      .select('id, user_id, terms_version, privacy_version, accepted_at, source')
+      .in('user_id', userIds)
+      .order('accepted_at', { ascending: false }),
   ])
 
   const platformByUser = new Map((platformRows ?? []).map(row => [row.user_id as string, row]))
@@ -128,6 +135,30 @@ export default async function AdminPage() {
     resourceId: log.resource_id,
     createdAt: log.created_at,
   }))
+  type LegalAcceptanceQueryRow = {
+    id: string
+    user_id: string
+    terms_version: string
+    privacy_version: string
+    accepted_at: string
+    source: string
+  }
+  const latestAcceptanceByUser = new Map<string, LegalAcceptanceQueryRow>()
+  for (const acceptance of legalAcceptances ?? []) {
+    if (!acceptance.user_id || latestAcceptanceByUser.has(acceptance.user_id)) continue
+    latestAcceptanceByUser.set(acceptance.user_id, acceptance)
+  }
+  const legalAcceptanceRows: AdminLegalAcceptanceRow[] = rows.map(row => {
+    const acceptance = latestAcceptanceByUser.get(row.id)
+    return {
+      userId: row.id,
+      userEmail: row.email,
+      acceptedAt: acceptance?.accepted_at ?? null,
+      termsVersion: acceptance?.terms_version ?? null,
+      privacyVersion: acceptance?.privacy_version ?? null,
+      source: acceptance?.source ?? null,
+    }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,6 +187,7 @@ export default async function AdminPage() {
           workspaces={workspaceRows}
           patients={patientRows}
           auditLogs={auditRows}
+          legalAcceptances={legalAcceptanceRows}
         />
       </main>
     </div>

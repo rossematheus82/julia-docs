@@ -12,10 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Activity, Ban, CheckCircle2, Download, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
+import { Activity, Ban, CheckCircle2, ClipboardCheck, Download, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
 import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
+import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@/lib/legal-content'
 
 export interface AdminUserRow {
   id: string
@@ -62,15 +63,25 @@ export interface AdminAuditRow {
   createdAt: string | null
 }
 
+export interface AdminLegalAcceptanceRow {
+  userId: string
+  userEmail: string
+  termsVersion: string | null
+  privacyVersion: string | null
+  acceptedAt: string | null
+  source: string | null
+}
+
 interface Props {
   users: AdminUserRow[]
   currentUserId: string
   workspaces: AdminWorkspaceRow[]
   patients: AdminPatientRow[]
   auditLogs: AdminAuditRow[]
+  legalAcceptances: AdminLegalAcceptanceRow[]
 }
 
-export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs }: Props) {
+export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs, legalAcceptances }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [restoringPatientId, setRestoringPatientId] = useState<string | null>(null)
@@ -84,6 +95,8 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
   const [auditStartDate, setAuditStartDate] = useState('')
   const [auditEndDate, setAuditEndDate] = useState('')
   const [auditSearch, setAuditSearch] = useState('')
+  const [legalSearch, setLegalSearch] = useState('')
+  const [legalStatusFilter, setLegalStatusFilter] = useState('all')
 
   const filteredPatients = useMemo(() => {
     const term = patientSearch.trim().toLowerCase()
@@ -155,6 +168,26 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
       return haystack.includes(term)
     })
   }, [auditActionFilter, auditEndDate, auditLogs, auditSearch, auditStartDate, auditUserFilter, auditWorkspaceFilter])
+
+  const filteredLegalAcceptances = useMemo(() => {
+    const term = legalSearch.trim().toLowerCase()
+
+    return legalAcceptances.filter(row => {
+      const status = getLegalAcceptanceStatus(row)
+      if (legalStatusFilter !== 'all' && status !== legalStatusFilter) return false
+      if (!term) return true
+
+      const haystack = [
+        row.userEmail,
+        row.userId,
+        row.termsVersion,
+        row.privacyVersion,
+        row.source,
+      ].filter(Boolean).join(' ').toLowerCase()
+
+      return haystack.includes(term)
+    })
+  }, [legalAcceptances, legalSearch, legalStatusFilter])
 
   function clearAuditFilters() {
     setAuditWorkspaceFilter('all')
@@ -307,6 +340,99 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
             })}
           </tbody>
         </table>
+      </section>
+
+      <section className="rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 p-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                <ClipboardCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Aceites legais</h2>
+                <p className="text-sm text-gray-500">
+                  {filteredLegalAcceptances.length} de {legalAcceptances.length} usuario(s) exibido(s)
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-[minmax(180px,220px)_minmax(220px,280px)]">
+              <Select value={legalStatusFilter} onValueChange={setLegalStatusFilter}>
+                <SelectTrigger aria-label="Filtrar aceite legal por status">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="current">Atualizados</SelectItem>
+                  <SelectItem value="outdated">Versao antiga</SelectItem>
+                  <SelectItem value="missing">Sem registro</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={legalSearch}
+                  onChange={event => setLegalSearch(event.target.value)}
+                  placeholder="Buscar usuario ou versao"
+                  className="pl-8"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] text-sm">
+            <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Usuario</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Termos</th>
+                <th className="px-4 py-3 font-medium">Privacidade</th>
+                <th className="px-4 py-3 font-medium">Registrado em</th>
+                <th className="px-4 py-3 font-medium">Origem</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredLegalAcceptances.map(row => {
+                const status = getLegalAcceptanceStatus(row)
+                return (
+                  <tr key={row.userId} className="hover:bg-gray-50/70">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{row.userEmail}</div>
+                      <div className="font-mono text-[11px] text-gray-400">{row.userId}</div>
+                    </td>
+                    <td className="px-4 py-3">{renderLegalAcceptanceBadge(status)}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {row.termsVersion ?? '-'}
+                      {row.termsVersion && row.termsVersion !== LEGAL_TERMS_VERSION && (
+                        <div className="text-xs text-amber-600">Atual: {LEGAL_TERMS_VERSION}</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {row.privacyVersion ?? '-'}
+                      {row.privacyVersion && row.privacyVersion !== LEGAL_PRIVACY_VERSION && (
+                        <div className="text-xs text-amber-600">Atual: {LEGAL_PRIVACY_VERSION}</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(row.acceptedAt)}</td>
+                    <td className="px-4 py-3 text-gray-600">{formatLegalSource(row.source)}</td>
+                  </tr>
+                )
+              })}
+
+              {filteredLegalAcceptances.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                    Nenhum aceite encontrado para os filtros selecionados.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white">
@@ -572,6 +698,27 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
 function formatDate(value: string | null) {
   if (!value) return '-'
   return value.includes('T') ? formatarDataHora(value) : formatarData(value)
+}
+
+function getLegalAcceptanceStatus(row: AdminLegalAcceptanceRow) {
+  if (!row.acceptedAt) return 'missing'
+  if (row.termsVersion !== LEGAL_TERMS_VERSION || row.privacyVersion !== LEGAL_PRIVACY_VERSION) return 'outdated'
+  return 'current'
+}
+
+function renderLegalAcceptanceBadge(status: string) {
+  if (status === 'current') return <Badge className="bg-green-100 text-green-700">Atualizado</Badge>
+  if (status === 'outdated') return <Badge className="bg-amber-100 text-amber-700">Versao antiga</Badge>
+  return <Badge className="bg-gray-100 text-gray-700">Sem registro</Badge>
+}
+
+function formatLegalSource(source: string | null) {
+  const labels: Record<string, string> = {
+    signup_with_invite: 'Cadastro com convite',
+    signup: 'Cadastro',
+  }
+  if (!source) return '-'
+  return labels[source] ?? source
 }
 
 function formatAction(action: string) {
