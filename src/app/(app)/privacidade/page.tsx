@@ -1,39 +1,5 @@
 import { ShieldCheck } from 'lucide-react'
-
-const sections = [
-  {
-    title: 'Finalidade',
-    body: 'O Júlia Docs organiza dados necessários para cadastro de pacientes, preenchimento de LMEs, geração de documentos do CEAF/SES-MG, acompanhamento de renovações e apoio à rotina assistencial do ambulatório.',
-  },
-  {
-    title: 'Dados tratados',
-    body: 'A plataforma pode tratar dados cadastrais, documentos pessoais, dados de contato, informações clínicas necessárias aos formulários, dados do médico responsável, dados de ambulatório, registros técnicos de acesso e logs de auditoria.',
-  },
-  {
-    title: 'Base de uso',
-    body: 'O uso dos dados ocorre para apoiar assistência à saúde, emissão documental necessária ao tratamento, cumprimento de obrigações legais/regulatórias e segurança da plataforma. Os usuários devem inserir apenas dados necessários ao atendimento e à emissão dos documentos.',
-  },
-  {
-    title: 'Acesso e permissões',
-    body: 'O acesso é separado por ambulatório. Usuários comuns acessam apenas ambulatórios em que entraram por convite. Administradores do ambulatório podem apoiar a gestão de membros. Administradores da plataforma possuem acesso restrito a funções de segurança, auditoria, suspensão, restauração e exportação administrativa.',
-  },
-  {
-    title: 'Segurança',
-    body: 'A plataforma usa autenticação, convite por ambulatório, políticas de banco de dados, timeout por inatividade, auditoria de ações sensíveis, restrição de permissões e mascaramento de CPF/CNS em listas e telas de seleção.',
-  },
-  {
-    title: 'PDFs e arquivos baixados',
-    body: 'Os PDFs são gerados sob demanda e baixados no computador do usuário. Eles não devem ser compartilhados por canais não autorizados e precisam ser armazenados em local seguro após o download.',
-  },
-  {
-    title: 'Retenção e arquivamento',
-    body: 'Cadastros, LMEs e snapshots são mantidos enquanto houver necessidade assistencial, documental ou obrigação legal aplicável. Pacientes excluídos saem dos fluxos normais, mas permanecem arquivados para histórico e auditoria.',
-  },
-  {
-    title: 'Direitos e solicitações',
-    body: 'Solicitações de correção, revisão de acesso, informação sobre dados tratados, exportação administrativa ou avaliação de arquivamento devem ser enviadas pela aba flutuante Sugestões / Erros, sem incluir dados sensíveis no texto livre.',
-  },
-]
+import { PRIVACY_SECTIONS } from '@/lib/legal-content'
 
 export default function PrivacidadePage() {
   return (
@@ -50,7 +16,7 @@ export default function PrivacidadePage() {
 
       <section className="rounded-lg border border-gray-200 bg-white p-6 text-sm leading-6 text-gray-700">
         <div className="space-y-5">
-          {sections.map(section => (
+          {PRIVACY_SECTIONS.map(section => (
             <div key={section.title}>
               <h2 className="text-base font-semibold text-gray-900">{section.title}</h2>
               <p className="mt-1">{section.body}</p>

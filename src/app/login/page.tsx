@@ -10,34 +10,21 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Mail, CheckCircle } from 'lucide-react'
+import { PRIVACY_SECTIONS, TERMS_SECTIONS, type LegalSection } from '@/lib/legal-content'
 
 type Tab = 'login' | 'signup' | 'forgot'
 type LegalModal = 'termos' | 'privacidade' | null
 
-const LEGAL_CONTENT: Record<Exclude<LegalModal, null>, { title: string; description: string; items: string[] }> = {
+const LEGAL_CONTENT: Record<Exclude<LegalModal, null>, { title: string; description: string; sections: LegalSection[] }> = {
   termos: {
     title: 'Termos de Uso',
     description: 'Regras básicas para uso seguro do Júlia Docs.',
-    items: [
-      'Use a plataforma apenas se estiver autorizado pelo ambulatório.',
-      'Sua conta é individual: não compartilhe senha nem use conta de colega.',
-      'Revise dados de pacientes, CID-10, medicamentos e documentos antes de gerar PDFs.',
-      'Use apenas dados necessários ao atendimento e à emissão documental.',
-      'PDFs baixados devem ser guardados e compartilhados somente por meios seguros.',
-      'Ações sensíveis podem ser registradas para segurança e auditoria.',
-    ],
+    sections: TERMS_SECTIONS,
   },
   privacidade: {
     title: 'Política de Privacidade',
     description: 'Como o Júlia Docs trata informações de pacientes e usuários.',
-    items: [
-      'Os dados são usados para cadastro, preenchimento de LMEs, geração de documentos e acompanhamento assistencial.',
-      'O acesso é separado por ambulatório e depende de convite válido.',
-      'CPF e CNS aparecem mascarados em listas e telas de seleção.',
-      'Pacientes excluídos saem dos fluxos normais, mas ficam arquivados para histórico e auditoria.',
-      'Solicitações de privacidade devem ser enviadas pela aba Sugestões / Erros, sem dados de pacientes no texto livre.',
-      'PDFs são gerados sob demanda e baixados no computador do usuário.',
-    ],
+    sections: PRIVACY_SECTIONS,
   },
 }
 
@@ -374,15 +361,13 @@ export default function LoginPage() {
               <DialogTitle>{LEGAL_CONTENT[legalModal].title}</DialogTitle>
               <DialogDescription>{LEGAL_CONTENT[legalModal].description}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-3 text-sm leading-6 text-gray-700">
-              <ul className="list-disc space-y-2 pl-5">
-                {LEGAL_CONTENT[legalModal].items.map(item => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <p className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
-                O texto completo também fica disponível nas páginas públicas após o cadastro.
-              </p>
+            <div className="space-y-4 text-sm leading-6 text-gray-700">
+              {LEGAL_CONTENT[legalModal].sections.map(section => (
+                <section key={section.title}>
+                  <h3 className="font-semibold text-gray-900">{section.title}</h3>
+                  <p className="mt-1">{section.body}</p>
+                </section>
+              ))}
             </div>
           </>
         )}
