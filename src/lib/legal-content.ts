@@ -3,6 +3,10 @@ export type LegalSection = {
   body: string
 }
 
+export const LEGAL_TERMS_VERSION = '2026-07-05'
+export const LEGAL_PRIVACY_VERSION = '2026-07-05'
+export const LEGAL_EFFECTIVE_DATE = '2026-07-05'
+
 export const TERMS_SECTIONS: LegalSection[] = [
   {
     title: 'Uso permitido',

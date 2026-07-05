@@ -153,6 +153,23 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      legal_acceptances: {
+        Row: {
+          id: string
+          user_id: string
+          terms_version: string
+          privacy_version: string
+          accepted_at: string
+          ip_address: string | null
+          user_agent: string | null
+          source: string
+          metadata: Json
+        }
+        Insert: Omit<Database['public']['Tables']['legal_acceptances']['Row'], 'id' | 'accepted_at'>
+          & Partial<Pick<Database['public']['Tables']['legal_acceptances']['Row'], 'id' | 'accepted_at' | 'ip_address' | 'user_agent' | 'source' | 'metadata'>>
+        Update: never
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -192,3 +209,4 @@ export type HealthFacility = Database['public']['Tables']['health_facilities']['
 export type Patient = Database['public']['Tables']['patients']['Row']
 export type Lme = Database['public']['Tables']['lmes']['Row']
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row']
+export type LegalAcceptance = Database['public']['Tables']['legal_acceptances']['Row']

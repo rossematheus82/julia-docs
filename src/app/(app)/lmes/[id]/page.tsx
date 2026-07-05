@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ import { LmePdfButtons } from './lme-pdf-buttons'
 import { DeleteLmeButton } from './delete-lme-button'
 import { lmeCode } from '@/lib/lme-code'
 import { diasAteDataIso, formatarData, formatarDataHora } from '@/lib/utils/date'
+import { auditLog } from '@/lib/security/audit'
 
 const STATUS_COLORS: Record<string, string> = {
   rascunho: 'bg-gray-100 text-gray-700',
@@ -48,6 +50,23 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
     .single()
 
   if (!lme) notFound()
+
+  const headerStore = await headers()
+  await auditLog(supabase, {
+    workspaceId: active.workspaceId,
+    userId: user.id,
+    action: 'lme_view',
+    resourceType: 'lme',
+    resourceId: lme.id,
+    ipAddress: headerStore.get('x-forwarded-for')?.split(',')[0]?.trim() ?? headerStore.get('x-real-ip'),
+    userAgent: headerStore.get('user-agent'),
+    metadata: {
+      page: 'lme_detail',
+      patient_id: lme.patient_id,
+      disease: lme.disease,
+      status: lme.status,
+    },
+  })
 
   const isCreator = lme.created_by_user_id === user.id
 

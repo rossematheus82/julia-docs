@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ import { TimelineActions } from './timeline-actions'
 import { lmeCode } from '@/lib/lme-code'
 import { calcularIdade, formatarData } from '@/lib/utils/date'
 import { isPlatformAdminEmail } from '@/lib/platform-admin'
+import { auditLog } from '@/lib/security/audit'
 
 const DISEASE_LABELS: Record<string, string> = {
   asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP',
@@ -40,6 +42,20 @@ export default async function PacienteDetailPage({ params }: { params: Promise<{
     .single()
 
   if (!patient) notFound()
+
+  const headerStore = await headers()
+  await auditLog(supabase, {
+    workspaceId: active.workspaceId,
+    userId: user.id,
+    action: 'patient_view',
+    resourceType: 'patient',
+    resourceId: patient.id,
+    ipAddress: headerStore.get('x-forwarded-for')?.split(',')[0]?.trim() ?? headerStore.get('x-real-ip'),
+    userAgent: headerStore.get('user-agent'),
+    metadata: {
+      page: 'patient_detail',
+    },
+  })
 
   type LmeRow = {
     id: string; disease: string; request_type: string; status: string

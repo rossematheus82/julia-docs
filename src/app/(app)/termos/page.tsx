@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
-import { TERMS_SECTIONS } from '@/lib/legal-content'
+import { LEGAL_EFFECTIVE_DATE, LEGAL_TERMS_VERSION, TERMS_SECTIONS } from '@/lib/legal-content'
 
 export default function TermosPage() {
   return (
@@ -12,6 +12,7 @@ export default function TermosPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Termos de Uso</h1>
           <p className="text-sm text-gray-500">Regras básicas para uso seguro do Júlia Docs</p>
+          <p className="text-xs text-gray-400">Versão {LEGAL_TERMS_VERSION} · vigente desde {LEGAL_EFFECTIVE_DATE}</p>
         </div>
       </div>
 

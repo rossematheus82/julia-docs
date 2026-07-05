@@ -8,9 +8,12 @@ type AuditAction =
   | 'patient_delete'
   | 'patient_export'
   | 'patient_restore'
+  | 'patient_view'
   | 'lme_delete'
   | 'lme_status_update'
+  | 'lme_view'
   | 'pdf_generate'
+  | 'legal_acceptance'
   | 'workspace_join'
   | 'workspace_switch'
   | 'workspace_leave'
@@ -25,6 +28,8 @@ interface AuditEvent {
   resourceType?: string
   resourceId?: string | null
   metadata?: Record<string, Json | undefined>
+  ipAddress?: string | null
+  userAgent?: string | null
 }
 
 export async function auditLog(
@@ -37,8 +42,8 @@ export async function auditLog(
     action: event.action,
     resource_type: event.resourceType ?? null,
     resource_id: event.resourceId ?? null,
-    ip_address: null,
-    user_agent: null,
+    ip_address: event.ipAddress ?? null,
+    user_agent: event.userAgent ?? null,
     metadata: event.metadata ?? {},
   })
 

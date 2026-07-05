@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Mail, CheckCircle } from 'lucide-react'
-import { PRIVACY_SECTIONS, TERMS_SECTIONS, type LegalSection } from '@/lib/legal-content'
+import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION, PRIVACY_SECTIONS, TERMS_SECTIONS, type LegalSection } from '@/lib/legal-content'
 
 type Tab = 'login' | 'signup' | 'forgot'
 type LegalModal = 'termos' | 'privacidade' | null
@@ -18,12 +18,12 @@ type LegalModal = 'termos' | 'privacidade' | null
 const LEGAL_CONTENT: Record<Exclude<LegalModal, null>, { title: string; description: string; sections: LegalSection[] }> = {
   termos: {
     title: 'Termos de Uso',
-    description: 'Regras básicas para uso seguro do Júlia Docs.',
+    description: `Versão ${LEGAL_TERMS_VERSION}. Regras básicas para uso seguro do Júlia Docs.`,
     sections: TERMS_SECTIONS,
   },
   privacidade: {
     title: 'Política de Privacidade',
-    description: 'Como o Júlia Docs trata informações de pacientes e usuários.',
+    description: `Versão ${LEGAL_PRIVACY_VERSION}. Como o Júlia Docs trata informações de pacientes e usuários.`,
     sections: PRIVACY_SECTIONS,
   },
 }

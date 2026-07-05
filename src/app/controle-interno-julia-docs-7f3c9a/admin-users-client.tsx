@@ -581,15 +581,18 @@ function formatAction(action: string) {
     patient_delete: 'Paciente excluido',
     patient_export: 'Paciente exportado',
     patient_restore: 'Paciente restaurado',
+    patient_view: 'Paciente visualizado',
     patients_insert: 'Paciente criado',
     patients_update: 'Paciente editado',
     patients_delete: 'Paciente excluido',
     lme_delete: 'LME excluida',
     lme_status_update: 'Status da LME alterado',
+    lme_view: 'LME visualizada',
     lmes_insert: 'LME criada',
     lmes_update: 'LME editada',
     lmes_delete: 'LME excluida',
     pdf_generate: 'PDF gerado',
+    legal_acceptance: 'Aceite legal registrado',
     workspace_join: 'Entrada em ambulatorio',
     workspace_switch: 'Troca de ambulatorio',
     workspace_leave: 'Saida de ambulatorio',
@@ -610,6 +613,7 @@ function formatResourceType(value: string | null) {
     health_facilities: 'Estabelecimento',
     workspace_members: 'Membro',
     workspaces: 'Ambulatorio',
+    legal_acceptance: 'Aceite legal',
   }
   if (!value) return '-'
   return labels[value] ?? value

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { auditLog } from '@/lib/security/audit'
+import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@/lib/legal-content'
 
 function supabaseAdmin() {
   return createClient(
@@ -81,6 +82,47 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Erro ao vincular usuario ao ambulatorio.' }, { status: 500 })
   }
 
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? request.headers.get('x-real-ip')
+  const userAgent = request.headers.get('user-agent')
+
+  const { data: acceptance, error: acceptanceError } = await admin
+    .from('legal_acceptances')
+    .insert({
+      user_id: signup.user.id,
+      terms_version: LEGAL_TERMS_VERSION,
+      privacy_version: LEGAL_PRIVACY_VERSION,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      source: 'signup_with_invite',
+      metadata: {
+        workspace_id: workspace.id,
+        accepted_privacy_checkbox: acceptedPrivacy,
+      },
+    })
+    .select('id')
+    .single()
+
+  if (acceptanceError) {
+    await admin.auth.admin.deleteUser(signup.user.id).catch(() => undefined)
+    return NextResponse.json({ error: 'Erro ao registrar aceite dos termos.' }, { status: 500 })
+  }
+
+  await auditLog(admin, {
+    workspaceId: workspace.id,
+    userId: signup.user.id,
+    action: 'legal_acceptance',
+    resourceType: 'legal_acceptance',
+    resourceId: acceptance.id,
+    ipAddress,
+    userAgent,
+    metadata: {
+      terms_version: LEGAL_TERMS_VERSION,
+      privacy_version: LEGAL_PRIVACY_VERSION,
+      source: 'signup_with_invite',
+    },
+  })
+
   await auditLog(admin, {
     workspaceId: workspace.id,
     userId: signup.user.id,
@@ -91,6 +133,8 @@ export async function POST(request: NextRequest) {
       source: 'signup_with_invite',
       email,
     },
+    ipAddress,
+    userAgent,
   })
 
   return NextResponse.json({
