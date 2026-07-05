@@ -1,6 +1,41 @@
 import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 
+const sections = [
+  {
+    title: 'Finalidade',
+    body: 'O Júlia Docs organiza dados necessários para cadastro de pacientes, preenchimento de LMEs, geração de documentos do CEAF/SES-MG, acompanhamento de renovações e apoio à rotina assistencial do ambulatório.',
+  },
+  {
+    title: 'Dados tratados',
+    body: 'A plataforma pode tratar dados cadastrais, documentos pessoais, dados de contato, informações clínicas necessárias aos formulários, dados do médico responsável, dados de ambulatório, registros técnicos de acesso e logs de auditoria.',
+  },
+  {
+    title: 'Base de uso',
+    body: 'O uso dos dados ocorre para apoiar assistência à saúde, emissão documental necessária ao tratamento, cumprimento de obrigações legais/regulatórias e segurança da plataforma. Os usuários devem inserir apenas dados necessários ao atendimento e à emissão dos documentos.',
+  },
+  {
+    title: 'Acesso e permissões',
+    body: 'O acesso é separado por ambulatório. Usuários comuns acessam apenas ambulatórios em que entraram por convite. Administradores do ambulatório podem apoiar a gestão de membros. Administradores da plataforma possuem acesso restrito a funções de segurança, auditoria, suspensão, restauração e exportação administrativa.',
+  },
+  {
+    title: 'Segurança',
+    body: 'A plataforma usa autenticação, convite por ambulatório, políticas de banco de dados, timeout por inatividade, auditoria de ações sensíveis, restrição de permissões e mascaramento de CPF/CNS em listas e telas de seleção.',
+  },
+  {
+    title: 'PDFs e arquivos baixados',
+    body: 'Os PDFs são gerados sob demanda e baixados no computador do usuário. Eles não devem ser compartilhados por canais não autorizados e precisam ser armazenados em local seguro após o download.',
+  },
+  {
+    title: 'Retenção e arquivamento',
+    body: 'Cadastros, LMEs e snapshots são mantidos enquanto houver necessidade assistencial, documental ou obrigação legal aplicável. Pacientes excluídos saem dos fluxos normais, mas permanecem arquivados para histórico e auditoria.',
+  },
+  {
+    title: 'Direitos e solicitações',
+    body: 'Solicitações de correção, revisão de acesso, informação sobre dados tratados, exportação administrativa ou avaliação de arquivamento devem ser encaminhadas ao administrador responsável pela plataforma.',
+  },
+]
+
 export default function PrivacidadePage() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -17,52 +52,18 @@ export default function PrivacidadePage() {
 
         <section className="rounded-lg border border-gray-200 bg-white p-6 text-sm leading-6 text-gray-700">
           <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Finalidade</h2>
-              <p className="mt-1">
-                O Júlia Docs organiza dados necessários para cadastro de pacientes, preenchimento de LMEs,
-                geração de documentos do CEAF/SES-MG e acompanhamento assistencial dentro do ambulatório.
-              </p>
-            </div>
+            {sections.map(section => (
+              <div key={section.title}>
+                <h2 className="text-base font-semibold text-gray-900">{section.title}</h2>
+                <p className="mt-1">{section.body}</p>
+              </div>
+            ))}
 
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Dados tratados</h2>
+            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-blue-900">
+              <h2 className="text-base font-semibold">Contato</h2>
               <p className="mt-1">
-                A plataforma pode tratar dados cadastrais, documentos pessoais, informações clínicas necessárias
-                aos formulários, dados do médico responsável, registros de acesso e logs de auditoria.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Acesso e segurança</h2>
-              <p className="mt-1">
-                O acesso aos dados é restrito ao ambulatório do usuário. A plataforma usa autenticação,
-                separação por ambulatório, políticas de banco de dados, auditoria de ações e permissões
-                administrativas para reduzir acessos indevidos.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Minimização e exibição</h2>
-              <p className="mt-1">
-                CPF e CNS são mascarados em listas e telas de seleção. Os documentos completos ficam reservados
-                para telas de detalhe, edição e PDFs oficiais, quando necessários para conferência e emissão.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Retenção</h2>
-              <p className="mt-1">
-                Cadastros, LMEs e snapshots são mantidos enquanto houver necessidade assistencial, documental
-                ou obrigação legal aplicável. Logs de auditoria são mantidos para segurança e rastreabilidade.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Contato</h2>
-              <p className="mt-1">
-                Para solicitar correção, revisão de acesso ou tratar de privacidade, entre em contato com o
-                administrador responsável pelo Júlia Docs.
+                Para tratar de privacidade, segurança, correção de dados ou revisão de acesso,
+                entre em contato com o administrador responsável pelo Júlia Docs.
               </p>
             </div>
           </div>
