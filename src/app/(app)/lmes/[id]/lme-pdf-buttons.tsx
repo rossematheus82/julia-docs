@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { FileText, Loader2, Download, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { confirmSensitivePdfDownload, SENSITIVE_PDF_NOTICE } from '@/lib/utils/sensitive-download'
 
 interface Props {
   lmeId: string
@@ -59,6 +61,7 @@ export function LmePdfButtons({
   const canGenerate = hasLmeData && (situacoesOk ?? true)
 
   async function handleAll() {
+    if (!confirmSensitivePdfDownload()) return
     setGeneratingAll(true)
     try {
       await downloadPdf(lmeId, 'all', `Processo_${diseaseLabel}_${lmeId.slice(0, 8)}.pdf`)
@@ -72,6 +75,7 @@ export function LmePdfButtons({
   }
 
   async function handleLme() {
+    if (!confirmSensitivePdfDownload()) return
     setGeneratingLme(true)
     try {
       await downloadPdf(lmeId, 'lme', `LME_${diseaseLabel}_${lmeId.slice(0, 8)}.pdf`)
@@ -85,6 +89,12 @@ export function LmePdfButtons({
 
   return (
     <div className="space-y-3">
+      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+        <AlertDescription className="text-xs text-amber-900">
+          {SENSITIVE_PDF_NOTICE}
+        </AlertDescription>
+      </Alert>
+
       {/* Botão principal */}
       <Button
         className="w-full gap-2"

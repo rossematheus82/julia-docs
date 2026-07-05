@@ -11,6 +11,8 @@ import { ArrowLeft, Save, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { getCidsByDoenca } from '@/lib/cid10'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { confirmSensitivePdfDownload, SENSITIVE_PDF_NOTICE } from '@/lib/utils/sensitive-download'
 import type { Disease, RequestType, Json } from '@/lib/supabase/types'
 
 interface Props {
@@ -63,6 +65,7 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
       toast.error('Informe se o paciente realizou ou está em tratamento da doença.')
       return
     }
+    if (!confirmSensitivePdfDownload()) return
     setGeneratingPdf(true)
     try {
       const { error } = await supabase
@@ -145,6 +148,12 @@ export function LmeEditClient({ lmeId, disease, requestType, lmeData, specificFo
           onSpecificDataChange={setCurrentSpecificData}
         />
       </div>
+
+      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+        <AlertDescription className="text-xs text-amber-900">
+          {SENSITIVE_PDF_NOTICE}
+        </AlertDescription>
+      </Alert>
 
       <div className="flex justify-between gap-3">
         <Link href={`/lmes/${lmeId}`}>

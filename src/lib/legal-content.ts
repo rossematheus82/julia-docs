@@ -3,8 +3,8 @@ export type LegalSection = {
   body: string
 }
 
-export const LEGAL_TERMS_VERSION = '2026-07-05'
-export const LEGAL_PRIVACY_VERSION = '2026-07-05'
+export const LEGAL_TERMS_VERSION = '2026-07-05.2'
+export const LEGAL_PRIVACY_VERSION = '2026-07-05.2'
 export const LEGAL_EFFECTIVE_DATE = '2026-07-05'
 
 export const TERMS_SECTIONS: LegalSection[] = [
@@ -38,7 +38,7 @@ export const TERMS_SECTIONS: LegalSection[] = [
   },
   {
     title: 'PDFs e documentos baixados',
-    body: 'Os PDFs gerados pela plataforma são baixados no computador do usuário. Após o download, o usuário deve armazenar e compartilhar esses arquivos somente por meios seguros e autorizados pelo fluxo do serviço.',
+    body: 'Os PDFs gerados pela plataforma são baixados no computador do usuário e contêm dados pessoais e de saúde. Após o download, o usuário deve armazenar e compartilhar esses arquivos somente por meios seguros e autorizados pelo fluxo do serviço, evitando dispositivos compartilhados ou canais sem controle institucional.',
   },
   {
     title: 'Auditoria e segurança',
@@ -68,6 +68,10 @@ export const TERMS_SECTIONS: LegalSection[] = [
     title: 'Atualizações dos termos',
     body: 'Estes termos podem ser atualizados para refletir mudanças na plataforma, segurança, governança ou requisitos legais. O uso continuado da plataforma pressupõe ciência das regras vigentes.',
   },
+  {
+    title: 'Retenção e histórico',
+    body: 'Cadastros, LMEs, snapshots e registros de auditoria podem ser mantidos enquanto houver necessidade assistencial, documental, regulatória, de segurança ou de prestação de contas. Quando um paciente é excluído da lista ativa, o cadastro deixa os fluxos normais, mas permanece arquivado para preservar histórico e rastreabilidade. Restauração ou exportação administrativa deve ocorrer apenas por usuários autorizados e mediante finalidade legítima.',
+  },
 ]
 
 export const PRIVACY_SECTIONS: LegalSection[] = [
@@ -93,11 +97,11 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
   },
   {
     title: 'PDFs e arquivos baixados',
-    body: 'Os PDFs são gerados sob demanda e baixados no computador do usuário. Eles não devem ser compartilhados por canais não autorizados e precisam ser armazenados em local seguro após o download.',
+    body: 'Os PDFs são gerados sob demanda e baixados no computador do usuário. Eles contêm dados pessoais e de saúde, não devem ser compartilhados por canais não autorizados e precisam ser armazenados em local seguro após o download.',
   },
   {
     title: 'Retenção e arquivamento',
-    body: 'Cadastros, LMEs e snapshots são mantidos enquanto houver necessidade assistencial, documental ou obrigação legal aplicável. Pacientes excluídos saem dos fluxos normais, mas permanecem arquivados para histórico e auditoria.',
+    body: 'Cadastros, LMEs, snapshots e registros de auditoria são mantidos enquanto houver necessidade assistencial, documental, regulatória, de segurança ou de prestação de contas. Pacientes excluídos saem dos fluxos normais da plataforma, mas permanecem arquivados para preservar histórico, rastreabilidade e eventual revisão administrativa. Restauração ou exportação administrativa deve ocorrer apenas por usuários autorizados e mediante finalidade legítima.',
   },
   {
     title: 'Direitos e solicitações',

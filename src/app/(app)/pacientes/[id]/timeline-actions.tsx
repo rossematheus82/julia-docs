@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Download, RefreshCw, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { confirmSensitivePdfDownload } from '@/lib/utils/sensitive-download'
 
 interface Props {
   lmeId: string
@@ -22,6 +23,7 @@ export function TimelineActions({ lmeId, disease, showRenew }: Props) {
   const label = DISEASE_LABELS[disease] ?? disease
 
   async function download() {
+    if (!confirmSensitivePdfDownload()) return
     setDownloading(true)
     try {
       const res = await fetch('/api/pdf/generate', {
