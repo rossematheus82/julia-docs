@@ -4,6 +4,7 @@ export const PLATFORM_ADMIN_EMAILS = [
 ] as const
 
 export const ADMIN_MFA_REQUIRED_EMAILS = [
+  'drmatheusrosse@gmail.com',
   'rossematheus@gmail.com',
 ] as const
 
