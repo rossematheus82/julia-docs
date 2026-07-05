@@ -103,10 +103,16 @@ export default async function RenovarLmePage({ params }: { params: Promise<{ id:
         <Card>
           <CardHeader><CardTitle className="text-base">Nenhum estabelecimento cadastrado</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-gray-700">Cadastre ao menos um estabelecimento antes de renovar.</p>
-            <Link href="/configuracoes/estabelecimentos">
-              <Button>Cadastrar estabelecimento</Button>
-            </Link>
+            <p className="text-sm text-gray-700">
+              {active.role === 'owner' || active.role === 'admin'
+                ? 'Cadastre ao menos um estabelecimento antes de renovar.'
+                : 'Peça para um administrador do ambulatório cadastrar ao menos um estabelecimento antes de renovar.'}
+            </p>
+            {(active.role === 'owner' || active.role === 'admin') && (
+              <Link href="/configuracoes/estabelecimentos">
+                <Button>Cadastrar estabelecimento</Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       </div>

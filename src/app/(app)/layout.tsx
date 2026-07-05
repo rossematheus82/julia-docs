@@ -16,13 +16,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Lista de todos os workspaces do usuário (para o switcher na sidebar)
   const { data: memberships } = await supabase
     .from('workspace_members')
-    .select('workspace:workspaces(id, name)')
+    .select('role, workspace:workspaces(id, name)')
     .eq('user_id', user.id)
 
-  type Membership = { workspace: { id: string; name: string } | null }
+  type Membership = { role: string; workspace: { id: string; name: string } | null }
   const workspaces = ((memberships ?? []) as unknown as Membership[])
-    .map(m => m.workspace)
-    .filter((w): w is { id: string; name: string } => !!w)
+    .map(m => m.workspace ? { ...m.workspace, role: m.role as 'owner' | 'admin' | 'member' } : null)
+    .filter((w): w is { id: string; name: string; role: 'owner' | 'admin' | 'member' } => !!w)
 
   const activeWorkspace = workspaces.find(w => w.id === active.workspaceId) ?? workspaces[0]
   if (!activeWorkspace) redirect('/onboarding')

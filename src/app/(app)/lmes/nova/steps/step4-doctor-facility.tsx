@@ -12,9 +12,10 @@ interface Props {
   update: (patch: Partial<WizardData>) => void
   doctors: DoctorItem[] // sempre 1 elemento (o médico do usuário logado)
   facilities: FacilityItem[]
+  canManageFacilities: boolean
 }
 
-export function Step4DoctorFacility({ data, update, doctors, facilities }: Props) {
+export function Step4DoctorFacility({ data, update, doctors, facilities, canManageFacilities }: Props) {
   const meuMedico = doctors[0]
   const unicoEstab = facilities.length === 1 ? facilities[0] : null
 
@@ -62,10 +63,17 @@ export function Step4DoctorFacility({ data, update, doctors, facilities }: Props
           </Label>
           {facilities.length === 0 ? (
             <div className="p-3 rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 text-center">
-              Nenhum estabelecimento cadastrado.{' '}
-              <Link href="/configuracoes/estabelecimentos" target="_blank" className="text-blue-600 hover:underline">
-                Cadastrar estabelecimento
-              </Link>
+              Nenhum estabelecimento cadastrado.
+              {canManageFacilities ? (
+                <>
+                  {' '}
+                  <Link href="/configuracoes/estabelecimentos" target="_blank" className="text-blue-600 hover:underline">
+                    Cadastrar estabelecimento
+                  </Link>
+                </>
+              ) : (
+                <span className="block mt-1">Peça para um administrador do ambulatório cadastrar o estabelecimento.</span>
+              )}
             </div>
           ) : unicoEstab ? (
             <div className="p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800">
@@ -73,8 +81,13 @@ export function Step4DoctorFacility({ data, update, doctors, facilities }: Props
               {unicoEstab.cnes ? ` — CNES ${unicoEstab.cnes}` : ''}
               {unicoEstab.city ? ` — ${unicoEstab.city}${unicoEstab.state ? `/${unicoEstab.state}` : ''}` : ''}
               <div className="text-xs text-gray-400 mt-0.5">
-                Selecionado automaticamente (único cadastrado).{' '}
-                <Link href="/configuracoes/estabelecimentos" target="_blank" className="hover:underline">Gerenciar</Link>
+                Selecionado automaticamente (único cadastrado).
+                {canManageFacilities && (
+                  <>
+                    {' '}
+                    <Link href="/configuracoes/estabelecimentos" target="_blank" className="hover:underline">Gerenciar</Link>
+                  </>
+                )}
               </div>
             </div>
           ) : (

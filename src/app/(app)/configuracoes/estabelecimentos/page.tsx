@@ -10,6 +10,8 @@ export default async function EstabelecimentosPage() {
 
   const active = await getActiveWorkspace(supabase, user.id)
   if (!active) redirect('/onboarding')
+  if (active.role !== 'owner' && active.role !== 'admin') redirect('/dashboard')
+
   const memberData = { workspace_id: active.workspaceId }
 
   const { data: facilities } = await supabase

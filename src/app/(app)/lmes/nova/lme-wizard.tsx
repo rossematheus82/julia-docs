@@ -47,10 +47,11 @@ interface Props {
   facilities: FacilityItem[]
   workspaceId: string
   userId: string
+  canManageFacilities: boolean
   defaultPatientId?: string
 }
 
-export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, defaultPatientId }: Props) {
+export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, canManageFacilities, defaultPatientId }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const [step, setStep] = useState(0)
@@ -184,7 +185,7 @@ export function LmeWizard({ patients, doctors, facilities, workspaceId, userId, 
         {step === 0 && <Step1Disease {...stepProps} />}
         {step === 1 && <Step2RequestType {...stepProps} />}
         {step === 2 && <Step3Patient {...stepProps} />}
-        {step === 3 && <Step4DoctorFacility {...stepProps} />}
+        {step === 3 && <Step4DoctorFacility {...stepProps} canManageFacilities={canManageFacilities} />}
         {step === 4 && <Step5Prontuario data={data} update={update} patients={patients} />}
         {step === 5 && <Step6Review {...stepProps} patients={patients} doctors={doctors} facilities={facilities} />}
       </div>

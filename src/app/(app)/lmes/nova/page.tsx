@@ -42,6 +42,7 @@ export default async function NovaLmePage({
       facilities={facilities ?? []}
       workspaceId={active.workspaceId}
       userId={user.id}
+      canManageFacilities={active.role === 'owner' || active.role === 'admin'}
       defaultPatientId={paciente}
     />
   )
