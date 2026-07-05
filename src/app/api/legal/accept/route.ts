@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
 import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@/lib/legal-content'
+import { buildLegalAcceptanceSnapshot } from '@/lib/legal-snapshot'
 import { auditLog } from '@/lib/security/audit'
 
 export async function POST(request: NextRequest) {
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
   const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? request.headers.get('x-real-ip')
   const userAgent = request.headers.get('user-agent')
+  const legalSnapshot = buildLegalAcceptanceSnapshot()
 
   const { data: acceptance, error } = await supabase
     .from('legal_acceptances')
@@ -29,6 +31,8 @@ export async function POST(request: NextRequest) {
       ip_address: ipAddress,
       user_agent: userAgent,
       source: 'required_modal',
+      terms_snapshot: legalSnapshot.terms,
+      privacy_snapshot: legalSnapshot.privacy,
       metadata: {
         workspace_id: active.workspaceId,
         reason: 'terms_or_privacy_updated',
@@ -53,6 +57,7 @@ export async function POST(request: NextRequest) {
       terms_version: LEGAL_TERMS_VERSION,
       privacy_version: LEGAL_PRIVACY_VERSION,
       source: 'required_modal',
+      has_snapshot: true,
     },
   })
 

@@ -164,9 +164,11 @@ export interface Database {
           user_agent: string | null
           source: string
           metadata: Json
+          terms_snapshot: Json | null
+          privacy_snapshot: Json | null
         }
         Insert: Omit<Database['public']['Tables']['legal_acceptances']['Row'], 'id' | 'accepted_at'>
-          & Partial<Pick<Database['public']['Tables']['legal_acceptances']['Row'], 'id' | 'accepted_at' | 'ip_address' | 'user_agent' | 'source' | 'metadata'>>
+          & Partial<Pick<Database['public']['Tables']['legal_acceptances']['Row'], 'id' | 'accepted_at' | 'ip_address' | 'user_agent' | 'source' | 'metadata' | 'terms_snapshot' | 'privacy_snapshot'>>
         Update: never
         Relationships: []
       }

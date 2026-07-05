@@ -48,6 +48,9 @@ export async function POST(request: NextRequest) {
   if (type !== 'lme' && type !== 'all') {
     return NextResponse.json({ error: 'Tipo nao suportado' }, { status: 400 })
   }
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? request.headers.get('x-real-ip')
+  const userAgent = request.headers.get('user-agent')
 
   const active = await getActiveWorkspace(supabase, user.id)
   if (!active) return NextResponse.json({ error: 'Sem workspace' }, { status: 403 })
@@ -199,19 +202,30 @@ export async function POST(request: NextRequest) {
 
       const diseaseLabel = ({ asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP' } as Record<string, string>)[lme.disease] ?? lme.disease
       const [dd, mm, aa] = fillDate.split('/')
+      const fileName = `LME_${diseaseLabel}_${lmeId}_${dd}-${mm}-${aa}.pdf`
       await auditLog(supabase, {
         workspaceId: memberData.workspace_id,
         userId: user.id,
         action: 'pdf_generate',
         resourceType: 'lme',
         resourceId: lmeId,
-        metadata: { type },
+        ipAddress,
+        userAgent,
+        metadata: {
+          type,
+          document_type: 'lme_only',
+          file_name: fileName,
+          patient_id: lme.patient_id,
+          disease: lme.disease,
+          request_type: lme.request_type,
+          created_by_user_id: lme.created_by_user_id,
+        },
       })
       return new NextResponse(Buffer.from(lmePdf), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="LME_${diseaseLabel}_${lmeId}_${dd}-${mm}-${aa}.pdf"`,
+          'Content-Disposition': `attachment; filename="${fileName}"`,
           ...PDF_SECURITY_HEADERS,
         },
       })
@@ -344,20 +358,31 @@ export async function POST(request: NextRequest) {
       const diseaseLabel = ({ asma: 'Asma', dpoc: 'DPOC', 'dpi-fp': 'DPI-FP', hap: 'HAP' } as Record<string, string>)[lme.disease] ?? lme.disease
       const [dd, mm, aa] = fillDate.split('/')
       const dateName = `${dd}-${mm}-${aa}`
+      const fileName = `Processo_${diseaseLabel}_${lmeId}_${dateName}.pdf`
       await auditLog(supabase, {
         workspaceId: memberData.workspace_id,
         userId: user.id,
         action: 'pdf_generate',
         resourceType: 'lme',
         resourceId: lmeId,
-        metadata: { type },
+        ipAddress,
+        userAgent,
+        metadata: {
+          type,
+          document_type: 'full_process',
+          file_name: fileName,
+          patient_id: lme.patient_id,
+          disease: lme.disease,
+          request_type: lme.request_type,
+          created_by_user_id: lme.created_by_user_id,
+        },
       })
 
       return new NextResponse(Buffer.from(processo), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="Processo_${diseaseLabel}_${lmeId}_${dateName}.pdf"`,
+          'Content-Disposition': `attachment; filename="${fileName}"`,
           ...PDF_SECURITY_HEADERS,
         },
       })

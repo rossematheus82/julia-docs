@@ -61,7 +61,7 @@ export default async function AdminPage() {
       .limit(1000),
     admin
       .from('audit_logs')
-      .select('id, workspace_id, user_id, action, resource_type, resource_id, created_at')
+      .select('id, workspace_id, user_id, action, resource_type, resource_id, created_at, ip_address, user_agent, metadata')
       .order('created_at', { ascending: false })
       .limit(500),
     admin
@@ -134,6 +134,9 @@ export default async function AdminPage() {
     resourceType: log.resource_type,
     resourceId: log.resource_id,
     createdAt: log.created_at,
+    ipAddress: log.ip_address,
+    userAgent: log.user_agent,
+    metadata: log.metadata,
   }))
   type LegalAcceptanceQueryRow = {
     id: string

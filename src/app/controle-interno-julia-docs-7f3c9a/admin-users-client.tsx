@@ -61,6 +61,9 @@ export interface AdminAuditRow {
   resourceType: string | null
   resourceId: string | null
   createdAt: string | null
+  ipAddress: string | null
+  userAgent: string | null
+  metadata: unknown
 }
 
 export interface AdminLegalAcceptanceRow {
@@ -167,6 +170,9 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
         log.resourceType,
         formatResourceType(log.resourceType),
         log.resourceId,
+        log.ipAddress,
+        formatUserAgent(log.userAgent),
+        stringifyMetadata(log.metadata),
       ].filter(Boolean).join(' ').toLowerCase()
 
       return haystack.includes(term)
@@ -203,6 +209,37 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
     setAuditStartDate('')
     setAuditEndDate('')
     setAuditSearch('')
+  }
+
+  function exportAuditCsv() {
+    if (filteredAuditLogs.length === 0) {
+      toast.error('Nao ha eventos para exportar.')
+      return
+    }
+
+    const headers = ['data', 'usuario', 'ambulatorio', 'acao', 'recurso_tipo', 'recurso_id', 'ip', 'dispositivo', 'metadata']
+    const rows = filteredAuditLogs.map(log => [
+      log.createdAt ?? '',
+      log.userEmail,
+      log.workspaceName,
+      formatAction(log.action),
+      formatResourceType(log.resourceType),
+      log.resourceId ?? '',
+      log.ipAddress ?? '',
+      formatUserAgent(log.userAgent),
+      stringifyMetadata(log.metadata),
+    ])
+    const csv = [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n')
+    const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `auditoria-julia-docs-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    toast.success('Auditoria exportada.')
   }
 
   async function setStatus(user: AdminUserRow, status: 'active' | 'banned') {
@@ -591,7 +628,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
               </div>
             </div>
 
-            <div className="grid gap-2 lg:grid-cols-[minmax(180px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_140px_140px_minmax(220px,1fr)_auto]">
+            <div className="grid gap-2 lg:grid-cols-[minmax(180px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_140px_140px_minmax(220px,1fr)_auto_auto]">
               <Select value={auditWorkspaceFilter} onValueChange={setAuditWorkspaceFilter}>
                 <SelectTrigger aria-label="Filtrar auditoria por ambulatorio">
                   <SelectValue placeholder="Ambulatorio" />
@@ -660,6 +697,10 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
 
               <Button variant="outline" onClick={clearAuditFilters}>
                 Limpar
+              </Button>
+              <Button variant="outline" onClick={exportAuditCsv} className="gap-1.5">
+                <Download className="h-4 w-4" />
+                CSV
               </Button>
             </div>
           </div>
@@ -743,6 +784,19 @@ function formatUserAgent(userAgent: string | null) {
   if (userAgent.includes('Firefox/')) return 'Mozilla Firefox'
   if (userAgent.includes('Safari/') && !userAgent.includes('Chrome/')) return 'Safari'
   return userAgent.slice(0, 80)
+}
+
+function csvCell(value: string) {
+  return `"${value.replace(/"/g, '""')}"`
+}
+
+function stringifyMetadata(metadata: unknown) {
+  if (!metadata) return ''
+  try {
+    return JSON.stringify(metadata)
+  } catch {
+    return String(metadata)
+  }
 }
 
 function formatAction(action: string) {

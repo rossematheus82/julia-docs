@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { auditLog } from '@/lib/security/audit'
 import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@/lib/legal-content'
+import { buildLegalAcceptanceSnapshot } from '@/lib/legal-snapshot'
 
 function supabaseAdmin() {
   return createClient(
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
   const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? request.headers.get('x-real-ip')
   const userAgent = request.headers.get('user-agent')
+  const legalSnapshot = buildLegalAcceptanceSnapshot()
 
   const { data: acceptance, error: acceptanceError } = await admin
     .from('legal_acceptances')
@@ -95,6 +97,8 @@ export async function POST(request: NextRequest) {
       ip_address: ipAddress,
       user_agent: userAgent,
       source: 'signup_with_invite',
+      terms_snapshot: legalSnapshot.terms,
+      privacy_snapshot: legalSnapshot.privacy,
       metadata: {
         workspace_id: workspace.id,
         accepted_privacy_checkbox: acceptedPrivacy,
@@ -120,6 +124,7 @@ export async function POST(request: NextRequest) {
       terms_version: LEGAL_TERMS_VERSION,
       privacy_version: LEGAL_PRIVACY_VERSION,
       source: 'signup_with_invite',
+      has_snapshot: true,
     },
   })
 
