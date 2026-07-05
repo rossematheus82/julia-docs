@@ -47,6 +47,10 @@ const sections = [
     body: 'O acesso pode ser suspenso ou revisado em caso de uso indevido, risco de segurança, saída do serviço, solicitação administrativa ou necessidade de proteção dos dados.',
   },
   {
+    title: 'Comunicação com a administração',
+    body: 'Solicitações, suspeitas de erro, incidentes, revisão de acesso ou demandas de privacidade devem ser enviadas pela aba flutuante Sugestões / Erros, sem incluir dados de pacientes no texto livre.',
+  },
+  {
     title: 'Disponibilidade e manutenção',
     body: 'A plataforma pode ficar temporariamente indisponível por manutenção, atualização, falha técnica ou dependência de serviços externos. Sempre revise e guarde os documentos necessários conforme o fluxo do serviço.',
   },

@@ -32,7 +32,7 @@ const sections = [
   },
   {
     title: 'Direitos e solicitações',
-    body: 'Solicitações de correção, revisão de acesso, informação sobre dados tratados, exportação administrativa ou avaliação de arquivamento devem ser encaminhadas ao administrador responsável pela plataforma.',
+    body: 'Solicitações de correção, revisão de acesso, informação sobre dados tratados, exportação administrativa ou avaliação de arquivamento devem ser enviadas pela aba flutuante Sugestões / Erros, sem incluir dados sensíveis no texto livre.',
   },
 ]
 
@@ -63,7 +63,7 @@ export default function PrivacidadePage() {
               <h2 className="text-base font-semibold">Contato</h2>
               <p className="mt-1">
                 Para tratar de privacidade, segurança, correção de dados ou revisão de acesso,
-                entre em contato com o administrador responsável pelo Júlia Docs.
+                use a aba flutuante Sugestões / Erros dentro da plataforma. Não inclua dados de pacientes na mensagem.
               </p>
             </div>
           </div>
