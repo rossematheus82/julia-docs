@@ -2,7 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { ShieldCheck, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { isPlatformAdminEmail } from '@/lib/platform-admin'
+import { isPlatformAdminEmail, requiresAdminMfa } from '@/lib/platform-admin'
+import { hasVerifiedMfaSession } from '@/lib/security/mfa'
 import {
   AdminUsersClient,
   type AdminAuditRow,
@@ -35,6 +36,10 @@ export default async function AdminPage() {
   const isAdmin = isPlatformAdminEmail(user.email)
     || (currentPlatformUser?.role === 'platform_admin' && currentPlatformUser?.status === 'active')
   if (!isAdmin) notFound()
+  if (requiresAdminMfa(user.email)) {
+    const verifiedMfa = await hasVerifiedMfaSession(supabase)
+    if (!verifiedMfa) redirect('/seguranca-admin-mfa?next=/controle-interno-julia-docs-7f3c9a')
+  }
 
   const { data: authUsers, error: usersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
   if (usersError) throw usersError

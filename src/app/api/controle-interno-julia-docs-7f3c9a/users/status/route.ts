@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
-import { isPlatformAdminEmail } from '@/lib/platform-admin'
+import { isPlatformAdminEmail, requiresAdminMfa } from '@/lib/platform-admin'
 import { UUID_RE, readJsonBody } from '@/lib/api/security'
+import { hasVerifiedMfaSession } from '@/lib/security/mfa'
 
 function createAdminClient() {
   return createSupabaseClient(
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
   const isAdmin = isPlatformAdminEmail(user.email)
     || (platformUser?.role === 'platform_admin' && platformUser?.status === 'active')
   if (!isAdmin) return NextResponse.json({ error: 'Sem permissao' }, { status: 403 })
+  if (requiresAdminMfa(user.email) && !(await hasVerifiedMfaSession(supabase))) {
+    return NextResponse.json({ error: 'MFA obrigatorio para esta conta administrativa.' }, { status: 403 })
+  }
 
   const parsed = await readJsonBody<{ userId?: unknown; status?: unknown }>(request, 8 * 1024)
   if ('response' in parsed) return parsed.response

@@ -59,6 +59,7 @@ export async function middleware(request: NextRequest) {
   const isOnboarding = path.startsWith('/onboarding')
   const isPerfilNovo = path.startsWith('/perfil-medico/novo')
   const isAdminRoute = path.startsWith('/controle-interno-julia-docs-7f3c9a')
+  const isAdminMfaRoute = path.startsWith('/seguranca-admin-mfa')
   const isApiRoute = path.startsWith('/api')
   const isSuspendedAccessRoute = path.startsWith('/acesso-suspenso')
   const isPublic = isAuthRoute || isApiRoute || path === '/'
@@ -103,7 +104,7 @@ export async function middleware(request: NextRequest) {
   // Para todas as páginas autenticadas (exceto onboarding/perfil novo/API/login):
   // 1) precisa de workspace ativo
   // 2) precisa de perfil de médico naquele workspace
-  if (user && !isPublic && !isOnboarding && !isPerfilNovo && !isAdminRoute) {
+  if (user && !isPublic && !isOnboarding && !isPerfilNovo && !isAdminRoute && !isAdminMfaRoute) {
     const { data: memberships } = await supabase
       .from('workspace_members')
       .select('workspace_id')
