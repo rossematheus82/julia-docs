@@ -70,6 +70,10 @@ export interface AdminLegalAcceptanceRow {
   privacyVersion: string | null
   acceptedAt: string | null
   source: string | null
+  ipAddress: string | null
+  userAgent: string | null
+  workspaceId: string | null
+  workspaceName: string | null
 }
 
 interface Props {
@@ -183,6 +187,9 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
         row.termsVersion,
         row.privacyVersion,
         row.source,
+        row.ipAddress,
+        row.workspaceName,
+        formatUserAgent(row.userAgent),
       ].filter(Boolean).join(' ').toLowerCase()
 
       return haystack.includes(term)
@@ -384,7 +391,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-sm">
+          <table className="w-full min-w-[1080px] text-sm">
             <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Usuario</th>
@@ -392,6 +399,8 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                 <th className="px-4 py-3 font-medium">Termos</th>
                 <th className="px-4 py-3 font-medium">Privacidade</th>
                 <th className="px-4 py-3 font-medium">Registrado em</th>
+                <th className="px-4 py-3 font-medium">Ambulatorio/IP</th>
+                <th className="px-4 py-3 font-medium">Dispositivo</th>
                 <th className="px-4 py-3 font-medium">Origem</th>
               </tr>
             </thead>
@@ -418,6 +427,11 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
                       )}
                     </td>
                     <td className="px-4 py-3 text-gray-600">{formatDate(row.acceptedAt)}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      <div>{row.workspaceName ?? '-'}</div>
+                      <div className="font-mono text-[11px] text-gray-400">{row.ipAddress ?? '-'}</div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{formatUserAgent(row.userAgent)}</td>
                     <td className="px-4 py-3 text-gray-600">{formatLegalSource(row.source)}</td>
                   </tr>
                 )
@@ -425,7 +439,7 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
 
               {filteredLegalAcceptances.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
                     Nenhum aceite encontrado para os filtros selecionados.
                   </td>
                 </tr>
@@ -716,9 +730,19 @@ function formatLegalSource(source: string | null) {
   const labels: Record<string, string> = {
     signup_with_invite: 'Cadastro com convite',
     signup: 'Cadastro',
+    required_modal: 'Atualizacao obrigatoria',
   }
   if (!source) return '-'
   return labels[source] ?? source
+}
+
+function formatUserAgent(userAgent: string | null) {
+  if (!userAgent) return '-'
+  if (userAgent.includes('Edg/')) return 'Microsoft Edge'
+  if (userAgent.includes('Chrome/')) return 'Google Chrome'
+  if (userAgent.includes('Firefox/')) return 'Mozilla Firefox'
+  if (userAgent.includes('Safari/') && !userAgent.includes('Chrome/')) return 'Safari'
+  return userAgent.slice(0, 80)
 }
 
 function formatAction(action: string) {

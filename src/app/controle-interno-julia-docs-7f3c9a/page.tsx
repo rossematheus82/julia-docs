@@ -66,7 +66,7 @@ export default async function AdminPage() {
       .limit(500),
     admin
       .from('legal_acceptances')
-      .select('id, user_id, terms_version, privacy_version, accepted_at, source')
+      .select('id, user_id, terms_version, privacy_version, accepted_at, source, ip_address, user_agent, metadata')
       .in('user_id', userIds)
       .order('accepted_at', { ascending: false }),
   ])
@@ -142,6 +142,9 @@ export default async function AdminPage() {
     privacy_version: string
     accepted_at: string
     source: string
+    ip_address: string | null
+    user_agent: string | null
+    metadata: { workspace_id?: string } | null
   }
   const latestAcceptanceByUser = new Map<string, LegalAcceptanceQueryRow>()
   for (const acceptance of legalAcceptances ?? []) {
@@ -157,6 +160,12 @@ export default async function AdminPage() {
       termsVersion: acceptance?.terms_version ?? null,
       privacyVersion: acceptance?.privacy_version ?? null,
       source: acceptance?.source ?? null,
+      ipAddress: acceptance?.ip_address ?? null,
+      userAgent: acceptance?.user_agent ?? null,
+      workspaceId: acceptance?.metadata?.workspace_id ?? null,
+      workspaceName: acceptance?.metadata?.workspace_id
+        ? workspaceNameById.get(acceptance.metadata.workspace_id) ?? 'Ambulatorio removido'
+        : null,
     }
   })
 
