@@ -254,7 +254,11 @@ export default function LoginPage() {
                     className="mt-0.5"
                   />
                   <span>
-                    Confirmo que li e estou ciente do uso de dados pessoais e de saúde conforme a{' '}
+                    Confirmo que li e estou ciente dos{' '}
+                    <Link href="/termos" target="_blank" className="font-medium text-blue-700 hover:underline">
+                      Termos de Uso
+                    </Link>
+                    {' '}e da{' '}
                     <Link href="/privacidade" target="_blank" className="font-medium text-blue-700 hover:underline">
                       Política de Privacidade
                     </Link>
