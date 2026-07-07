@@ -7,8 +7,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Júlia Docs — LMEs CEAF/SES-MG',
-  description: 'Plataforma de automação de LMEs para Pneumologia',
+  title: 'JúliaDocs',
+  description: 'Documentos do ambulatório com mais agilidade e segurança',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
