@@ -9,6 +9,7 @@ import {
   type AdminAuditRow,
   type AdminLegalAcceptanceRow,
   type AdminPatientRow,
+  type AdminSecurityAlertRow,
   type AdminUserRow,
   type AdminWorkspaceRow,
 } from './admin-users-client'
@@ -54,6 +55,7 @@ export default async function AdminPage() {
     { data: patients },
     { data: auditLogs },
     { data: legalAcceptances },
+    { data: securityAlerts },
   ] = await Promise.all([
     admin.from('platform_users').select('user_id, email, role, status').in('user_id', userIds),
     admin.from('workspace_members').select('user_id, workspace_id').in('user_id', userIds),
@@ -74,6 +76,11 @@ export default async function AdminPage() {
       .select('id, user_id, terms_version, privacy_version, accepted_at, source, ip_address, user_agent, metadata')
       .in('user_id', userIds)
       .order('accepted_at', { ascending: false }),
+    admin
+      .from('security_alerts')
+      .select('id, severity, type, title, description, workspace_id, user_id, resource_type, resource_id, ip_address, emailed_at, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
   ])
 
   const platformByUser = new Map((platformRows ?? []).map(row => [row.user_id as string, row]))
@@ -176,6 +183,22 @@ export default async function AdminPage() {
         : null,
     }
   })
+  const securityAlertRows: AdminSecurityAlertRow[] = (securityAlerts ?? []).map(alert => ({
+    id: alert.id,
+    severity: alert.severity,
+    type: alert.type,
+    title: alert.title,
+    description: alert.description,
+    workspaceId: alert.workspace_id,
+    workspaceName: alert.workspace_id ? workspaceNameById.get(alert.workspace_id) ?? 'Ambulatorio removido' : 'Plataforma',
+    userId: alert.user_id,
+    userEmail: alert.user_id ? emailByUserId.get(alert.user_id) ?? alert.user_id : 'Sistema',
+    resourceType: alert.resource_type,
+    resourceId: alert.resource_id,
+    ipAddress: alert.ip_address,
+    emailedAt: alert.emailed_at,
+    createdAt: alert.created_at,
+  }))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -205,6 +228,7 @@ export default async function AdminPage() {
           patients={patientRows}
           auditLogs={auditRows}
           legalAcceptances={legalAcceptanceRows}
+          securityAlerts={securityAlertRows}
         />
       </main>
     </div>

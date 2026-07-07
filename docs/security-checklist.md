@@ -18,6 +18,9 @@ Estado controlado pelo repositório:
 - CPF e CNS aparecem mascarados em listas e seleções, com dados completos apenas onde necessário.
 - Exclusão de paciente usa arquivamento lógico (`deleted_at`) e preserva histórico/auditoria.
 - Painel administrativo permite filtrar auditoria, exportar auditoria filtrada em CSV, suspender usuários, restaurar pacientes arquivados e exportar dados administrativos do paciente em JSON.
+- Alertas de segurança ficam registrados em `security_alerts` e aparecem no painel administrativo.
+- Alertas de severidade média/alta podem ser enviados por email via Resend para `SECURITY_ALERT_TO` ou `FEEDBACK_TO`.
+- Alertas iniciais cobrem exportação administrativa de paciente, tentativa administrativa sem MFA e volume incomum de PDFs gerados.
 - Papéis por ambulatório usam `owner`, `admin` e `member`; proprietários podem promover/rebaixar admins do ambulatório.
 - Contas administrativas principais exigem MFA/TOTP para acessar o painel administrativo e APIs administrativas: `drmatheusrosse@gmail.com` e `rossematheus@gmail.com`.
 - Bucket `lme-pdfs` é privado.
@@ -32,6 +35,8 @@ Configurações externas para marcar manualmente:
 - GitHub Push Protection ativado.
 - MFA obrigatório nas contas GitHub, Supabase e Vercel.
 - Supabase Auth MFA/TOTP habilitado para permitir a verificação das contas administrativas dentro da plataforma.
+- `RESEND_API_KEY` configurado na Vercel para envio de feedback e alertas de segurança por email.
+- `SECURITY_ALERT_TO` configurado quando o destinatário dos alertas de segurança for diferente de `FEEDBACK_TO`.
 - Secrets reais apenas na Vercel/Supabase, nunca no GitHub.
 - Supabase Backup/PITR configurado no painel do projeto quando o plano permitir; enquanto isso, fazer backup manual antes de migrations sensíveis.
 - Job agendado para `select prune_audit_logs(3650);` conforme política aprovada.

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { type SupportedDisease } from '@/lib/pdf/fill-specific'
 import { gerarProcessoCompleto } from '@/lib/pdf/merge-processo'
@@ -9,8 +10,18 @@ import { getActiveWorkspace } from '@/lib/active-workspace'
 import { readJsonBody, UUID_RE, safeErrorMessage } from '@/lib/api/security'
 import { auditLog } from '@/lib/security/audit'
 import { logError } from '@/lib/security/logger'
+import { createSecurityAlert } from '@/lib/security/alerts'
+import type { Database } from '@/lib/supabase/types'
 
 type Snap = Record<string, unknown>
+
+function createAdminClient() {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  )
+}
 
 /** Nome da doença a partir do código CID (mesma fonte usada na UI). */
 function diagnosticoDoCid(cid: string): string {
@@ -27,6 +38,55 @@ const PDF_SECURITY_HEADERS = {
 
 function str(v: unknown): string {
   return v != null ? String(v) : ''
+}
+
+async function alertIfHighPdfVolume(input: {
+  userId: string
+  workspaceId: string
+  lmeId: string
+  patientId: string | null
+  documentType: string
+  ipAddress?: string | null
+  userAgent?: string | null
+}) {
+  const admin = createAdminClient()
+  const since = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+  const [{ count }, { data: recentAlert }] = await Promise.all([
+    admin
+      .from('audit_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', input.userId)
+      .eq('action', 'pdf_generate')
+      .gte('created_at', since),
+    admin
+      .from('security_alerts')
+      .select('id')
+      .eq('user_id', input.userId)
+      .eq('type', 'high_pdf_volume')
+      .gte('created_at', since)
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  if ((count ?? 0) < 20 || recentAlert) return
+
+  await createSecurityAlert(admin, {
+    severity: 'medium',
+    type: 'high_pdf_volume',
+    title: 'Volume incomum de PDFs gerados',
+    description: 'Um usuario gerou 20 ou mais PDFs em 10 minutos.',
+    workspaceId: input.workspaceId,
+    userId: input.userId,
+    resourceType: 'lme',
+    resourceId: input.lmeId,
+    ipAddress: input.ipAddress,
+    userAgent: input.userAgent,
+    metadata: {
+      pdf_count_10_min: count ?? 0,
+      patient_id: input.patientId,
+      document_type: input.documentType,
+    },
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -221,6 +281,15 @@ export async function POST(request: NextRequest) {
           created_by_user_id: lme.created_by_user_id,
         },
       })
+      await alertIfHighPdfVolume({
+        userId: user.id,
+        workspaceId: memberData.workspace_id,
+        lmeId,
+        patientId: lme.patient_id,
+        documentType: 'lme_only',
+        ipAddress,
+        userAgent,
+      })
       return new NextResponse(Buffer.from(lmePdf), {
         status: 200,
         headers: {
@@ -376,6 +445,15 @@ export async function POST(request: NextRequest) {
           request_type: lme.request_type,
           created_by_user_id: lme.created_by_user_id,
         },
+      })
+      await alertIfHighPdfVolume({
+        userId: user.id,
+        workspaceId: memberData.workspace_id,
+        lmeId,
+        patientId: lme.patient_id,
+        documentType: 'full_process',
+        ipAddress,
+        userAgent,
       })
 
       return new NextResponse(Buffer.from(processo), {

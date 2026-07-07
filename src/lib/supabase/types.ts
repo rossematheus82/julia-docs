@@ -172,6 +172,28 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      security_alerts: {
+        Row: {
+          id: number
+          severity: 'low' | 'medium' | 'high'
+          type: string
+          title: string
+          description: string
+          workspace_id: string | null
+          user_id: string | null
+          resource_type: string | null
+          resource_id: string | null
+          ip_address: string | null
+          user_agent: string | null
+          metadata: Json
+          emailed_at: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['security_alerts']['Row'], 'id' | 'created_at'>
+          & Partial<Pick<Database['public']['Tables']['security_alerts']['Row'], 'id' | 'created_at' | 'metadata' | 'emailed_at'>>
+        Update: never
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

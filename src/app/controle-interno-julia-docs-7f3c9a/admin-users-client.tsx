@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Activity, Ban, CheckCircle2, ClipboardCheck, Download, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
+import { Activity, AlertTriangle, Ban, CheckCircle2, ClipboardCheck, Download, Loader2, RotateCcw, Search, Stethoscope, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatarData, formatarDataHora } from '@/lib/utils/date'
 import { mascararCns, mascararCpf } from '@/lib/utils/privacy'
@@ -79,6 +79,23 @@ export interface AdminLegalAcceptanceRow {
   workspaceName: string | null
 }
 
+export interface AdminSecurityAlertRow {
+  id: number
+  severity: 'low' | 'medium' | 'high'
+  type: string
+  title: string
+  description: string
+  workspaceId: string | null
+  workspaceName: string
+  userId: string | null
+  userEmail: string
+  resourceType: string | null
+  resourceId: string | null
+  ipAddress: string | null
+  emailedAt: string | null
+  createdAt: string | null
+}
+
 interface Props {
   users: AdminUserRow[]
   currentUserId: string
@@ -86,9 +103,10 @@ interface Props {
   patients: AdminPatientRow[]
   auditLogs: AdminAuditRow[]
   legalAcceptances: AdminLegalAcceptanceRow[]
+  securityAlerts: AdminSecurityAlertRow[]
 }
 
-export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs, legalAcceptances }: Props) {
+export function AdminUsersClient({ users, currentUserId, workspaces, patients, auditLogs, legalAcceptances, securityAlerts }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [restoringPatientId, setRestoringPatientId] = useState<string | null>(null)
@@ -384,6 +402,69 @@ export function AdminUsersClient({ users, currentUserId, workspaces, patients, a
             })}
           </tbody>
         </table>
+      </section>
+
+      <section className="rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Alertas de seguranca</h2>
+              <p className="text-sm text-gray-500">
+                {securityAlerts.length} alerta(s) recente(s)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[980px] text-sm">
+            <thead className="border-b bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Data</th>
+                <th className="px-4 py-3 font-medium">Nivel</th>
+                <th className="px-4 py-3 font-medium">Alerta</th>
+                <th className="px-4 py-3 font-medium">Usuario</th>
+                <th className="px-4 py-3 font-medium">Ambulatorio/IP</th>
+                <th className="px-4 py-3 font-medium">Email</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {securityAlerts.map(alert => (
+                <tr key={alert.id} className="hover:bg-gray-50/70">
+                  <td className="px-4 py-3 text-gray-600">{formatDate(alert.createdAt)}</td>
+                  <td className="px-4 py-3">{renderSecuritySeverityBadge(alert.severity)}</td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-gray-900">{alert.title}</div>
+                    <div className="max-w-[360px] truncate text-xs text-gray-500" title={alert.description}>{alert.description}</div>
+                    <div className="text-[11px] text-gray-400">{formatSecurityAlertType(alert.type)}</div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="max-w-[220px] truncate text-gray-900" title={alert.userEmail}>{alert.userEmail}</div>
+                    {alert.userId && <div className="font-mono text-[11px] text-gray-400">{alert.userId}</div>}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    <div>{alert.workspaceName}</div>
+                    <div className="font-mono text-[11px] text-gray-400">{alert.ipAddress ?? '-'}</div>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {alert.emailedAt ? formatDate(alert.emailedAt) : 'Nao enviado'}
+                  </td>
+                </tr>
+              ))}
+
+              {securityAlerts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                    Nenhum alerta de seguranca recente.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white">
@@ -765,6 +846,21 @@ function renderLegalAcceptanceBadge(status: string) {
   if (status === 'current') return <Badge className="bg-green-100 text-green-700">Atualizado</Badge>
   if (status === 'outdated') return <Badge className="bg-amber-100 text-amber-700">Versao antiga</Badge>
   return <Badge className="bg-gray-100 text-gray-700">Sem registro</Badge>
+}
+
+function renderSecuritySeverityBadge(severity: AdminSecurityAlertRow['severity']) {
+  if (severity === 'high') return <Badge className="bg-red-100 text-red-700">Alto</Badge>
+  if (severity === 'medium') return <Badge className="bg-amber-100 text-amber-700">Medio</Badge>
+  return <Badge className="bg-blue-100 text-blue-700">Baixo</Badge>
+}
+
+function formatSecurityAlertType(type: string) {
+  const labels: Record<string, string> = {
+    admin_mfa_missing: 'Admin sem MFA',
+    patient_admin_export: 'Exportacao administrativa',
+    high_pdf_volume: 'Volume incomum de PDFs',
+  }
+  return labels[type] ?? type
 }
 
 function formatLegalSource(source: string | null) {

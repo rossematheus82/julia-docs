@@ -5,6 +5,7 @@ import { isPlatformAdminEmail, requiresAdminMfa } from '@/lib/platform-admin'
 import { UUID_RE, readJsonBody } from '@/lib/api/security'
 import { auditLog } from '@/lib/security/audit'
 import { hasVerifiedMfaSession } from '@/lib/security/mfa'
+import { createSecurityAlert } from '@/lib/security/alerts'
 
 function createAdminClient() {
   return createSupabaseClient(
@@ -30,6 +31,16 @@ export async function POST(request: NextRequest) {
     || (platformUser?.role === 'platform_admin' && platformUser?.status === 'active')
   if (!isAdmin) return NextResponse.json({ error: 'Sem permissao' }, { status: 403 })
   if (requiresAdminMfa(user.email) && !(await hasVerifiedMfaSession(supabase))) {
+    await createSecurityAlert(admin, {
+      severity: 'high',
+      type: 'admin_mfa_missing',
+      title: 'Tentativa administrativa sem MFA',
+      description: 'Conta administrativa tentou exportar paciente sem MFA validado.',
+      userId: user.id,
+      resourceType: 'admin_api',
+      resourceId: 'patients/export',
+      metadata: { email: user.email ?? null },
+    })
     return NextResponse.json({ error: 'MFA obrigatorio para esta conta administrativa.' }, { status: 403 })
   }
 
@@ -78,6 +89,20 @@ export async function POST(request: NextRequest) {
     workspaceId: patient.workspace_id,
     userId: user.id,
     action: 'patient_export',
+    resourceType: 'patient',
+    resourceId: patient.id,
+    metadata: {
+      lmes_count: lmes?.length ?? 0,
+      audit_logs_count: auditLogs?.length ?? 0,
+    },
+  })
+  await createSecurityAlert(admin, {
+    severity: 'high',
+    type: 'patient_admin_export',
+    title: 'Exportacao administrativa de paciente',
+    description: 'Dados administrativos de um paciente foram exportados por conta administrativa.',
+    workspaceId: patient.workspace_id,
+    userId: user.id,
     resourceType: 'patient',
     resourceId: patient.id,
     metadata: {

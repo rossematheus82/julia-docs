@@ -5,6 +5,7 @@ import { isPlatformAdminEmail, requiresAdminMfa } from '@/lib/platform-admin'
 import { UUID_RE, readJsonBody } from '@/lib/api/security'
 import { auditLog } from '@/lib/security/audit'
 import { hasVerifiedMfaSession } from '@/lib/security/mfa'
+import { createSecurityAlert } from '@/lib/security/alerts'
 
 function createAdminClient() {
   return createSupabaseClient(
@@ -30,6 +31,16 @@ export async function POST(request: NextRequest) {
     || (platformUser?.role === 'platform_admin' && platformUser?.status === 'active')
   if (!isAdmin) return NextResponse.json({ error: 'Sem permissao' }, { status: 403 })
   if (requiresAdminMfa(user.email) && !(await hasVerifiedMfaSession(supabase))) {
+    await createSecurityAlert(admin, {
+      severity: 'high',
+      type: 'admin_mfa_missing',
+      title: 'Tentativa administrativa sem MFA',
+      description: 'Conta administrativa tentou restaurar paciente sem MFA validado.',
+      userId: user.id,
+      resourceType: 'admin_api',
+      resourceId: 'patients/restore',
+      metadata: {},
+    })
     return NextResponse.json({ error: 'MFA obrigatorio para esta conta administrativa.' }, { status: 403 })
   }
 
