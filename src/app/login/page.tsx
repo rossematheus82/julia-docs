@@ -39,6 +39,8 @@ export default function LoginPage() {
   const [signupInviteCode, setSignupInviteCode] = useState('')
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [forgotEmail, setForgotEmail] = useState('')
+  const [signupConfirmationEmail, setSignupConfirmationEmail] = useState('')
+  const [signupWorkspaceName, setSignupWorkspaceName] = useState('')
   const [legalModal, setLegalModal] = useState<LegalModal>(null)
 
   function set(field: 'email' | 'password', value: string) {
@@ -78,6 +80,14 @@ export default function LoginPage() {
     const body = await res.json().catch(() => ({}))
     if (!res.ok) {
       toast.error(body.error ?? 'Erro ao criar conta')
+      setLoading(false)
+      return
+    }
+
+    if (body.needsEmailConfirmation) {
+      setSignupConfirmationEmail(form.email)
+      setSignupWorkspaceName(body.workspaceName ?? '')
+      toast.success('Conta criada! Confirme seu email para liberar o acesso.')
       setLoading(false)
       return
     }
@@ -214,6 +224,30 @@ export default function LoginPage() {
 
             {/* ── Criar conta ── */}
             {tab === 'signup' && (
+              signupConfirmationEmail ? (
+                <div className="flex flex-col items-center gap-3 py-4 text-center">
+                  <Mail className="h-10 w-10 text-blue-600" />
+                  <div>
+                    <p className="font-medium text-gray-900">Confirme seu email</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Enviamos um link de confirmacao para <strong>{signupConfirmationEmail}</strong>.
+                      Abra sua caixa de entrada, confirme o cadastro e depois volte para entrar na plataforma.
+                    </p>
+                    {signupWorkspaceName && (
+                      <p className="text-xs text-gray-400 mt-2">
+                        Apos confirmar, sua conta estara vinculada ao ambulatorio {signupWorkspaceName}.
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setTab('login'); setSignupConfirmationEmail(''); setSignupWorkspaceName('') }}
+                    className="text-sm text-blue-600 hover:underline mt-2"
+                  >
+                    Ir para o login
+                  </button>
+                </div>
+              ) : (
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-1">
                   <Label htmlFor="email-signup">Email</Label>
@@ -286,9 +320,10 @@ export default function LoginPage() {
                   {loading ? 'Criando conta...' : 'Criar conta'}
                 </Button>
                 <p className="text-xs text-gray-500 text-center">
-                  O acesso ao dashboard depende de um convite valido do ambulatorio
+                  Depois de criar a conta, voce pode precisar confirmar o email antes de entrar.
                 </p>
               </form>
+              )
             )}
 
             {/* ── Recuperar senha ── */}
