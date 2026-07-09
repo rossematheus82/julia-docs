@@ -235,6 +235,10 @@ type WrappedPrep = {
   items: { pageIndex: number; x: number; yTop: number; lines: string[]; fontSize: number; lineHeight: number }[]
 }
 
+const HAP_EXAM_RESULT_FIELDS = new Set([
+  'Text25', 'Text26', 'Text67', 'Text28', 'Text29', 'Text30', 'Text31', 'Text68', 'Text33',
+])
+
 /** Calcula posições e linhas dos campos de texto longo. Chamar ANTES do flatten
  *  (o flatten remove os widgets, perdendo os Rects). */
 export async function prepareWrappedText(doc: PDFDocument, wrappedText?: Record<string, string>): Promise<WrappedPrep | null> {
@@ -253,10 +257,12 @@ export async function prepareWrappedText(doc: PDFDocument, wrappedText?: Record<
     // Auto-ajuste: reduz a fonte (10→7) até o texto caber inteiro na altura da caixa.
     // O espaçamento de 1.08 mantém a leitura e permite até 7 linhas na caixa de
     // anamnese da LME, sem ultrapassar o retângulo oficial.
+    const compact = HAP_EXAM_RESULT_FIELDS.has(name)
+    const sizes = compact ? [8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5] : [10, 9.5, 9, 8.5, 8, 7.5, 7]
     let fontSize = 10, lineHeight = fontSize * 1.15
     let lines = wrapToWidth(value, font, fontSize, maxWidth)
-    for (const size of [10, 9.5, 9, 8.5, 8, 7.5, 7]) {
-      const lh = size * 1.08
+    for (const size of sizes) {
+      const lh = size * (compact ? 0.98 : 1.08)
       const maxLines = Math.max(1, Math.floor((boxHeight - 1) / lh))
       const wrapped = wrapToWidth(value, font, size, maxWidth)
       fontSize = size; lineHeight = lh; lines = wrapped.slice(0, maxLines)
