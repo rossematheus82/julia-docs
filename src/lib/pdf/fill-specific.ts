@@ -168,6 +168,27 @@ export function paintCheckedMarks(doc: PDFDocument, marks: CheckedMark[]): void 
  *  quebrando palavras longas demais. */
 function wrapToWidth(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const out: string[] = []
+  const takePrefix = (value: string, width: number) => {
+    let chunk = ''
+    let index = 0
+    for (const ch of value) {
+      if (chunk && font.widthOfTextAtSize(chunk + ch, size) > width) break
+      chunk += ch
+      index += ch.length
+    }
+    return { chunk, rest: value.slice(index) }
+  }
+  const pushLongWord = (value: string) => {
+    let rest = value
+    while (font.widthOfTextAtSize(rest, size) > maxWidth) {
+      const part = takePrefix(rest, maxWidth)
+      if (!part.chunk) break
+      out.push(part.chunk)
+      rest = part.rest
+    }
+    return rest
+  }
+
   for (const paragraph of String(text).split('\n')) {
     const words = paragraph.split(/\s+/).filter(Boolean)
     if (words.length === 0) { out.push(''); continue }
@@ -175,14 +196,22 @@ function wrapToWidth(text: string, font: PDFFont, size: number, maxWidth: number
     for (const word of words) {
       const test = line ? `${line} ${word}` : word
       if (font.widthOfTextAtSize(test, size) <= maxWidth) { line = test; continue }
-      if (line) { out.push(line); line = '' }
-      if (font.widthOfTextAtSize(word, size) > maxWidth) {
-        let chunk = ''
-        for (const ch of word) {
-          if (chunk && font.widthOfTextAtSize(chunk + ch, size) > maxWidth) { out.push(chunk); chunk = ch }
-          else chunk += ch
+      if (line) {
+        const prefix = `${line} `
+        const remainingWidth = maxWidth - font.widthOfTextAtSize(prefix, size)
+        if (remainingWidth > 0 && font.widthOfTextAtSize(word, size) > remainingWidth) {
+          const part = takePrefix(word, remainingWidth)
+          if (part.chunk) {
+            out.push(prefix + part.chunk)
+            line = part.rest ? pushLongWord(part.rest) : ''
+            continue
+          }
         }
-        line = chunk
+        out.push(line)
+        line = ''
+      }
+      if (font.widthOfTextAtSize(word, size) > maxWidth) {
+        line = pushLongWord(word)
       } else {
         line = word
       }
