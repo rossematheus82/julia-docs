@@ -12,6 +12,7 @@ import { confirmSensitivePdfDownload, SENSITIVE_PDF_NOTICE } from '@/lib/utils/s
 interface Props {
   lmeId: string
   disease: string
+  requestType: string
   hasLmeData: boolean
   hasSpecificFormData: boolean
   lmePdfUrl: string | null
@@ -48,7 +49,7 @@ const DISEASE_LABELS: Record<string, string> = {
 }
 
 export function LmePdfButtons({
-  lmeId, disease, hasLmeData,
+  lmeId, disease, requestType, hasLmeData,
   situacoesOk,
   isCreator,
 }: Props) {
@@ -58,14 +59,21 @@ export function LmePdfButtons({
   const [showIndividual, setShowIndividual] = useState(false)
 
   const diseaseLabel = DISEASE_LABELS[disease] ?? disease
-  const canGenerate = hasLmeData && (situacoesOk ?? true)
+  const isRenewal = requestType === 'renovacao'
+  const canGenerate = hasLmeData && (isRenewal || (situacoesOk ?? true))
+  const mainLabel = isRenewal ? 'Gerar LME + Receita' : 'Gerar processo completo'
+  const downloadLabel = isRenewal ? 'Baixar LME + Receita original' : 'Baixar processo original'
+  const generatingLabel = isRenewal ? 'Gerando LME + receita...' : 'Gerando processo...'
+  const successLabel = isRenewal ? 'LME + receita geradas! Status atualizado para Emitida.' : 'Processo completo gerado! Status atualizado para Emitida.'
+  const downloadedLabel = isRenewal ? 'LME + receita original baixada.' : 'Processo original baixado.'
+  const filenamePrefix = isRenewal ? 'LME_Receita' : 'Processo'
 
   async function handleAll() {
     if (!confirmSensitivePdfDownload()) return
     setGeneratingAll(true)
     try {
-      await downloadPdf(lmeId, 'all', `Processo_${diseaseLabel}_${lmeId.slice(0, 8)}.pdf`)
-      toast.success(isCreator ? 'Processo completo gerado! Status atualizado para Emitida.' : 'Processo original baixado.')
+      await downloadPdf(lmeId, 'all', `${filenamePrefix}_${diseaseLabel}_${lmeId.slice(0, 8)}.pdf`)
+      toast.success(isCreator ? successLabel : downloadedLabel)
       router.refresh()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao gerar processo')
@@ -102,10 +110,10 @@ export function LmePdfButtons({
         disabled={!canGenerate || generatingAll}
       >
         {generatingAll
-          ? <><Loader2 className="h-4 w-4 animate-spin" /> {isCreator ? 'Gerando processo...' : 'Baixando...'}</>
+          ? <><Loader2 className="h-4 w-4 animate-spin" /> {isCreator ? generatingLabel : 'Baixando...'}</>
           : <>
               {isCreator ? <FileText className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-              {isCreator ? 'Gerar processo completo' : 'Baixar processo original'}
+              {isCreator ? mainLabel : downloadLabel}
             </>
         }
       </Button>

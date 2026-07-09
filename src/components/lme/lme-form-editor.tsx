@@ -896,13 +896,13 @@ function HapSection({
         <p className="text-sm font-medium text-gray-700 mb-2">12. Exames complementares</p>
         <div className="overflow-x-auto">
         <div className="border border-gray-200 rounded-lg overflow-hidden min-w-[440px]">
-          <div className="grid grid-cols-[1fr_120px_160px] gap-0 bg-gray-50 border-b border-gray-200 px-3 py-1.5">
+          <div className="grid grid-cols-[1fr_120px_260px] gap-0 bg-gray-50 border-b border-gray-200 px-3 py-1.5">
             <span className="text-xs font-medium text-gray-500">Exame</span>
             <span className="text-xs font-medium text-gray-500">Data</span>
             <span className="text-xs font-medium text-gray-500">Resultado</span>
           </div>
           {EXAMES.map(({ key, label }) => (
-            <div key={key} className="grid grid-cols-[1fr_120px_160px] gap-0 items-center border-b border-gray-100 last:border-0 px-3 py-1.5">
+            <div key={key} className="grid grid-cols-[1fr_120px_260px] gap-0 items-center border-b border-gray-100 last:border-0 px-3 py-1.5">
               <span className="text-sm text-gray-700">{label}</span>
               <Input
                 className="h-7 text-xs border-0 border-r border-gray-200 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -911,14 +911,14 @@ function HapSection({
                 onChange={e => setExame(key, 'data', e.target.value)}
               />
               <div className="relative">
-                <Input
-                  className="h-7 text-xs border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-2 pr-9"
+                <Textarea
+                  className="min-h-14 resize-y text-xs border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-2 pr-10"
                   placeholder="Resultado"
                   maxLength={L.exame_resultado}
                   value={examesObj[key]?.resultado ?? ''}
                   onChange={e => setExame(key, 'resultado', e.target.value)}
                 />
-                <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] tabular-nums text-gray-400">
+                <span className="pointer-events-none absolute right-1.5 bottom-1 text-[9px] tabular-nums text-gray-400">
                   {(examesObj[key]?.resultado?.length ?? 0)}/{L.exame_resultado}
                 </span>
               </div>

@@ -70,8 +70,7 @@ export function Sidebar({ activeWorkspace, workspaces, userEmail }: SidebarProps
       return
     }
     toast.success('Ambulatório trocado.')
-    router.refresh()
-    router.push('/dashboard')
+    window.location.assign('/dashboard')
   }
 
   async function handleLogout() {

@@ -23,7 +23,7 @@ export const SPEC_TEXT_LIMITS: Record<string, Record<string, number>> = {
     caracteristicas_clinicas: 735,
     outras_observacoes: 725,
     teste_no_justificativa_nao_realizacao: 45,
-    exame_resultado: 85,
+    exame_resultado: 160,
     // Detalhamento do risco — caixa livre logo abaixo da linha "Detalhar:" na seção 9
     // (Text15, p2, ~470x99 → ~9 linhas × 94 chars ≈ 778 chars; cap com folga).
     risco_detalhe: 700,

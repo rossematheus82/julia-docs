@@ -311,6 +311,7 @@ export default async function LmeDetailPage({ params }: { params: Promise<{ id: 
               <LmePdfButtons
                 lmeId={id}
                 disease={lme.disease}
+                requestType={lme.request_type}
                 hasLmeData={!!lme.lme_data && Object.keys(lme.lme_data as object).length > 0}
                 hasSpecificFormData={!!lme.specific_form_data && Object.keys(lme.specific_form_data as object).length > 0}
                 lmePdfUrl={lme.lme_pdf_url}

@@ -16,6 +16,10 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { DateInput } from '@/components/ui/date-input'
 
+function cpfDigits(value?: string | null) {
+  return (value ?? '').replace(/\D/g, '')
+}
+
 export default function EditarPacientePage() {
   const router = useRouter()
   const params = useParams()
@@ -68,7 +72,7 @@ export default function EditarPacientePage() {
         full_name: data.full_name,
         social_name: data.social_name || null,
         mother_name: data.mother_name || null,
-        cpf: data.cpf || null,
+        cpf: cpfDigits(data.cpf) || null,
         cns: data.cns || null,
         birth_date: data.birth_date || null,
         sex: data.sex || null,
