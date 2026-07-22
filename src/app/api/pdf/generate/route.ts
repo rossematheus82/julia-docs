@@ -200,9 +200,11 @@ export async function POST(request: NextRequest) {
         email_paciente:       str(raw.email_paciente)       || str(patient.email),
         raca_etnia:           (patient.race_ethnicity as LmeCommonData['raca_etnia']) ?? (raw.raca_etnia as LmeCommonData['raca_etnia']) ?? undefined,
         etnia_detalhe:        str(raw.etnia_detalhe)        || str(patient.ethnicity_detail),
-        // Capacidade civil
-        paciente_incapaz:     raw.paciente_incapaz != null ? Boolean(raw.paciente_incapaz) : isIncapaz,
-        responsavel_nome:     str(raw.responsavel_nome)     || str(patient.responsible_name),
+        // Capacidade civil: sempre reflete o cadastro atual do paciente — esse campo não é
+        // editável na tela de editar LME, então travar no valor gravado em lme_data faria uma
+        // atualização posterior do cadastro (ex.: paciente passou a ter responsável) nunca aparecer.
+        paciente_incapaz:     isIncapaz,
+        responsavel_nome:     str(patient.responsible_name) || str(raw.responsavel_nome),
         // Documento
         documento_tipo:       (raw.documento_tipo as LmeCommonData['documento_tipo']) ?? (docTipo as LmeCommonData['documento_tipo']) ?? undefined,
         documento_numero:     str(raw.documento_numero)     || docNumero,
@@ -324,8 +326,10 @@ export async function POST(request: NextRequest) {
         email_paciente:       str(raw.email_paciente)       || str(patient.email),
         raca_etnia:           (patient.race_ethnicity as LmeCommonData['raca_etnia']) ?? (raw.raca_etnia as LmeCommonData['raca_etnia']) ?? undefined,
         etnia_detalhe:        str(raw.etnia_detalhe)        || str(patient.ethnicity_detail),
-        paciente_incapaz:     raw.paciente_incapaz != null ? Boolean(raw.paciente_incapaz) : isIncapaz,
-        responsavel_nome:     str(raw.responsavel_nome)     || str(patient.responsible_name),
+        // Capacidade civil: sempre reflete o cadastro atual do paciente (não é editável na
+        // tela de editar LME) — ver comentário equivalente no bloco 'lme' acima.
+        paciente_incapaz:     isIncapaz,
+        responsavel_nome:     str(patient.responsible_name) || str(raw.responsavel_nome),
         documento_tipo:       (raw.documento_tipo as LmeCommonData['documento_tipo']) ?? (docTipo as LmeCommonData['documento_tipo']) ?? undefined,
         documento_numero:     str(raw.documento_numero)     || docNumero,
         tratamento_previo:    raw.tratamento_previo != null ? Boolean(raw.tratamento_previo) : false,

@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-07-22',
+    itens: [
+      { tipo: 'correcao', texto: 'Ao gerar o PDF, a marcação de paciente incapaz e o nome do responsável agora sempre seguem o cadastro atual do paciente, refletindo atualizações feitas após a LME já ter sido emitida.' },
+    ],
+  },
+  {
     data: '2026-07-04',
     itens: [
       { tipo: 'melhoria', texto: 'Downloads de PDFs foram reforcados para evitar cache e armazenamento intermediario indevido.' },
