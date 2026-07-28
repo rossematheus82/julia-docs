@@ -69,8 +69,13 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
   }
 
   /**
-   * Busca endereço/CNPJ no CNES (DataSUS) e preenche os campos vazios.
-   * Nunca sobrescreve o que já foi digitado — só completa o que falta.
+   * Busca os dados do estabelecimento no CNES (DataSUS).
+   *
+   * Os dados oficiais (CNPJ, endereço, telefone, cidade, UF) substituem o que
+   * estiver no formulário — a busca é uma ação explícita e serve justamente
+   * para trazer o cadastro nacional. O nome só é preenchido se estiver vazio,
+   * porque costuma ser personalizado ("Ambulatório de Pneumologia").
+   * Nada é gravado até clicar em Salvar.
    */
   async function buscarPorCnes() {
     const codigo = (v.cnes ?? '').replace(/\D/g, '')
@@ -96,26 +101,35 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
 
       const e = json.estabelecimento
       const preenchidos: string[] = []
-      const completar = (campo: keyof FacilityForm, valor: string | null, rotulo: string) => {
-        if (!valor || (v[campo] ?? '').trim()) return
+
+      /** Substitui o valor do campo pelo dado oficial do CNES. */
+      const aplicar = (campo: keyof FacilityForm, valor: string | null, rotulo: string) => {
+        if (!valor || valor === (v[campo] ?? '').trim()) return
         setValue(campo, valor, { shouldValidate: true, shouldDirty: true })
         preenchidos.push(rotulo)
       }
 
-      completar('name', e.nome, 'nome')
-      completar('cnpj', e.cnpj, 'CNPJ')
-      completar('address', e.endereco, 'endereço')
-      completar('phone', e.telefone, 'telefone')
-      completar('city', e.cidade, 'cidade')
-      completar('state', e.state, 'UF')
+      // Nome é o único que preservamos quando já preenchido (costuma ser apelido interno).
+      if (e.nome && !(v.name ?? '').trim()) {
+        setValue('name', e.nome, { shouldValidate: true, shouldDirty: true })
+        preenchidos.push('nome')
+      }
+      aplicar('cnpj', e.cnpj, 'CNPJ')
+      aplicar('address', e.endereco, 'endereço')
+      aplicar('phone', e.telefone, 'telefone')
+      aplicar('city', e.cidade, 'cidade')
+      aplicar('state', e.state, 'UF')
 
       if (!e.cnpj) {
         toast.warning('O CNES não informa CNPJ para este estabelecimento — preencha manualmente.')
       }
+      if (!e.cidade) {
+        toast.warning('O CNES não informa o município deste estabelecimento — preencha a cidade manualmente.')
+      }
       toast.success(
         preenchidos.length
-          ? `Dados do CNES preenchidos: ${preenchidos.join(', ')}.`
-          : 'CNES encontrado, mas os campos já estavam preenchidos.',
+          ? `Dados do CNES aplicados: ${preenchidos.join(', ')}. Confira e clique em Salvar.`
+          : 'CNES encontrado — os dados já estavam iguais aos do cadastro nacional.',
       )
     } catch {
       toast.error('Falha ao consultar o CNES. Tente novamente.')
@@ -244,7 +258,7 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
                   </Button>
                 </div>
                 {errors.cnes && <p className="text-xs text-red-500 mt-1">{errors.cnes.message}</p>}
-                <p className="text-xs text-gray-400 mt-1">Busca preenche endereço, CNPJ e cidade pelo DataSUS.</p>
+                <p className="text-xs text-gray-400 mt-1">Busca atualiza endereço, CNPJ, telefone e cidade pelo DataSUS.</p>
               </div>
               <div>
                 <Label>Telefone</Label>
