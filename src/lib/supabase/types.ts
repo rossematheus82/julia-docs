@@ -60,6 +60,7 @@ export interface Database {
           workspace_id: string
           name: string
           cnes: string | null
+          cnpj: string | null
           address: string | null
           phone: string | null
           city: string | null

@@ -5,7 +5,13 @@ import { calcularIdade, dataHoje } from '@/lib/utils/date'
 export interface PrescricaoData {
   estabelecimento_nome: string
   cnes?: string
+  /** CNPJ do estabelecimento — exigido pelo CEAF no cabeçalho da receita. */
+  cnpj?: string
+  /** Endereço do estabelecimento (logradouro, número, bairro, CEP). */
+  endereco?: string
+  telefone?: string
   cidade?: string
+  uf?: string
   paciente_nome: string
   paciente_cpf?: string
   paciente_birth_date?: string   // YYYY-MM-DD
@@ -114,17 +120,41 @@ export async function fillPrescricao(data: PrescricaoData): Promise<Uint8Array> 
   }
 
   // ── Header: estabelecimento ───────────────────────────────────────────────
-  page.drawRectangle({ x: margin, y: y - 48, width: right - margin, height: 52, color: LIGHT })
+  // O CEAF exige que a receita traga endereço e CNPJ do estabelecimento, além do
+  // CNES. As linhas são montadas dinamicamente (endereço longo quebra em várias)
+  // e a caixa cinza cresce conforme o conteúdo.
+  const headerTextX = margin + 10
+  const headerMaxW  = right - headerTextX - 10
 
-  textLine(page, data.estabelecimento_nome.toUpperCase(), margin + 10, y - 12, bold, 11)
-  if (data.cnes) {
-    textLine(page, `CNES: ${data.cnes}`, margin + 10, y - 26, reg, 9, GRAY)
+  const headerLines: string[] = []
+  const ids = [
+    data.cnes ? `CNES: ${data.cnes}` : '',
+    data.cnpj ? `CNPJ: ${data.cnpj}` : '',
+  ].filter(Boolean).join('   ·   ')
+  if (ids) headerLines.push(ids)
+  if (data.endereco) headerLines.push(...wrapText(data.endereco, reg, 9, headerMaxW))
+  const localidade = [
+    [data.cidade, data.uf].filter(Boolean).join('/'),
+    data.telefone ? `Tel.: ${data.telefone}` : '',
+  ].filter(Boolean).join('   ·   ')
+  if (localidade) headerLines.push(localidade)
+
+  const nomeLines = wrapText(data.estabelecimento_nome.toUpperCase(), bold, 11, headerMaxW)
+  const headerTop = y + 4
+  const headerH   = 8 + nomeLines.length * 14 + headerLines.length * 11 + 8
+  page.drawRectangle({ x: margin, y: headerTop - headerH, width: right - margin, height: headerH, color: LIGHT })
+
+  let hy = headerTop - 18
+  for (const line of nomeLines) {
+    textLine(page, line, headerTextX, hy, bold, 11)
+    hy -= 14
   }
-  if (data.cidade) {
-    textLine(page, data.cidade, margin + 10, y - 38, reg, 9, GRAY)
+  for (const line of headerLines) {
+    textLine(page, line, headerTextX, hy, reg, 9, GRAY)
+    hy -= 11
   }
 
-  y -= 60
+  y = headerTop - headerH - 12
 
   // ── Título ────────────────────────────────────────────────────────────────
   const titulo = 'PRESCRIÇÃO MÉDICA'

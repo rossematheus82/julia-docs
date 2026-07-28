@@ -19,6 +19,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-07-28',
+    itens: [
+      { tipo: 'correcao', texto: 'A receita agora traz endereço, CNPJ e telefone do estabelecimento no cabeçalho, além do CNES — processos vinham sendo devolvidos por falta desses dados.' },
+      { tipo: 'novo', texto: 'Cadastro de estabelecimento ganhou campo de CNPJ e o botão "Buscar", que preenche automaticamente nome, endereço, CNPJ e telefone a partir do CNES (base do DataSUS).' },
+      { tipo: 'melhoria', texto: 'Endereço e CNPJ atualizados no cadastro do estabelecimento passam a valer também nas receitas de LMEs antigas.' },
+    ],
+  },
+  {
     data: '2026-07-22',
     itens: [
       { tipo: 'correcao', texto: 'Ao gerar o PDF, a marcação de paciente incapaz e o nome do responsável agora sempre seguem o cadastro atual do paciente, refletindo atualizações feitas após a LME já ter sido emitida.' },

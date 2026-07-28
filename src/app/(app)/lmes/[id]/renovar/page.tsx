@@ -33,7 +33,7 @@ export default async function RenovarLmePage({ params }: { params: Promise<{ id:
       .eq('workspace_id', active.workspaceId)
       .eq('owner_user_id', user.id)
       .maybeSingle(),
-    supabase.from('health_facilities').select('id, name, cnes, address, city, state')
+    supabase.from('health_facilities').select('id, name, cnes, cnpj, address, city, state')
       .eq('workspace_id', active.workspaceId).eq('is_active', true).order('name'),
     supabase.from('patients').select('weight_kg, height_cm, birth_date, is_incapable, responsible_name, deleted_at')
       .eq('id', lme.patient_id)

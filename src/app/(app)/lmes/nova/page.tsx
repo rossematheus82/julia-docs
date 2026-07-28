@@ -29,7 +29,7 @@ export default async function NovaLmePage({
       .eq('workspace_id', active.workspaceId)
       .eq('owner_user_id', user.id)
       .maybeSingle(),
-    supabase.from('health_facilities').select('id, name, cnes, address, city, state')
+    supabase.from('health_facilities').select('id, name, cnes, cnpj, address, city, state')
       .eq('workspace_id', active.workspaceId).eq('is_active', true).order('name'),
   ])
 

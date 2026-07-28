@@ -151,6 +151,18 @@ export async function POST(request: NextRequest) {
     currentDoctor = (dCur ?? null) as Snap | null
   }
 
+  // Estabelecimento: relemos o cadastro atual porque o snapshot antigo não guarda
+  // endereço/CNPJ — dados que o CEAF exige no cabeçalho da receita.
+  let currentFacility: Snap | null = null
+  if (lme.facility_id) {
+    const { data: fCur } = await supabase
+      .from('health_facilities')
+      .select('name, cnes, cnpj, address, phone, city, state')
+      .eq('id', lme.facility_id)
+      .single()
+    currentFacility = (fCur ?? null) as Snap | null
+  }
+
   try {
     const fillDate = dataHoje()
     const snapshot = (lme.patient_snapshot ?? {}) as Snap
@@ -165,7 +177,10 @@ export async function POST(request: NextRequest) {
     const doctor: Snap = currentDoctor
       ? { ...doctorSnap, ...Object.fromEntries(Object.entries(currentDoctor).filter(([, val]) => val != null && val !== '')) }
       : doctorSnap
-    const facility = (lme.facility_snapshot ?? {}) as Snap
+    const facilitySnap = (lme.facility_snapshot ?? {}) as Snap
+    const facility: Snap = currentFacility
+      ? { ...facilitySnap, ...Object.fromEntries(Object.entries(currentFacility).filter(([, val]) => val != null && val !== '')) }
+      : facilitySnap
     const raw      = (lme.lme_data          ?? {}) as Snap
 
     if (type === 'lme') {
@@ -245,7 +260,9 @@ export async function POST(request: NextRequest) {
         specificFormData: enrichedSpecific,
         fillDate,
         prescricaoData: {
-          estabelecimento_nome: str(enriched.estabelecimento_nome), cnes: str(enriched.cnes), cidade: str(facility.city),
+          estabelecimento_nome: str(enriched.estabelecimento_nome), cnes: str(enriched.cnes),
+          cnpj: str(facility.cnpj), endereco: str(facility.address), telefone: formatarTelefone(str(facility.phone)),
+          cidade: str(facility.city), uf: str(facility.state),
           paciente_nome: patientNome, paciente_cpf: docTipo === 'CPF' ? docNumero : undefined,
           paciente_birth_date: str(patient.birth_date), cid10: str(enriched.cid10), diagnostico: str(enriched.diagnostico),
           medico_nome: str(enriched.medico_nome), medico_crm: str(doctor.crm), medico_crm_uf: str(doctor.crm_uf),
@@ -375,7 +392,11 @@ export async function POST(request: NextRequest) {
         prescricaoData: {
           estabelecimento_nome: str(enriched.estabelecimento_nome),
           cnes: str(enriched.cnes),
+          cnpj: str(facility.cnpj),
+          endereco: str(facility.address),
+          telefone: formatarTelefone(str(facility.phone)),
           cidade: str(facility.city),
+          uf: str(facility.state),
           paciente_nome: patientNome,
           paciente_cpf: docTipo === 'CPF' ? docNumero : undefined,
           paciente_birth_date: str(patient.birth_date),
