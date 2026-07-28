@@ -83,7 +83,10 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
     try {
       const res = await fetch(`/api/cnes/${codigo}`)
       const json = await res.json() as {
-        estabelecimento?: { nome: string; cnpj: string | null; endereco: string | null; telefone: string | null; state: string | null }
+        estabelecimento?: {
+          nome: string; cnpj: string | null; endereco: string | null
+          telefone: string | null; cidade: string | null; state: string | null
+        }
         error?: string
       }
       if (!res.ok || !json.estabelecimento) {
@@ -103,6 +106,7 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
       completar('cnpj', e.cnpj, 'CNPJ')
       completar('address', e.endereco, 'endereço')
       completar('phone', e.telefone, 'telefone')
+      completar('city', e.cidade, 'cidade')
       completar('state', e.state, 'UF')
 
       if (!e.cnpj) {
@@ -240,7 +244,7 @@ export function EstabelecimentosClient({ facilities: initial, workspaceId }: Pro
                   </Button>
                 </div>
                 {errors.cnes && <p className="text-xs text-red-500 mt-1">{errors.cnes.message}</p>}
-                <p className="text-xs text-gray-400 mt-1">Busca preenche endereço e CNPJ pelo DataSUS.</p>
+                <p className="text-xs text-gray-400 mt-1">Busca preenche endereço, CNPJ e cidade pelo DataSUS.</p>
               </div>
               <div>
                 <Label>Telefone</Label>

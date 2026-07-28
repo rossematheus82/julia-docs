@@ -7,9 +7,11 @@
  * `/api/cnes/[codigo]`), nunca direto do browser.
  */
 
+import { municipioPorCodigoIbge } from './ibge-municipios'
+
 const CNES_API = 'https://apidadosabertos.saude.gov.br/cnes/estabelecimentos'
 
-/** Código IBGE da UF → sigla. */
+/** Código IBGE da UF → sigla (fallback quando o município não é encontrado). */
 const UF_POR_CODIGO: Record<number, string> = {
   11: 'RO', 12: 'AC', 13: 'AM', 14: 'RR', 15: 'PA', 16: 'AP', 17: 'TO',
   21: 'MA', 22: 'PI', 23: 'CE', 24: 'RN', 25: 'PB', 26: 'PE', 27: 'AL', 28: 'SE', 29: 'BA',
@@ -28,6 +30,8 @@ export interface CnesEstabelecimento {
   endereco: string | null
   cep: string | null
   telefone: string | null
+  /** Nome do município, resolvido a partir do código IBGE. */
+  cidade: string | null
   state: string | null
   codigo_municipio: string | null
 }
@@ -81,6 +85,8 @@ export async function buscarEstabelecimentoPorCnes(cnes: string): Promise<CnesEs
 
   const cnpjRaw = limpo(raw.numero_cnpj) || limpo(raw.numero_cnpj_entidade)
   const ufCodigo = Number(raw.codigo_uf)
+  // A API do CNES devolve só o código IBGE do município — o nome vem da tabela local.
+  const municipio = municipioPorCodigoIbge(limpo(raw.codigo_municipio))
 
   return {
     cnes: String(raw.codigo_cnes).padStart(7, '0'),
@@ -90,7 +96,8 @@ export async function buscarEstabelecimentoPorCnes(cnes: string): Promise<CnesEs
     endereco: endereco || null,
     cep: cepRaw ? formatarCep(cepRaw) : null,
     telefone: limpo(raw.numero_telefone_estabelecimento) || null,
-    state: UF_POR_CODIGO[ufCodigo] ?? null,
+    cidade: municipio?.nome ?? null,
+    state: municipio?.uf ?? UF_POR_CODIGO[ufCodigo] ?? null,
     codigo_municipio: limpo(raw.codigo_municipio) || null,
   }
 }
