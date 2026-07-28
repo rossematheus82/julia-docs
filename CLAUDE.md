@@ -19,6 +19,7 @@ Sistema web para geração e gestão de **LMEs** (Laudos de Solicitação, Avali
   - `0003_lme_status_emitida.sql` — inclui `'emitida'` na check constraint de `lmes.status`
   - `0007_platform_admin_workspace_creation.sql` — restringe criação de ambulatórios a administradores da plataforma e cria RPC `create_workspace_as_admin`.
   - `0008_platform_users_admin_dashboard.sql` — adiciona `platform_users`, papéis/status globais (`basic`, `platform_admin`, `active`, `banned`) e suporte ao painel administrativo.
+  - `0017_facility_cnpj.sql` — adiciona `health_facilities.cnpj` (usado no cabeçalho da receita, junto com endereço e CNES). **Precisa ser aplicada antes de salvar estabelecimentos.**
 - **Ajustes recentes (2026-05-28 a 30):**
   - DPOC: "em uso de medicamento" virou SIM/NÃO explícito (radio, tri-estado — não força NÃO quando não respondido); caixas "Especificar" de poluentes ambientais/ocupacionais agora aparecem inline sob o item marcado.
   - Cadastro de paciente: campos obrigatórios reforçados (ver seção própria); **CNS voltou a ser opcional** (basta CPF) após ajuste 2026-05-29.
