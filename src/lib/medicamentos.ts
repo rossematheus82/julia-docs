@@ -77,12 +77,19 @@ function q6(n: string): [string, string, string, string, string, string] {
  * editor (o médico ainda pode ajustar). Variam por tipo de processo: a 1ª LME
  * (`inicial`) de alguns fármacos exige titulação de dose; a renovação já vai na
  * dose plena de manutenção.
+ *
+ * Via de administração:
+ *   • aerossol / spray / solução para inalação (dose em "jatos") → **via inalatória**,
+ *     porque o dispositivo pode ser usado com espaçador ou máscara, e não
+ *     necessariamente pela boca;
+ *   • cápsula inalante e pó inalante → "via oral", já que a inalação é sempre
+ *     feita pela boca no próprio inalador.
  */
 const SUGESTOES_POSOLOGIA: Record<string, { inicial: SugestaoPosologia; manutencao: SugestaoPosologia }> = {
   // ── ASMA ──────────────────────────────────────────────────────────────────
   'asma-bud200': mesma({ posologia: 'Realizar 1 inalação (cápsula de 200 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'asma-bud400': mesma({ posologia: 'Realizar 1 inalação (cápsula de 400 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
-  'asma-fen100': mesma({ posologia: 'Realizar 1 a 2 jatos, via oral, se falta de ar (resgate).' }),
+  'asma-fen100': mesma({ posologia: 'Realizar 1 a 2 jatos, via inalatória, se falta de ar (resgate).' }),
   'asma-for12': mesma({ posologia: 'Realizar 1 inalação (cápsula de 12 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'asma-for6bud200cap': mesma({ posologia: 'Realizar 1 inalação (cápsula), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'asma-for6bud200po': mesma({ posologia: 'Realizar 1 inalação, via oral, de 12/12 horas.' }),
@@ -94,8 +101,8 @@ const SUGESTOES_POSOLOGIA: Record<string, { inicial: SugestaoPosologia; manutenc
   // ── DPOC ──────────────────────────────────────────────────────────────────
   'dpoc-bud200': mesma({ posologia: 'Realizar 1 inalação (cápsula de 200 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'dpoc-bud400': mesma({ posologia: 'Realizar 1 inalação (cápsula de 400 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
-  'dpoc-becfor-gli': mesma({ posologia: 'Realizar 2 jatos, via oral, de 12/12 horas.' }),
-  'dpoc-fen100': mesma({ posologia: 'Realizar 1 a 2 jatos, via oral, se falta de ar (resgate).' }),
+  'dpoc-becfor-gli': mesma({ posologia: 'Realizar 2 jatos, via inalatória, de 12/12 horas.' }),
+  'dpoc-fen100': mesma({ posologia: 'Realizar 1 a 2 jatos, via inalatória, se falta de ar (resgate).' }),
   'dpoc-for12': mesma({ posologia: 'Realizar 1 inalação (cápsula de 12 mcg), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'dpoc-for6bud200cap': mesma({ posologia: 'Realizar 1 inalação (cápsula), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'dpoc-for6bud200po': mesma({ posologia: 'Realizar 1 inalação, via oral, de 12/12 horas.' }),
@@ -103,11 +110,11 @@ const SUGESTOES_POSOLOGIA: Record<string, { inicial: SugestaoPosologia; manutenc
   'dpoc-for12bud400cap': mesma({ posologia: 'Realizar 1 inalação (cápsula), via oral, de 12/12 horas.', quantidades: q6('60') }),
   'dpoc-flut-ume-vil': mesma({ posologia: 'Realizar 1 inalação, via oral, pela manhã.' }),
   'dpoc-gli50': mesma({ posologia: 'Realizar 1 inalação (cápsula de 50 mcg), via oral, pela manhã.', quantidades: q6('30') }),
-  'dpoc-sal25flut125': mesma({ posologia: 'Realizar 2 jatos, via oral, de 12/12 horas.' }),
-  'dpoc-sal25flut250': mesma({ posologia: 'Realizar 2 jatos, via oral, de 12/12 horas.' }),
+  'dpoc-sal25flut125': mesma({ posologia: 'Realizar 2 jatos, via inalatória, de 12/12 horas.' }),
+  'dpoc-sal25flut250': mesma({ posologia: 'Realizar 2 jatos, via inalatória, de 12/12 horas.' }),
   'dpoc-sal50flut250': mesma({ posologia: 'Realizar 1 inalação, via oral, de 12/12 horas.' }),
-  'dpoc-tio25spray': mesma({ posologia: 'Realizar 2 jatos, via oral, pela manhã.' }),
-  'dpoc-tio-olo': mesma({ posologia: 'Realizar 2 jatos, via oral, pela manhã.' }),
+  'dpoc-tio25spray': mesma({ posologia: 'Realizar 2 jatos, via inalatória, pela manhã.' }),
+  'dpoc-tio-olo': mesma({ posologia: 'Realizar 2 jatos, via inalatória, pela manhã.' }),
   'dpoc-ume625': mesma({ posologia: 'Realizar 1 inalação, via oral, pela manhã.' }),
   'dpoc-ume-vil': mesma({ posologia: 'Realizar 1 inalação, via oral, pela manhã.' }),
 

@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     data: '2026-08-04',
     itens: [
+      { tipo: 'correcao', texto: 'Posologia sugerida dos inalatórios em aerossol, spray e solução para inalação passa a indicar "via inalatória" no lugar de "via oral". Cápsulas e pós inalantes seguem como "via oral".' },
       { tipo: 'correcao', texto: 'Corrigido nome do paciente saindo incompleto na LME (ex.: "Fulana das [PACIENTE]") quando o preenchimento vinha da extração por IA. Nome, mãe, telefone e e-mail agora seguem sempre o cadastro do paciente.' },
       { tipo: 'melhoria', texto: 'A extração por IA não tenta mais ler dados de identificação do prontuário — esses campos vêm do cadastro, o que também reduz o envio de dados pessoais ao serviço de IA.' },
     ],
