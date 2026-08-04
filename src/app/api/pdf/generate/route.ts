@@ -207,12 +207,15 @@ export async function POST(request: NextRequest) {
         medico_nome:          str(raw.medico_nome)          || str(doctor.full_name),
         medico_cns:           str(raw.medico_cns)           || str(doctor.cns),
         // Dados do paciente
-        paciente_nome:        str(raw.paciente_nome)        || str(patient.full_name),
-        mae_nome:             str(raw.mae_nome)             || str(patient.mother_name),
+        // Identificação: o CADASTRO manda. Esses campos não são editáveis na tela
+        // de editar LME e já vieram errados de extrações antigas da IA (o
+        // prontuário é anonimizado, então o nome voltava como "Fulana das [PACIENTE]").
+        paciente_nome:        str(patient.full_name)        || str(raw.paciente_nome),
+        mae_nome:             str(patient.mother_name)      || str(raw.mae_nome),
         peso_kg:              str(raw.peso_kg)              || str(patient.weight_kg),
         altura_cm:            str(raw.altura_cm)            || str(patient.height_cm),
-        telefones:            str(raw.telefones)            || formatarTelefone(str(patient.phone)),
-        email_paciente:       str(raw.email_paciente)       || str(patient.email),
+        telefones:            formatarTelefone(str(patient.phone)) || str(raw.telefones),
+        email_paciente:       str(patient.email)            || str(raw.email_paciente),
         raca_etnia:           (patient.race_ethnicity as LmeCommonData['raca_etnia']) ?? (raw.raca_etnia as LmeCommonData['raca_etnia']) ?? undefined,
         etnia_detalhe:        str(raw.etnia_detalhe)        || str(patient.ethnicity_detail),
         // Capacidade civil: sempre reflete o cadastro atual do paciente — esse campo não é
@@ -240,8 +243,9 @@ export async function POST(request: NextRequest) {
       const specificRaw = (lme.specific_form_data ?? {}) as Snap
       const enrichedSpecific: Snap = {
         ...specificRaw,
-        nome_civil:      str(specificRaw.nome_civil)      || str(patient.full_name),
-        nome_social:     str(specificRaw.nome_social),
+        // Nome civil/social também seguem o cadastro (ver nota em `enriched`).
+        nome_civil:      str(patient.full_name)           || str(specificRaw.nome_civil),
+        nome_social:     str(patient.social_name)         || str(specificRaw.nome_social),
         idade:           str(specificRaw.idade)           || (calcularIdade(str(patient.birth_date)) != null ? String(calcularIdade(str(patient.birth_date))) : ''),
         data_nascimento: str(specificRaw.data_nascimento) || str(patient.birth_date),
         cid10:           str(specificRaw.cid10)           || lme.cid10 || '',
@@ -335,12 +339,15 @@ export async function POST(request: NextRequest) {
         estabelecimento_nome: str(raw.estabelecimento_nome) || str(facility.name),
         medico_nome:          str(raw.medico_nome)          || str(doctor.full_name),
         medico_cns:           str(raw.medico_cns)           || str(doctor.cns),
-        paciente_nome:        str(raw.paciente_nome)        || str(patient.full_name),
-        mae_nome:             str(raw.mae_nome)             || str(patient.mother_name),
+        // Identificação: o CADASTRO manda. Esses campos não são editáveis na tela
+        // de editar LME e já vieram errados de extrações antigas da IA (o
+        // prontuário é anonimizado, então o nome voltava como "Fulana das [PACIENTE]").
+        paciente_nome:        str(patient.full_name)        || str(raw.paciente_nome),
+        mae_nome:             str(patient.mother_name)      || str(raw.mae_nome),
         peso_kg:              str(raw.peso_kg)              || str(patient.weight_kg),
         altura_cm:            str(raw.altura_cm)            || str(patient.height_cm),
-        telefones:            str(raw.telefones)            || formatarTelefone(str(patient.phone)),
-        email_paciente:       str(raw.email_paciente)       || str(patient.email),
+        telefones:            formatarTelefone(str(patient.phone)) || str(raw.telefones),
+        email_paciente:       str(patient.email)            || str(raw.email_paciente),
         raca_etnia:           (patient.race_ethnicity as LmeCommonData['raca_etnia']) ?? (raw.raca_etnia as LmeCommonData['raca_etnia']) ?? undefined,
         etnia_detalhe:        str(raw.etnia_detalhe)        || str(patient.ethnicity_detail),
         // Capacidade civil: sempre reflete o cadastro atual do paciente (não é editável na
@@ -361,8 +368,9 @@ export async function POST(request: NextRequest) {
       const specificRaw = (lme.specific_form_data ?? {}) as Snap
       const enrichedSpecific: Snap = {
         ...specificRaw,
-        nome_civil:      str(specificRaw.nome_civil)      || str(patient.full_name),
-        nome_social:     str(specificRaw.nome_social),
+        // Nome civil/social também seguem o cadastro (ver nota em `enriched`).
+        nome_civil:      str(patient.full_name)           || str(specificRaw.nome_civil),
+        nome_social:     str(patient.social_name)         || str(specificRaw.nome_social),
         idade:           str(specificRaw.idade)           || (calcularIdade(str(patient.birth_date)) != null ? String(calcularIdade(str(patient.birth_date))) : ''),
         data_nascimento: str(specificRaw.data_nascimento) || str(patient.birth_date),
         cid10:           str(specificRaw.cid10)           || lme.cid10 || '',

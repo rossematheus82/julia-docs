@@ -54,19 +54,15 @@ Retorne APENAS um JSON válido com a estrutura:
 }
 
 export function getLmeFieldDescriptions(): string {
+  // Campos de identificação (nome, mãe, telefone, e-mail, raça, responsável) não
+  // são pedidos à IA: vêm do cadastro do paciente. O prontuário é anonimizado
+  // antes do envio, então a IA só devolveria marcadores no lugar dos nomes.
   return `
-- paciente_nome: Nome completo do paciente
-- mae_nome: Nome completo da mãe do paciente
 - peso_kg: Peso em kg (número)
 - altura_cm: Altura em cm (número)
 - anamnese: Resumo clínico / anamnese do paciente, com no máximo ${LME_TEXT_LIMITS.anamnese} caracteres
 - tratamento_previo: true se já fez tratamento, false se não
 - tratamento_previo_descricao: Descrição do tratamento prévio (se houver)
-- paciente_incapaz: true se incapaz, false caso contrário
-- responsavel_nome: Nome do responsável (se paciente for incapaz)
-- telefones: Telefones de contato
-- email_paciente: Email do paciente
-- raca_etnia: Raça/etnia (Branca, Preta, Parda, Amarela ou Indígena)
 `.trim()
 }
 

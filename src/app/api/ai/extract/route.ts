@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspace } from '@/lib/active-workspace'
-import { aiProvider, anonymizeProntuario } from '@/lib/ai/index'
+import { aiProvider, anonymizeProntuario, limparExtracao } from '@/lib/ai/index'
 import { LmeCommonSchema } from '@/lib/schemas/lme-common'
 import { AsmaFormSchema } from '@/lib/schemas/asma'
 import { DpocFormSchema } from '@/lib/schemas/dpoc'
@@ -83,6 +83,16 @@ export async function POST(request: NextRequest) {
         anonymize: shouldAnonymize,
       }),
     ])
+
+    // Identificação (nome, mãe, telefone...) nunca vem da IA: o prontuário é
+    // anonimizado antes do envio, então esses campos voltariam com o marcador
+    // no lugar do nome. Eles são preenchidos a partir do cadastro do paciente.
+    lmeResult.data = limparExtracao(
+      lmeResult.data as Record<string, unknown>,
+    ) as typeof lmeResult.data
+    specificResult.data = limparExtracao(
+      specificResult.data as Record<string, unknown>,
+    ) as typeof specificResult.data
 
     // A extração também respeita o limite físico da caixa da LME, mesmo se o
     // provedor devolver uma anamnese maior que a solicitada no prompt.

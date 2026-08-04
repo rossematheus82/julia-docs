@@ -19,6 +19,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-08-04',
+    itens: [
+      { tipo: 'correcao', texto: 'Corrigido nome do paciente saindo incompleto na LME (ex.: "Fulana das [PACIENTE]") quando o preenchimento vinha da extração por IA. Nome, mãe, telefone e e-mail agora seguem sempre o cadastro do paciente.' },
+      { tipo: 'melhoria', texto: 'A extração por IA não tenta mais ler dados de identificação do prontuário — esses campos vêm do cadastro, o que também reduz o envio de dados pessoais ao serviço de IA.' },
+    ],
+  },
+  {
     data: '2026-07-28',
     itens: [
       { tipo: 'correcao', texto: 'A receita agora traz endereço, CNPJ e telefone do estabelecimento no cabeçalho, além do CNES — processos vinham sendo devolvidos por falta desses dados.' },
