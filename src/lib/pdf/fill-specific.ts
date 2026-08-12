@@ -345,10 +345,14 @@ export async function applyMappingsToDoc(doc: PDFDocument, mappings: Mappings): 
   }
 
   for (const [fieldName, option] of Object.entries(mappings.radios)) {
-    if (!option) continue
     try {
       const field = form.getRadioGroup(fieldName)
-      field.select(option)
+      // Sem resposta: LIMPA o grupo em vez de deixar como está. Alguns templates
+      // do SES-MG já vêm com uma opção pré-marcada de fábrica (o form de DPOC vem
+      // com Button15 = grupo A), que sairia no PDF como se o médico tivesse
+      // respondido aquilo.
+      if (!option) field.clear()
+      else field.select(option)
     } catch { /* campo não encontrado — ignorar */ }
   }
 

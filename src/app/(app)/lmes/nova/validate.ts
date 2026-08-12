@@ -10,6 +10,24 @@ export interface ValidationIssue {
 }
 
 /**
+ * Campos do formulário específico que são obrigatórios para emitir.
+ *
+ * Motivo de existir: campos não respondidos saem em branco no PDF (ou, pior,
+ * saíam com a marcação de fábrica do template — o form de DPOC vem com o grupo
+ * de gravidade "A" pré-marcado), e o processo volta do CEAF.
+ *
+ * Só vale para processo completo; em renovação o formulário específico nem é
+ * preenchido.
+ */
+const CAMPOS_ESPECIFICOS_OBRIGATORIOS: Partial<Record<string, Array<{ campo: string; rotulo: string; mensagem: string }>>> = {
+  dpoc: [{
+    campo: 'gravidade_grupo',
+    rotulo: 'Gravidade (GOLD)',
+    mensagem: 'Selecione o grupo de gravidade (GOLD) do DPOC: A, B ou E',
+  }],
+}
+
+/**
  * Roda todas as validações e retorna TODAS as falhas (não para na primeira).
  * Assim a pessoa vê de uma vez tudo o que falta preencher.
  */
@@ -47,6 +65,18 @@ export function validateLme(data: WizardData): ValidationIssue[] {
       const qtdMes1 = m.quantidades?.mes1
       if (!qtdMes1)        issues.push({ campo: ref,              mensagem: `Quantidade do 1º mês de ${ref} faltando`,    step: 4 })
     })
+  }
+
+  // Formulário específico da doença (não existe em renovação — só LME + receita)
+  if (data.disease && data.request_type !== 'renovacao') {
+    const spec = (data.specific_form_data as Record<string, unknown> | undefined) ?? {}
+    for (const obrigatorio of CAMPOS_ESPECIFICOS_OBRIGATORIOS[data.disease] ?? []) {
+      const valor = spec[obrigatorio.campo]
+      const vazio = valor == null || (typeof valor === 'string' && !valor.trim())
+      if (vazio) {
+        issues.push({ campo: obrigatorio.rotulo, mensagem: obrigatorio.mensagem, step: 4 })
+      }
+    }
   }
 
   return issues

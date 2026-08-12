@@ -19,6 +19,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    data: '2026-08-06',
+    itens: [
+      { tipo: 'correcao', texto: 'DPOC: o formulário não sai mais com o grupo de gravidade "A" marcado por padrão. O modelo do SES-MG já vinha com essa opção pré-selecionada e ela aparecia no PDF mesmo sem o médico responder.' },
+      { tipo: 'melhoria', texto: 'DPOC: não é mais possível emitir o processo completo sem informar o grupo de gravidade (GOLD) — o wizard avisa e leva até o campo.' },
+    ],
+  },
+  {
     data: '2026-08-04',
     itens: [
       { tipo: 'correcao', texto: 'Posologia sugerida dos inalatórios em aerossol, spray e solução para inalação passa a indicar "via inalatória" no lugar de "via oral". Cápsulas e pós inalantes seguem como "via oral".' },
